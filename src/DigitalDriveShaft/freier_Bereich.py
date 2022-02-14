@@ -6,11 +6,5 @@ Created on Tue Feb  8 16:49:24 2022
 """
 
 def freier_Bereich(D_Trennfuge,Lasten,Mat_Comp):
-    
-    
-    
-    
-    
-    
-    
-    return (D_Welle)
+    D_Welle = 0
+    return D_Welle
