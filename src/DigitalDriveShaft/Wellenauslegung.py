@@ -11,6 +11,10 @@ class Material(object):
     def __init__(self, materialname):
         self.Materialname = materialname
 
+#Definition der Materialklasse
+class Last(object):
+    pass
+
 "Parameterdefinition"
 
 "Geometrie"
@@ -19,17 +23,16 @@ Bauraum_Laenge = 400 #mm
 
 "Lasten"
 # x in Längsachse der Welle, y, z out of plane
-Fx = 0      #N
-Fy = 0      #N
-Fz = 0      #N
-Mx = 168960    #Nm
-My = 0      #Nm
-Mz = 0      #Nm
+Last.Fx = 0      #N
+Last.Fy = 0      #N
+Last.Fz = 0      #N
+Last.Mx = 168960    #Nm
+Last.My = 0      #Nm
+Last.Mz = 0      #Nm
 
-Drehzahl = 6600 #U/min
+Last.Drehzahl = 6600 #U/min
 
-#Zusammenfassung zu Array
-Lasten = [Fx, Fy, Fz, Mx, My, Mz, Drehzahl]
+Sicherheit = 1.6
 
 "Verschiebungen"
 
@@ -37,8 +40,11 @@ Lasten = [Fx, Fy, Fz, Mx, My, Mz, Drehzahl]
 "Materialauswahl"
 #benötigte Materialkarten importieren
 Mat_Comp = Material("HTS40")
-Mat_Comp.Ex = 240 #GPa
-Mat_Comp.Ey = 70 #GPa
+Mat_Comp.E1 = 145200 #MPa
+Mat_Comp.E2 = 6272.7 #MPa
+Mat_Comp.Ny12 = 0.28
+Mat_Comp.tau_zul = 630.93 #MPa
+Mat_Comp.rho = 1.515 #g/cm^3
 
 Mat_Nabe = Material("Stahl")
 Mat_Nabe.E = 210 #GPa
@@ -49,13 +55,13 @@ Mat_Bolzen = Material("Stahl")
 
 "Auslegung freier Bereich"
 #Übergabe der Parameter an die Funktion zur Auslegung des freien Bereichs
-Auslegung_freier_Bereich = freier_Bereich(Durchmesser_Trennfuge, Lasten, Mat_Comp)
+Auslegung_freier_Bereich = freier_Bereich(Durchmesser_Trennfuge, Bauraum_Laenge, Last, Mat_Comp,Sicherheit)
 
 
 
 "Auslegung Interface A"
 #Übergabe der Parameter an die Funktion zur Auslegung der Interfaces
-Auslegung_Interfaces = Interfaces(Durchmesser_Trennfuge, Lasten, Mat_Comp, Mat_Nabe, Mat_Bolzen)
+#Auslegung_Interfaces = Interfaces(Durchmesser_Trennfuge, Lasten, Mat_Comp, Mat_Nabe, Mat_Bolzen)
 
 
 "Auslegung Interface B"
