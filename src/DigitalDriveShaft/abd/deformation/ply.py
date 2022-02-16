@@ -2,6 +2,7 @@ import numpy as np
 from .rotations import stress_rotation, strain_rotation
 import matplotlib.pyplot as plt
 
+
 # Calculate the strain in each ply.
 def ply_strain(deformed, Q, angles, thickness):
     r"""
