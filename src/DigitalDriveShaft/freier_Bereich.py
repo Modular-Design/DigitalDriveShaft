@@ -66,9 +66,11 @@ def freier_Bereich(D_Trennfuge,L_Welle,Last,Mat_Welle,Sicherheit):
     "Berechnung Biegekritische Drehzahl"
     
     
-    Drehzahl_krit = 30*np.pi/8**0.5*D_Welle_Außen/L_Welle**2*(1000**4*E_Axial/(Mat_Welle.rho*1000))**0.5 #u/min
+    Drehzahl_krit = 30*np.pi/np.sqrt(8)*D_Welle_Außen/L_Welle**2*np.sqrt(1000**4*E_Axial/(Mat_Welle.rho*1000)) #u/min
     Sicherheit_Drehzahl = Drehzahl_krit/Last.Drehzahl
+    print('Biegekritische Drehzahl:' + str(round(Drehzahl_krit,1)))
     print('Sicherheit gegen Instabilität:' + str(round(Sicherheit_Drehzahl,1)))
+    
     
     
 
