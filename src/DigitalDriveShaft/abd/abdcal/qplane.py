@@ -49,6 +49,10 @@ def QPlaneStrain(El, Et, nult, G):
     Q : matrix
         Stiffness matrix in longitudional-transverse directions.
     """
+    nutl = nult * Et / El
+    Q = np.matrix([[El / (1 - nult * nutl), (nult * Et) / (1 - nult * nutl), 0],
+                   [(nutl * El) / (1 - nult * nutl), Et / (1 - nult * nutl), 0],
+                   [0, 0, G]])
     raise NotImplementedError(
         'QPlaneStrain is undefined. Use plane stress version QPlaneStress.')
     return 0
