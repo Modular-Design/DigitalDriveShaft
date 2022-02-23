@@ -2,7 +2,7 @@
 ! ==============================================================================
 ! Titel:            Gwen - Scherkriterium
 ! Autor:            Michael Birke
-! letzte Änderung:  02.10.2015
+! letzte Aenderung:  02.10.2015
 ! Quellen:          - 
 !                   - 
 ! ------------------------------------------------------------------------------
@@ -24,18 +24,18 @@ R_shear = 40                    ! Scherfestigkeit in [MPa]
 
 
 etable,tau,cont,sfric           ! Schubspannung
-etable,sigma,cont, press        ! Flächenpressung
+etable,sigma,cont, press        ! Flaechenpressung
 
 sadd,sigma,sigma,,-1
-sexp,sigmaabs,sigma,,1          ! Betrag der Flächenpressung
+sexp,sigmaabs,sigma,,1          ! Betrag der Flaechenpressung
 
-sadd,ans1,sigma,sigmaabs,1,1    ! Zähler Term1  
+sadd,ans1,sigma,sigmaabs,1,1    ! Zaehler Term1
 sadd,f1,ans1,,(1/(2*R_t_r))     ! Querfaserzuganstrengung
 
 sadd,ans2,sigma,,-b,,R_shear    ! Nenner Term2
 sexp,f2,tau,ans2,1,-1           ! Schubanstrengung
 
-sadd,ans3,sigma,sigmaabs,-1,1   ! Zähler Term3
+sadd,ans3,sigma,sigmaabs,-1,1   ! Zaehler Term3
 sadd,f3,ans3,,(1/(2*R_c_r))     ! Querfaserdruckanstrengung 
 
 sexp,term1,f1,,2

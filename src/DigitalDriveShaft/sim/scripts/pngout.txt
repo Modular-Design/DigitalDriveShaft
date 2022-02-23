@@ -3,9 +3,9 @@
 /show,png,,GR_STATUS              !Umschalten der Ausgabe (0=Vektor 1= Raser)
 ! /GRAPHICS,POWER
 !/SHADE, ,1
-/gfile,1200,               !Pixelauflösung 
+/gfile,1200,               !Pixelaufloesung
 white
 
 /SHOW, 
-/show,close,,GR_STATUS             !schaltet Ausgabe zurück
+/show,close,,GR_STATUS             !schaltet Ausgabe zurueck
 black

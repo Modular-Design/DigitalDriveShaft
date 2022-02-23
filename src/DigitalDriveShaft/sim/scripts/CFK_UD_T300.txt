@@ -17,7 +17,7 @@ XTEN%ARG1%=1602		$YTEN%ARG1%=25		  $ZTEN%ARG1%=25		  $SXY%ARG1%=40
 XCOM%ARG1%=-800	  $YCOM%ARG1%=-115	  $ZCOM%ARG1%=-115	  $SYZ%ARG1%=40
 									                                        $SZX%ARG1%=40
 
-!Wärmeausdehnungskoefizieten
+!Waermeausdehnungskoefizieten
 !ALPX%ARG1%=0.23e-6
 !ALPY%ARG1%=30e-6
 !ALPZ%ARG1%=30e-6

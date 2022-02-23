@@ -9,22 +9,22 @@ pi = acos(-1)                 ! Definition von pi
 drehzahl = 0                  ! Drehzahl in [1/min]
 winkelg = (drehzahl/60)*2*pi  ! Winkelgeschwindigkeit in [rad/s]
 
-nz = ARG1                        ! Zähneanzahl
-sw = 360/nz/2                 ! Halber Sektionswinkel in [°]
+nz = ARG1                        ! Zaehneanzahl
+sw = 360/nz/2                 ! Halber Sektionswinkel in [deg]
 ra = 97.5                       ! Aussenradius in [mm]
 la = 12                    ! Dicke der Aussenlage in [mm]
 li = 2                     ! Dicke der Innenlage in [mm]
-zw = 0.12*sw                  ! Anteil des Zahnkopfs am Sektor in [°]
-zh = 6		                ! Zahnhöhe in [mm]
-zf = 0.63*sw                  ! Anteil Zahnfuss in [°]
+zw = 0.12*sw                  ! Anteil des Zahnkopfs am Sektor in [deg]
+zh = 6		                ! Zahnhoehe in [mm]
+zf = 0.63*sw                  ! Anteil Zahnfuss in [deg]
 rk = 0.5                      ! Radius am Zahnkopf in [mm]
 rf = 0.5                      ! Radius am Zahnfuss in [mm]
-bw = 0.8*sw                 ! Zahnfussbreite in [°]
-deep = 40                     ! Länge des Wellenstücks in [mm]
+bw = 0.8*sw                 ! Zahnfussbreite in [deg]
+deep = 40                     ! Laenge des Wellenstuecks in [mm]
 deepin = 20
 deepout = 20
 mom = 168000000               ! Drehmoment in [Nmm]
-alpha = 45                    ! Zahnflankenwinkel in [°]
+alpha = 45                    ! Zahnflankenwinkel in [deg]
 dnabe = 7
 rinabe = ra-la-li-zh-dnabe						! Radius der Nabe in [mm]
 
@@ -58,7 +58,7 @@ CFK_BD_HTS40,202
 !*use,/fe_tmp/mbi/CFK_BD.mac,202 
 
 k,100,0,0                     ! Wellenmittelpunkt
-k,101,0,ra                    ! Punkt auf Außenradius
+k,101,0,ra                    ! Punkt auf Aussenradius
 circle,100,,,101,sw,1         ! Bogen um K100, ra von K101 um Winkel sw aus
 k,102,0,(ra-la)
 circle,100,,,102,sw,1                                 
@@ -224,7 +224,7 @@ lesize,45,,,3
 !vsweep,1,5,3,0
 veorient,1,kp,56,55
 vmesh,1
-! === Außenlage ===
+! === Aussenlage ===
 sectype,101,shell,,aussen
 secdata, la/4,202,45,5			!5 Integrationspunkte
 secdata, la/4,202,45,5
