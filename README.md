@@ -1,6 +1,6 @@
 # DigitalDriveShaft
 
-- Python Version: 3.8+
+- Python Version: 3.8 (3.9+ is currently not supported by ansys_cobra)
 - Future: 3.10+
 - 3.10 will allow slicker code, but is not needed yet
 
