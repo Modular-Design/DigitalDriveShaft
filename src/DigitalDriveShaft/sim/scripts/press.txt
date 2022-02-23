@@ -1,0 +1,15 @@
+/POST1  
+SET,LAST
+
+/VIEW,1,1,2,3   
+/ANG,1
+/AUTO,1   
+/REP,FAST
+
+plnsol,cont,press   
+esel,s,type,,108
+isocycle,2  
+/AUTO,1 
+/REP,FAST    
+pngout 
+/rename,file000,png,,press2,png

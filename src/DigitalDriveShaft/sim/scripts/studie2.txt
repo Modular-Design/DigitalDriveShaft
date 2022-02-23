@@ -1,0 +1,74 @@
+! ==============================================================================
+! ==============================================================================
+! Titel:            Zahnstudie ToKoKo
+! Autor:            Michael Birke, Alrik Dargel
+! letzte Änderung:  06.01.2022
+! Quellen:          - Button re_read: R. Gottwald
+!                   - viele Macros, start140.ans J. Friedrich
+! https://www.padtinc.com/blog/20-apdl-commands-every-ansys-mechanical-user-should-know/
+! ------------------------------------------------------------------------------
+! Beschreibung:     - Studie für Profilzahn-Wellen
+!                   - 
+! ------------------------------------------------------------------------------
+! To Dos:           -
+!                   - 
+! ==============================================================================
+! ==============================================================================
+
+finish                        ! goes to the begin level. You will need to go there if you are going to play with file names
+/clear,nostart
+/facet,fine                   ! feinere Aufteilung der Facetten
+
+/psearch,D:\APDL_Macros            ! Speicherort zur Suche der Macros
+
+*USE,D:\APDL_Macros\start140.ans      ! nutzen der start140 für customized Buttons
+
+pi = acos(-1)                 ! Definition von pi
+
+/NERR,5,10000,                ! keine Warnmeldungen
+
+/prep7                        ! Preprocessing
+
+*ABBR,Re-READ,/input,studie1,mac       ! Button zur erneuten Ausführung
+
+! ==============================================================================
+! Definitionen 
+! ==============================================================================
+
+ii = 1                                  ! Laufvariable
+str1 = 'D:\lokale_Rechnung\Sunshaft\Profilverbindung\v01\'    ! work directory für die Studie
+
+
+! ==============================================================================
+! 
+! ==============================================================================
+
+!*do,broad,1.0,1.4,0.4
+!  *do,height,0.75,1.25,0.25 
+    *do,nzahn,25,30,1        
+
+    str2 =chrval(ii)
+    dir = strcat(str1,str2)   ! workdirectory für die Variante
+
+    /MKDIR,dir                ! erstellt Ordner
+
+    zahn,nzahn!broad,height         ! Aufbau Zahnmodel mit Parametern ARG1,ARG2
+
+    /CWD,dir                  ! new working directory
+
+    !solve                    ! Lösen
+    !bild                     ! Auswertebilder-Macro
+    bildtest                  ! Auswertebilder-Macro zum Schleifentest
+                             
+    parsav                    ! Speichern der Variablen
+    finish
+    /clear
+    parres                    ! Widerherstellung der Variablen
+
+    ii = ii+1                 ! Inkrement
+                             
+    /CWD,str1                 ! new working directory
+
+    *enddo
+  !*enddo                      ! Ende *do Schleife innen
+!*enddo                        ! Ende *do Schleife außen

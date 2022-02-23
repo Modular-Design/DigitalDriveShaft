@@ -1,0 +1,11 @@
+
+*GET, GR_STATUS, GRAPH, 0, DISPLAY
+/show,png,,GR_STATUS              !Umschalten der Ausgabe (0=Vektor 1= Raser)
+! /GRAPHICS,POWER
+!/SHADE, ,1
+/gfile,1200,               !Pixelauflösung 
+white
+
+/SHOW, 
+/show,close,,GR_STATUS             !schaltet Ausgabe zurück
+black

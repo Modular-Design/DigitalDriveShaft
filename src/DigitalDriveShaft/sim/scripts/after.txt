@@ -1,0 +1,18 @@
+
+
+ii = arg1
+!*do,ii,3,3,1
+  
+  str1 = 'H:\GWEN\studie_hoch\'
+  str2 =chrval(ii)
+  dir = strcat(str1,str2)
+  
+  /CWD,dir
+  RESUME,'file','rdb',dir,0,0
+  !/INPUT,'file','rst',dir,, 0
+  /POST1  
+  SET,Last
+  cuntzeBD,101,1
+  
+  /CWD,'H:\GWEN\studie_hoch\'
+!*enddo   

@@ -1,0 +1,612 @@
+ finish
+/clear
+
+
+/facet,fine                   ! feinere Aufteilung der Facetten
+
+pi = acos(-1)                 ! Definition von pi
+
+drehzahl = 0                  ! Drehzahl in [1/min]
+winkelg = (drehzahl/60)*2*pi  ! Winkelgeschwindigkeit in [rad/s]
+
+nz = ARG1                        ! Zähneanzahl
+sw = 360/nz/2                 ! Halber Sektionswinkel in [°]
+ra = 97.5                       ! Aussenradius in [mm]
+la = 12                    ! Dicke der Aussenlage in [mm]
+li = 2                     ! Dicke der Innenlage in [mm]
+zw = 0.12*sw                  ! Anteil des Zahnkopfs am Sektor in [°]
+zh = 6		                ! Zahnhöhe in [mm]
+zf = 0.63*sw                  ! Anteil Zahnfuss in [°]
+rk = 0.5                      ! Radius am Zahnkopf in [mm]
+rf = 0.5                      ! Radius am Zahnfuss in [mm]
+bw = 0.8*sw                 ! Zahnfussbreite in [°]
+deep = 40                     ! Länge des Wellenstücks in [mm]
+deepin = 20
+deepout = 20
+mom = 168000000               ! Drehmoment in [Nmm]
+alpha = 45                    ! Zahnflankenwinkel in [°]
+dnabe = 7
+rinabe = ra-la-li-zh-dnabe						! Radius der Nabe in [mm]
+
+sb = ra-la-li
+sa = ra-la-li-zh/2
+wb = (180-alpha)*pi/180
+x =  sa/sb*sin(wb)
+wa = asin(x)
+wa = wa*180/pi
+wb = wb*180/pi
+fw = 180-wa-wb
+fw = bw-fw
+
+*if,li,gt,la,then
+  es = la
+*else
+  es = li
+*endif
+
+
+es=0.265*3
+!es=0.265/2
+!es=0.265/3
+  
+/prep7
+
+CFK_UD_HTS40,201
+CFK_BD_HTS40,202
+
+!*use,/fe_tmp/mbi/CFK_UD_T300.mac,201
+!*use,/fe_tmp/mbi/CFK_BD.mac,202 
+
+k,100,0,0                     ! Wellenmittelpunkt
+k,101,0,ra                    ! Punkt auf Außenradius
+circle,100,,,101,sw,1         ! Bogen um K100, ra von K101 um Winkel sw aus
+k,102,0,(ra-la)
+circle,100,,,102,sw,1                                 
+k,103,0,(ra-la-li)         ! Kreisbogen des Zahnfusses
+circle,100,,,103,sw
+k,104,0,(ra-la-li-zh/2)         ! Kreisbogen des Zahnfusses
+circle,100,,,104,sw
+k,105,0,(ra-la-li-zh)         ! Kreisbogen des Zahnfusses
+circle,100,,,105,sw
+k,106,0,(ra-la-li)         ! Kreisbogen des Zahnfusses
+circle,100,,,106,bw
+k,107,0,(ra-la-li-zh/2)         ! Kreisbogen des Zahnfusses
+circle,100,,,107,fw
+
+l,1,3
+l,2,4
+l,4,6
+l,12,14
+
+lextnd,11,14,ra
+lsbl,5,12
+ldele,11
+ldele,14
+ldele,7
+ldele,4
+l,12,16
+kdele,14
+ldele,8
+
+cskp,11,0,12,16,1
+LGEN,2,4,,,,li,,,0  
+csys,0
+
+k,108,0,(ra-zh-la)
+circle,100,,,108,bw
+
+lextnd,5,14,li,0
+ldele,6
+
+boptn,keep,yes
+lsbl,5,2
+ldele,6
+ldele,5
+lsbl,8,7
+lsbl,7,8
+ldele,5
+ldele,8
+ldele,12
+ldele,7
+lsbl,3,4
+ldele,5
+ldele,3
+
+l,19,16
+l,12,20
+lsbl,3,5
+csys,11
+LGEN,2,4,,,,li/2,,,0  
+csys,0
+cskp,12,0,22,24,1
+k,109,0,li
+k,110,0,-li
+csys,0
+l,109,110
+ldele,8
+ldele,14
+ldele,12
+ldele,5
+ldele,3
+
+lsbl,6,15
+lsbl,4,15
+lsbl,15,6
+ldele,14
+ldele,15
+ldele,6
+
+nummrg,kp
+
+lsbl,16,4
+ldele,4
+ldele,14
+ldele,16
+
+lsbl,2,3
+
+nummrg,kp
+ldele,2
+ldele,4
+
+lfillt,12,13,rk+0.5
+lfillt,11,5,rk
+lfillt,7,8,rf
+lfillt,14,3,rf*1.0
+
+lcomb,14,16,0
+lcomb,7,15,0
+lcomb,13,2,0
+lcomb,11,4,0
+
+lcomb,7,8,0
+lcomb,14,3,0
+lcomb,2,12,0
+lcomb,4,5,0
+
+k,111,0,ra-(1.001*la)
+circle,100,,,111,bw
+lsbl,3,5
+lsbl,5,3
+ldele,13
+ldele,5
+
+nummrg,kp
+lcomb,8,12,1
+ldele,8
+lcomb,11,4
+ldele,11
+
+nummrg,kp
+lsym,x,all
+nummrg,kp
+
+lcomb,1,11,0
+l,13,17
+lcomb,5,16,1
+ldele,5
+ldele,16
+lcomb,4,15,1
+ldele,4
+ldele,15
+lcomb,2,13,1
+ldele,2
+ldele,13
+
+al,1,20,23,9
+al,10,3,6,7
+al,5,17,4,6
+al,14,21,18,17
+al,12,11,8
+al,11,22,19
+AGEN,2,1, , , , , , ,0   
+AGEN,2,2, , , , , , ,0   
+AGEN,2,3, , , , , , ,0   
+AGEN,2,4, , , , , , ,0   
+AGEN,2,5, , , , , , ,0   
+AGEN,2,6, , , , , , ,0  
+
+vext,7,,,0,0,deep
+vext,8,,,0,0,deep
+vext,9,,,0,0,deep
+vext,10,,,0,0,deep
+vext,11,,,0,0,deep
+vext,12,,,0,0,deep
+
+vsel,s,volu,,1
+cm,outer,volu
+et,101,186
+keyopt,101,2,0    !red int
+keyopt,101,3,1    !layered
+keyopt,101,8,1    !all layers
+esize,6*es
+lesize,45,,,3
+!vsweep,1,5,3,0
+veorient,1,kp,56,55
+vmesh,1
+! === Außenlage ===
+sectype,101,shell,,aussen
+secdata, la/4,202,45,5			!5 Integrationspunkte
+secdata, la/4,202,45,5
+!secdata, la/4,202,45,5
+!secdata, la/4,202,45,5					
+esel,s,ename,,outer
+emodif,all,sec,101
+
+vsel,s,volu,,2
+cm,inner,volu
+et,102,186
+keyopt,102,2,0    !red int
+keyopt,102,3,1    !layered
+keyopt,102,8,1    !all layers
+type,102
+esize,es
+lesize,50,,,2
+!vsweep,2,11,11,0
+veorient,2,kp,60,61
+vmesh,2
+! === Innenlage ===
+sectype,102,shell,,aussen
+secdata, li/2,202,45,5			!5 Integrationspunkte				
+esel,s,ename,,inner
+emodif,all,sec,102
+allsel
+
+vsel,s,volu,,3
+cm,inner,volu
+et,102,186
+keyopt,102,2,0    !red int
+keyopt,102,3,1    !layered
+keyopt,102,8,1    !all layers
+type,102
+esize,es
+lesize,59,,,2
+!vsweep,2,11,11,0
+veorient,3,kp,64,63
+vmesh,3
+! === Innenlage ===
+sectype,102,shell,,aussen
+secdata, li/2,202,45,5			!5 Integrationspunkte					
+esel,s,ename,,inner
+emodif,all,sec,102
+allsel
+
+vsel,s,volu,,4
+cm,inner,volu
+et,102,186
+keyopt,102,2,0    !red int
+keyopt,102,3,1    !layered
+keyopt,102,8,1    !all layers
+type,102
+esize,es
+lesize,69,,,2
+!vsweep,2,11,11,0
+veorient,4,kp,69,66
+vmesh,4
+! === Innenlage ===
+sectype,102,shell,,aussen
+secdata, li/2,202,45,5			!5 Integrationspunkte					
+esel,s,ename,,inner
+emodif,all,sec,102
+allsel
+
+vsel,s,volu,,5,6,1
+cm,core,volu
+et,103,186
+keyopt,103,3,1
+type,103
+esize,1.5*es
+!vsweep,3,15,16,0
+!veorient,5,kp,50,48
+!veorient,5,line,-76
+veorient,5,area,34
+!veorient,5,kp,72,70
+vmesh,5
+!veorient,6,line,-82
+veorient,6,area,38
+!veorient,6,kp,73,74
+vmesh,6
+!clocal,12,2,1000,,0,0,90
+!emodif,all,esys,12
+!csys,0
+! === Kern ===
+esel,s,ename,,core
+emodif,all,mat,201
+emodif,all,sec,203
+
+!local,13,0
+!allsel
+!esel,s,type,,103
+!emodif,all,esys,13
+!eorient,186,1
+!csys,0
+
+allsel
+esel,s,type,,102
+nsle,s,all
+nummrg,node
+
+allsel
+esel,s,type,,103
+nsle,s,all
+nummrg,node
+
+allsel
+
+k,111,0,0,-deepout
+lsel,s,line,,18
+lsel,a,line,,7
+lsel,a,line,,4
+lgen,2,all ,,,,,-deepout,,1,0
+alls
+!rins=ra-2*(la+li+zh)
+!k,112,0,rins,-deep/4
+!k,112,0,ra-la-li-zh*3,-deepout
+k,112,0,rinabe,-deepout
+
+circle,111,,,112,sw
+lsym,x,89
+lglue,89,90
+ldele,90
+l,83,79
+l,81,78
+al,90,88,86,87,92,89,91
+vext,41,,,0,0,deepin+deepout
+
+allsel
+vsel,s,volu,,7
+cm,insert,volu
+et,104,187
+!keyopt,102,3,1
+type,104
+
+!Materialdefinition Nabe
+mp,ex,    204, 210e3         
+mp,prxy,  204, 0.3        
+mp,dens,  204, 7.8-9     
+aesize,45,es
+aesize,44,es
+aesize,46,es
+aesize,41,es*3 
+esize,es*6
+mshkey,mapped
+vmesh,7
+esel,s,ename,,insert
+emodif,all,mat,204
+
+! ==============================================================================
+! Kontakte
+MP,MU,201,  
+MAT,201 
+MP,EMIS,201,7.88860905221e-031  
+R,3 
+REAL,3  
+ET,105,170  
+ET,106,174  
+R,3,,,1.0,0.1,0,
+RMORE,,,1.0E20,0.0,1.0, 
+RMORE,0.0,0,1.0,,1.0,0.5
+RMORE,0,1.0,1.0,0.0,,1.0
+KEYOPT,106,4,0  
+KEYOPT,106,5,0  
+KEYOPT,106,7,0  
+KEYOPT,106,8,0  
+KEYOPT,106,9,0  
+KEYOPT,106,10,2 
+KEYOPT,106,11,0 
+KEYOPT,106,12,6 
+KEYOPT,106,2,0  
+KEYOPT,105,5,0  
+! Generate the target surface   
+ASEL,S,,,16
+TYPE,105
+NSLA,S,1
+ESLN,S,0
+ESLL,U  
+ESEL,U,ENAME,,188,189   
+NSLE,A,CT2  
+ESURF   
+! Generate the contact surface  
+ASEL,S,,,34
+asel,a,,,40
+asel,a,,,22
+asel,a,,,29 
+TYPE,106
+NSLA,S,1
+ESLN,S,0
+NSLE,A,CT2 ! CZMESH patch (fsk qt-40109 8/2008) 
+ESURF   
+ALLSEL  
+
+MP,MU,201,0 
+MAT,201 
+MP,EMIS,201,7.88860905221e-031  
+R,4 
+REAL,4  
+ET,107,170  
+ET,108,174  
+R,4,,,1.0,0.1,0,
+RMORE,,,1.0E20,0.0,1.0, 
+RMORE,0.0,0,1.0,,1.0,0.5
+RMORE,0,1.0,1.0,0.0,,1.0
+KEYOPT,108,4,0  
+KEYOPT,108,5,0  
+KEYOPT,108,7,0  
+KEYOPT,108,8,0  
+KEYOPT,108,9,0  
+KEYOPT,108,10,2 
+KEYOPT,108,11,0 
+KEYOPT,108,12,6 
+KEYOPT,108,2,1  
+KEYOPT,107,5,0  
+! Generate the target surface   
+ASEL,S,,,35
+asel,a,,,39  
+TYPE,107
+NSLA,S,1
+ESLN,S,0
+ESLL,U  
+ESEL,U,ENAME,,188,189   
+NSLE,A,CT2  
+ESURF   
+! Generate the contact surface  
+ASEL,S,,,22
+asel,a,,,24
+asel,a,,,29 
+TYPE,108
+NSLA,S,1
+ESLN,S,0
+NSLE,A,CT2 ! CZMESH patch (fsk qt-40109 8/2008) 
+ESURF   
+ALLSEL  
+
+
+MP,MU,201,0.1   
+MAT,201 
+MP,EMIS,201,7.88860905221e-031  
+R,7 
+REAL,7  
+ET,109,170  
+ET,110,174  
+R,7,,,1.0,0.1,0,
+RMORE,,,1.0E20,0.0,1.0, 
+RMORE,0.0,0,1.0,,1.0,0.5
+RMORE,0,1.0,1.0,0.0,,1.0
+KEYOPT,110,4,0  
+KEYOPT,110,5,0  
+KEYOPT,110,7,0  
+KEYOPT,110,8,0  
+KEYOPT,110,9,0  
+KEYOPT,110,10,2 
+KEYOPT,110,11,0 
+KEYOPT,110,12,0 
+KEYOPT,110,2,1  
+KEYOPT,109,5,0  
+!MP,MU,201,0.1 
+!MAT,201 
+!MP,EMIS,201,7.88860905221e-031  
+!R,5 
+!REAL,5  
+!ET,109,170  
+!ET,110,174  
+!R,5,,,1.0,0.1,0,
+!RMORE,,,1.0E20,0.0,1.0, 
+!RMORE,0.0,0,1.0,,1.0,0.5
+!RMORE,0,1.0,1.0,0.0,,1.0
+!KEYOPT,110,4,0  
+!KEYOPT,110,5,0  
+!KEYOPT,110,7,0  
+!KEYOPT,110,8,0  
+!KEYOPT,110,9,0  
+!KEYOPT,110,10,2 
+!KEYOPT,110,11,0 
+!KEYOPT,110,12,0 
+!KEYOPT,110,2,1  
+!KEYOPT,110,5,0  
+! Generate the target surface   
+ASEL,S,,,20 
+asel,a,,,26
+asel,a,,,31
+TYPE,109
+NSLA,S,1
+ESLN,S,0
+ESLL,U  
+ESEL,U,ENAME,,188,189   
+NSLE,A,CT2  
+ESURF   
+! Generate the contact surface  
+ASEL,S,,,44,46,1 
+TYPE,110
+NSLA,S,1
+ESLN,S,0
+NSLE,A,CT2 ! CZMESH patch (fsk qt-40109 8/2008) 
+ESURF   
+ALLSEL   
+
+
+! Define surface-based constraint type of pair  
+MAT,201 
+R,6 
+REAL,6  
+ET,111,170  
+ET,112,174  
+KEYOPT,112,12,5 
+KEYOPT,112,4,2  
+KEYOPT,112,2,2  
+KEYOPT,111,2,0  
+KEYOPT,111,4,111111 
+TYPE,111
+! Create a pilot node   
+KSEL,S,,,111
+KATT,-1,6,111,-1
+KMESH,111   
+! Generate the contact surface  
+ASEL,S,,,41 
+CM,_CONTACT,AREA
+TYPE,112
+NSLA,S,0
+ESLN,S,0
+NSLE,A,CT2 ! CZMESH patch (fsk qt-40109 8/2008) 
+ESURF   
+ALLSEL  
+
+csys,2
+asel,s,area,,13
+asel,a,area,,33
+asel,a,area,,37
+asel,a,area,,18
+asel,a,area,,23
+asel,a,area,,28
+nsla,s,1                                                               
+nrotat,all
+d,all,uz,0
+d,all,uy,0
+csys,0
+
+nsel,s,loc,y,0
+d,all,uz,0
+f,all,mz,mom/nz
+
+allsel
+cyclic
+
+/solu
+solcontrol,on
+nlgeom,on
+!nsubst,5
+outres,all
+
+/eof
+!End of file
+
+
+!!!Codefragmente!!!
+
+/post1
+plnsol,u,sum
+
+
+lplot
+/pnum,kp,1
+/pnum,line,1
+/replot
+!/eof
+
+allsel
+/PSYMB,ESYS,1 
+eplot
+/TRLCY,ELEM,0.9,all 
+check,esel,warn
+/replot
+!/eof
+! == bearbeitungsende ==
+! ==============================================================================
+
+!logfile erstellen
+/CLOG,log,txt
+
+
+/eof
+
+!CFK_UD_T300,201
+!CFK_BD,202 

@@ -1,0 +1,53 @@
+/PREP7
+MATNUM=ARG1
+!mpdele,all,ARG1
+!--------------Materialdef------------------------
+!______________CFK-Einzelschicht__________________
+
+e_grad = 0.8
+f_grad = 0.95
+
+!Emodule	Querkontraktion	Schubmodule
+EX%ARG1%=138e3 		$PRXY%ARG1%=0.29		$GXY%ARG1%=4.5e3	
+EY%ARG1%=8.5e3  	$PRXZ%ARG1%=0.29		$GXZ%ARG1%=4.5e3
+EZ%ARG1%=8.5e3   	$PRYZ%ARG1%=0.31		$GYZ%ARG1%=3.24e3
+
+!Versagen X		    Versagen Y		      Versagen Z		      !Versagen schub
+XTEN%ARG1%=1602		$YTEN%ARG1%=25		  $ZTEN%ARG1%=25		  $SXY%ARG1%=40
+XCOM%ARG1%=-800	  $YCOM%ARG1%=-115	  $ZCOM%ARG1%=-115	  $SYZ%ARG1%=40
+									                                        $SZX%ARG1%=40
+
+!Wärmeausdehnungskoefizieten
+!ALPX%ARG1%=0.23e-6
+!ALPY%ARG1%=30e-6
+!ALPZ%ARG1%=30e-6
+
+!dichte
+DENS%ARG1%=1.5e-9
+
+!________MATDEF
+!_______________CFK Unidirektional Prepreg (1)_____________________________________
+
+MP,EX,MATNUM,EX%ARG1%	  $MP,PRXY,MATNUM,PRXY%ARG1%	$MP,GXY,MATNUM,GXY%ARG1%
+MP,EY,MATNUM,EY%ARG1%   $MP,PRYZ,MATNUM,PRYZ%ARG1%	$MP,GYZ,MATNUM,GYZ%ARG1%
+MP,EZ,MATNUM,EZ%ARG1%   $MP,PRXZ,MATNUM,PRXZ%ARG1%	$MP,GXZ,MATNUM,GXZ%ARG1%
+
+MP,ALPX,MATNUM,ALPX%ARG1%	
+MP,ALPY,MATNUM,ALPY%ARG1%		
+MP,ALPZ,MATNUM,ALPZ%ARG1%
+
+MP,DENS,MATNUM,DENS%ARG1%
+
+
+FC,MATNUM,S,XTEN,XTEN%ARG1%
+FC,MATNUM,S,YTEN,YTEN%ARG1%
+FC,MATNUM,S,ZTEN,ZTEN%ARG1%
+FC,MATNUM,S,XCMP,XCOM%ARG1%
+FC,MATNUM,S,YCMP,YCOM%ARG1%
+FC,MATNUM,S,ZCMP,ZCOM%ARG1%
+FC,MATNUM,S,XY,SXY%ARG1%
+FC,MATNUM,S,YZ,SYZ%ARG1%
+FC,MATNUM,S,XZ,SZX%ARG1%
+FC,MATNUM,S,XYCP,-1  
+FC,MATNUM,S,YZCP,-1  
+FC,MATNUM,S,XZCP,-1

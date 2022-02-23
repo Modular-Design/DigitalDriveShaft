@@ -1,0 +1,5 @@
+/rgb,index,0,0,0,0		!
+/rgb,index,60,60,60,13		!Systemfarben zurücksetzen
+/rgb,index,80,80,80,14		!
+/rgb,index,100,100,100,15	!
+/replot				!
