@@ -2,6 +2,9 @@
 from freier_Bereich import freier_Bereich
 from load import Vector
 
+# Import local packages.
+from abd import abdcal, deformation, failure, homogenization
+
 
 # Definition der Materialklasse
 class Material(object):
@@ -14,6 +17,8 @@ class Last(object):
 
 
 "Parameterdefinition"
+
+Steifigkeit = False
 
 "Geometrie"
 Durchmesser_Trennfuge = 171  # mm
@@ -50,6 +55,7 @@ Mat_Comp.Ey = 70  # GPa
 Mat_Comp.E1 = 145200 #MPa
 Mat_Comp.E2 = 6272.7 #MPa
 Mat_Comp.Ny12 = 0.28
+Mat_Comp.G12 = 2634.2 #MPa
 Mat_Comp.tau_zul = 630.93 #MPa
 Mat_Comp.rho = 1.515 #g/cm^3
 
@@ -59,9 +65,36 @@ Mat_Nabe.R = 1100  # MPa
 
 Mat_Bolzen = Material("Stahl")
 
+
+
+
+###############################################################################
+# Ply Properties                                                              #
+###############################################################################
+
+
+# List the other properties of the ply.
+t = 1  # mm
+
+# Calculate the ply stiffness matricess matrix.
+Q = abdcal.QPlaneStress(Mat_Comp.E1, Mat_Comp.E2, Mat_Comp.Ny12, Mat_Comp.G12)
+
+
+###############################################################################
+# Laminate Properites                                                         #
+###############################################################################
+# Define the stacking sequence.
+angles_deg = [45,-45,-45,45]
+thickness = [t] * len(angles_deg)
+Q = [Q] * len(angles_deg)
+
+# Calculate the ABD matrix and its inverse.
+abd = abdcal.abd(Q, angles_deg, thickness)
+abd_inv = abdcal.matrix_inverse(abd)
+
 "Auslegung freier Bereich"
 # Übergabe der Parameter an die Funktion zur Auslegung des freien Bereichs
-Auslegung_freier_Bereich = freier_Bereich(Durchmesser_Trennfuge, Bauraum_Laenge, Last, Mat_Comp,Sicherheit)
+Auslegung_freier_Bereich = freier_Bereich(Durchmesser_Trennfuge, Bauraum_Laenge, Last, Mat_Comp,Sicherheit,Steifigkeit)
 
 "Auslegung Interface A"
 # Übergabe der Parameter an die Funktion zur Auslegung der Interfaces
