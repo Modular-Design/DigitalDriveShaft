@@ -31,4 +31,8 @@ class OrthotropicStressFailure(StressFailure):
                  tens_l: float, tens_t: float,
                  shear_lt: float, shear_tt: float,
                  compr_l: float, compr_t: float):
-        super().__init__()
+        attr = dict(XTEN=tens_l, YTEN=tens_t, ZTEN=tens_t,
+                    XCMP=compr_l, YCMP=compr_t, ZCMP=compr_t,
+                    XY=shear_lt, XZ=shear_lt, YZ=shear_tt,
+                    XYCP=-1, XZCP=-1, YZCP=-1)
+        super().__init__(attr)
