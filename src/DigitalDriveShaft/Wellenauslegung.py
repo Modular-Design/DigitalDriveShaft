@@ -3,6 +3,7 @@ from freier_Bereich import freier_Bereich
 from load import Vector
 
 
+
 # Definition der Materialklasse
 class Material(object):
     def __init__(self, materialname):
@@ -14,6 +15,8 @@ class Last(object):
 
 
 "Parameterdefinition"
+
+Auslegungsziel = 'Fertigung' #Steifigkeit, Masse, Fertigung
 
 "Geometrie"
 Durchmesser_Trennfuge = 171  # mm
@@ -28,7 +31,7 @@ Last.Mx = 168960    #Nm
 Last.My = 0      #Nm
 Last.Mz = 0      #Nm
 
-Last.Drehzahl = 6600 #U/min
+Last.Drehzahl = 136000 #U/min
 
 
 force = Vector()  # N
@@ -50,6 +53,7 @@ Mat_Comp.Ey = 70  # GPa
 Mat_Comp.E1 = 145200 #MPa
 Mat_Comp.E2 = 6272.7 #MPa
 Mat_Comp.Ny12 = 0.28
+Mat_Comp.G12 = 2634.2 #MPa
 Mat_Comp.tau_zul = 630.93 #MPa
 Mat_Comp.rho = 1.515 #g/cm^3
 
@@ -59,9 +63,14 @@ Mat_Nabe.R = 1100  # MPa
 
 Mat_Bolzen = Material("Stahl")
 
+
+
+
+
+
 "Auslegung freier Bereich"
 # Übergabe der Parameter an die Funktion zur Auslegung des freien Bereichs
-Auslegung_freier_Bereich = freier_Bereich(Durchmesser_Trennfuge, Bauraum_Laenge, Last, Mat_Comp,Sicherheit)
+Auslegung_freier_Bereich = freier_Bereich(Durchmesser_Trennfuge, Bauraum_Laenge, Last, Mat_Comp,Sicherheit,Auslegungsziel)
 
 "Auslegung Interface A"
 # Übergabe der Parameter an die Funktion zur Auslegung der Interfaces
