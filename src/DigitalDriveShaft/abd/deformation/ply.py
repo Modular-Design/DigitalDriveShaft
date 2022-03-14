@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 # Calculate the strain in each ply.
-def ply_strain(deformed, Q, angles, thickness):
+def ply_strain(deformed, Q, angles, thickness, plotting=False):
     r"""
     Calculate the strain at the top and bottom of each ply.
     Small and linear deformations are assumed. For each ply two strain states
