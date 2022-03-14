@@ -9,3 +9,5 @@ class Vector(BaseModel):
 
     def as_list(self) -> List[float]:
         return [self.x, self.y, self.z]
+
+

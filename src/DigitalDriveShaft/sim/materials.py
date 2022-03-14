@@ -18,7 +18,7 @@ class AnisotropicMaterial(Material):
                  density: float):
         attr = dict(EX=E_x, EY=E_y, EZ=E_z,
                     PRXY=nu_xy, PRXZ=nu_xz, PRYZ=nu_yz,
-                    GXY= G_xy, GXZ=G_xz, GYZ=G_yz,
+                    GXY=G_xy, GXZ=G_xz, GYZ=G_yz,
                     DENS=density)
         super().__init__(attr)
 
