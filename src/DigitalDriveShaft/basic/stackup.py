@@ -1,17 +1,23 @@
-from typing import List
+from typing import List, Optional
 import numpy as np
+
+from .materials import Material
 
 
 class Ply:
-    def __init__(self, stiffness, thickness: float, rotation=0.0, alpha=None):
-        self.stiffness = stiffness
+    def __init__(self, material: Material, thickness: float, rotation=0.0):
+        self.material = material
         self.thickness = thickness
         self.rotation = rotation
+        self.stiffness = self.material.get_stiffness()
 
     def rotate(self, angle) -> "Ply":
         angle = angle * np.pi / 180  # convert to radians
-        m = np.cos(angle)
-        n = np.sin(angle)
+        return Ply(self.material, self.thickness, self.rotation + angle)
+
+    def get_stiffness(self):
+        m = np.cos(self.rotation)
+        n = np.sin(self.rotation)
         T1 = np.matrix([[m ** 2, n ** 2, 2 * m * n],
                         [n ** 2, m ** 2, -2 * m * n],
                         [-m * n, m * n, m ** 2 - n ** 2]])
@@ -19,10 +25,10 @@ class Ply:
                         [n ** 2, m ** 2, -m * n],
                         [-2 * m * n, 2 * m * n, m ** 2 - n ** 2]])
         stiffness_rot = np.linalg.inv(T1) * self.stiffness * T2
-        return Ply(stiffness_rot, self.thickness, self.rotation + angle)
+        return stiffness_rot
 
-    def get_stiffness(self):
-        return self.stiffness
+    def get_material(self):
+        return self.material
 
     def get_local_stress(self, stress):
         angle = self.rotation  # TODO: Maby -self.rotation
@@ -32,7 +38,7 @@ class Ply:
                             [n ** 2, m ** 2, -2 * m * n],
                             [-m * n, m * n, m ** 2 - n ** 2]])
         stress_rot = T1_inv * stress
-        return stress_rot
+        return np.ravel(stress_rot)
 
     def get_local_strain(self, strain):
         angle = self.rotation  # TODO: Maby -self.rotation
@@ -41,7 +47,7 @@ class Ply:
         T2_inv = np.matrix([[m ** 2, n ** 2, m * n],
                             [n ** 2, m ** 2, -m * n],
                             [-2 * m * n, 2 * m * n, m ** 2 - n ** 2]])
-        return T2_inv * strain
+        return np.ravel(T2_inv.dot(strain))
 
 
 
@@ -69,7 +75,7 @@ class Stackup:
     def get_abd(self, truncate=True):
         if self.abd is None:
             # Calculate the total thickness.
-            h = sum(self.thickness) / 2
+            h = self.thickness / 2
 
             # Create empty matricces for A B en D.
             A = np.zeros((3, 3))
@@ -109,15 +115,39 @@ class Stackup:
             return np.matrix(np.where(np.abs(self.abd) < np.max(self.abd) * 1e-6, 0, self.abd))
         return self.abd
 
-    def apply_load(self, mech_load: List[float]):
-        return np.inv(self.get_abd()).dot(mech_load)
+    def apply_load(self, mech_load: np.ndarray) -> np.ndarray:
+        """
+        Calculate the strain and curvature of the full plate under a given load using Kirchhoff plate theory.
+        Parameters
+        ----------
+        mech_load : vector
+            The load vector consits of are :math:`(N_x, N_y, N_{xy}, M_x, M_y, M_{xy})^T`
+        Returns
+        -------
+        deformation : vector
+            This deformation consists of :math:`(\varepsilon_x, \varepsilon_y
+            \varepsilon_{xy},\kappa_x, \kappa_y, \kappa_{xy})^T`
+        """
+        return np.ravel(np.linalg.inv(self.get_abd()).dot(mech_load))
 
-    def apply_deformation(self, deformation: List[float]):
-        return self.get_abd().dot(deformation)
+    def apply_deformation(self, deformation: np.ndarray) -> np.ndarray:
+        r"""
+        Calculate the running load and moment of the plate under a given using Kichhoff plate theory.
+        Parameters
+        ----------
+        deformation : vector
+            This deformation consists of :math:`(\varepsilon_x, \varepsilon_y,
+            \varepsilon_{xy},\kappa_x, \kappa_y, \kappa_{xy})^T`
+        Returns
+        -------
+        load : vector
+            The load vector consits of are :math:`(N_x, N_y, N_{xy}, M_x, M_y, M_{xy})^T`
+        """
+        return np.ravel(self.get_abd().dot(deformation))
 
-    def get_strains(self, deformation: List[float]):  # TODO: TEST it!
+    def get_strains(self, deformation: np.ndarray):  # TODO: TEST it!
         # Calculating total thickness of the layup.
-        h = sum(self.thickness) / 2
+        h = self.thickness / 2
 
         # Calculate deformation of the midplane of the laminate.
         strain_membrane = deformation[:3]
@@ -141,7 +171,7 @@ class Stackup:
             strain_lt_bot = ply.get_local_strain(strain_bot)
 
             # Store the strain values of this ply.
-            strain_ply = [strain_lt_top, strain_lt_bot]
+            strain_ply = [strain_lt_bot, strain_lt_top]
             strains.append(strain_ply)
             z_bot = z_top
 
@@ -154,8 +184,8 @@ class Stackup:
         # Iterate over all plies.
         for i in range(len(self.plies)):
             # Obtain the strains from this ply.
-            strain_lt_top = strains[i][0]
-            strain_lt_bot = strains[i][1]
+            strain_lt_bot = strains[i][0]
+            strain_lt_top = strains[i][1]
 
             # Convert strains into stresses.
             Q = self.plies[i].get_stiffness()
@@ -163,7 +193,16 @@ class Stackup:
             stress_lt_bot = Q.dot(strain_lt_bot)
 
             # Store the stress values of this ply.
-            stress_ply = [stress_lt_top, stress_lt_bot]
+            stress_ply = [stress_lt_bot, stress_lt_top]
             stresses.append(stress_ply)
 
         return stresses
+
+    def is_safe(self, stresses):
+        for i in range(len(stresses)):
+            ply_stress = stresses[i]
+            material = self.plies[i].get_material()
+            if not material.is_safe(stresses=ply_stress):
+                return False
+        return True
+
