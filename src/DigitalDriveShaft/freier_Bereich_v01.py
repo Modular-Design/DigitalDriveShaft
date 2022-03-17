@@ -136,43 +136,40 @@ def Beulfestigkeit(D_Trennfuge, L_Welle, Last, Mat_Welle, Layup, Sicherheit: Opt
 
 def Dynamische_Stabilitaet(D_Trennfuge, L_Welle, Last, Mat_Welle, Layup, Sicherheit: Optional[float] = 1.0):
     "Berechnung Biegekritische Drehzahl"
+    
+    
+    
+    # =============================================================================
+    #     Layup einlesen und ABD-Matrix berechnen
+    # =============================================================================
+    #Layupinformationen auslesen    
+    angles_deg
+    thickness
+    
+    Laminatdicke = sum(thickness)
+    D_Mittelflaeche = D_Trennfuge + Laminatdicke
+    D_Welle_Außen = D_Trennfuge + 2*Laminatdicke
+    U_Welle = np.pi * D_Mittelflaeche
+    
+    
+    # Calculate the ply stiffness matricess matrix
+    Q_Einzel = abdcal.QPlaneStress(Mat_Welle.E1, Mat_Welle.E2, Mat_Welle.Ny12, Mat_Welle.G12)
+    
+    Q = [Q_Einzel] * len(angles_deg)
+    # Calculate the ABD matrix and its inverse.
+    abd = abdcal.abd(Q, angles_deg, thickness)
+    abd_inv = abdcal.matrix_inverse(abd)
+    
+    E_Axial = abd[0, 0] / Laminatdicke  # MPa #20000 bei Sebastian
 
     # Formel für Berechnung von Biegekritischer Drehzahl aus Sebastians Excel
     Drehzahl_krit = 60 / 2 * np.pi / np.sqrt(8) * D_Welle_Außen / L_Welle ** 2 * np.sqrt(
         1000 ** 3 * E_Axial / (Mat_Welle.rho))  # u/min
     Sicherheit_Drehzahl = Drehzahl_krit / Last.Drehzahl
-    print(f"Biegekritische Drehzahl: {round(Drehzahl_krit, 1)}")
-    print('Sicherheit gegen Instabilität: ' + str(round(Sicherheit_Drehzahl, 1)))
+    print(f'Biegekritische Drehzahl: {round(Drehzahl_krit, 1)}')
+    print(f'Sicherheit gegen Instabilität:  {(round(Sicherheit_Drehzahl, 1))}')
 
-    if Sicherheit_Drehzahl < Sicherheit:
-        while abs(Last.Drehzahl * Sicherheit - Drehzahl_krit) > 0.1:
-            # iterative Anpassung der Umfangslagen auf Basis des Ergebnisses
-            t_Axiallagen = t_Axiallagen + ((Sicherheit * Last.Drehzahl) / Drehzahl_krit) ** 2 - 1
-            # print('zusätzliche Axiallagen:' + str(round(t_Axiallagen,2))+ 'mm')
-
-            # Lagendicken neu Berechnen
-            thickness = [t_Diagonallagen / 4, t_Diagonallagen / 4, t_Umfangslagen / 2, t_Axiallagen, t_Umfangslagen / 2,
-                         t_Diagonallagen / 4, t_Diagonallagen / 4]
-            t_Gesamt = sum(thickness)
-            D_Welle_Außen = D_Trennfuge + 2 * t_Gesamt
-
-            # Laminatmatrizen
-            abd = abdcal.abd(Q, angles_deg, thickness)
-            # resultierende Steifigkeiten
-            E_Axial = abd[0, 0] / t_Gesamt  # MPa
-            E_Umfang = abd[1, 1] / t_Gesamt  # MPa
-
-            Drehzahl_krit = 60 / 2 * np.pi / np.sqrt(8) * D_Welle_Außen / L_Welle ** 2 * np.sqrt(
-                1000 ** 3 * E_Axial / (Mat_Welle.rho))  # u/min
-            Sicherheit_Drehzahl = Drehzahl_krit / Last.Drehzahl
-
-        # Alte Berechnung mit fixen Axialsteifigkeiten
-        # E_Axial_erf_Drehzahl = ((Sicherheit*Last.Drehzahl*L_Welle**2*np.sqrt(8))/(30*np.pi*D_Welle_Außen))**2*Mat_Welle.rho/1000^3
-        # t_Axiallagen = t_Diagonallagen * (E_Axial-E_Axial_erf_Drehzahl)/(E_Axial_erf_Drehzahl-Mat_Welle.E1)
-
-        print('zusätzliche Axiallagen:' + str(round(t_Axiallagen, 1)) + 'mm')
-
-        print('Sicherheit gegen Instabilität:' + str(round(Sicherheit_Drehzahl, 1)))
+   
 
     "Steifigkeitsberechnung"
 
