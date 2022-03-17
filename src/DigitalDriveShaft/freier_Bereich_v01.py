@@ -13,85 +13,8 @@ from typing import Optional, Final
 
 
 
-def Torsionsfestigkeit(D_Trennfuge, L_Welle, Last, Mat_Welle, Layup, Sicherheit: Optional[float] = 1.0):
-    """
-    Generates the optimal stackup and drive shaft diameter.
-
-    Parameters
-    ----------
-    D_Trennfuge
-    L_Welle
-    Last
-    Mat_Welle
-    Sicherheit
-    
-
-    Returns
-    -------
-    returns stackup and drive_shaft diameter
-    """
-    
-    
-    "Festigkeitsberechnung"
-    
-# =============================================================================
-#     Layup einlesen und ABD-Matrix berechnen
-# =============================================================================
-    #Layupinformationen auslesen    
-    angles_deg
-    thickness
-    
-    Laminatdicke = sum(thickness)
-    D_Mittelflaeche = D_Trennfuge + Laminatdicke
-    U_Welle = np.pi * D_Mittelflaeche
-    
-    
-    # Calculate the ply stiffness matricess matrix
-    Q_Einzel = abdcal.QPlaneStress(Mat_Welle.E1, Mat_Welle.E2, Mat_Welle.Ny12, Mat_Welle.G12)
-    
-    Q = [Q_Einzel] * len(angles_deg)
-    # Calculate the ABD matrix and its inverse.
-    abd = abdcal.abd(Q, angles_deg, thickness)
-    abd_inv = abdcal.matrix_inverse(abd)
 
 
-    ###############################################################################
-    # Applied Running Loads                                                       #
-    ###############################################################################
-    nx = Last.Fx/U_Welle    #N/mm
-    ny = 0                  #N/mm
-    nxy = Last.Mx/D_Mittelflaeche/2/U_Welle     #N/mm #ggf. Ergänzung von Fy und Fz komponenten
-    mx = 0                  #N
-    my = np.sqrt((Last.My/1000/D_Mittelflaeche/2)**2 + (Last.Mz/1000/D_Mittelflaeche/2)**2)     #N
-    mxy = 0                 #N
-    
-    # Calculate the deformation caused by a given running load.
-    NM = np.matrix([nx, ny, nxy, mx, my, mxy]).T  # MPa/mm and MPa*mm/mm
-    deformed = deformation.load_applied(abd_inv, NM)
-
-    
-    stress = deformation.ply_stress(deformed, Q, angles_deg, thickness, plotting=True)
-    FI_Torsionsbruch = failure.max_stress(stress, Mat_Welle.Xt, Mat_Welle.Xc, Mat_Welle.Yt, Mat_Welle.Yc, Mat_Welle.Smax)
-    
-    
-    
-    
-    # Abschätzung der Wandstärke mit Nabendurchmesser
-# =============================================================================
-#     t_Diagonallagen = Sicherheit * Last.Mx * 1000 / (2 * np.pi * (D_Trennfuge / 2) ** 2 * Mat_Welle.tau_zul)
-# 
-#     D_Welle_Außen = D_Trennfuge + 2 * t_Diagonallagen
-#     # Spannungsberechnung nach Excel von Sebastian
-#     tau_vorh = Last.Mx * 1000 / (2 * np.pi * (D_Welle_Außen / 2) ** 2 * t_Diagonallagen)
-#     Sicherheit_Torsionsbruch = Mat_Welle.tau_zul / tau_vorh
-# =============================================================================
-
-    # print(Sicherheit *tau_vorh/Mat_Welle.tau_zul)
-
-    
-    print(f'Sicherheit gegen Torsionsbruch: {round(FI_Torsionsbruch, 1)}')
-
-    return FI_Torsionsbruch
 
 def Beulfestigkeit(D_Trennfuge, L_Welle, Last, Mat_Welle, Layup, Sicherheit: Optional[float] = 1.0):
     "Beulrechnung"
