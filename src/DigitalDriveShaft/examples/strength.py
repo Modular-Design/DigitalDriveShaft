@@ -17,16 +17,16 @@ shaft_length = 400  # mm
 load = Loading(mz=168960, rpm=136000)
 
 "Materialauswahl"
-composite_failure = OrthotropicMaxStressFailure(tens_l=850, compr_l=630.93,
-                                                tens_t=55, compr_t=200,
-                                                shear_lt=120, shear_tt=120
-                                                )  # MPa
+composite_failure = PlaneMaxStressFailure(tens_l=850, compr_l=630.93,
+                                          tens_t=55, compr_t=200,
+                                          shear_lt=120, shear_tt=120
+                                          )  # MPa
 
-composite_HTS40 = OrthotropicMaterial(E_l=240, E_t=70,
-                                      nu_lt=0.28, nu_tt=0.28,
-                                      G_lt=2634.2, G_tt=2634.2,
-                                      density=1.515,
-                                      failure=composite_failure)  # "HTS40"
+composite_HTS40 = TransverselyIsotropicMaterial(E_l=240, E_t=70,
+                                                nu_lt=0.28, nu_tt=0.28,
+                                                G_lt=2634.2, G_tt=2634.2,
+                                                density=1.515,
+                                                failure=composite_failure)  # "HTS40"
 
 # steel = IsotropicMaterial(Em=210, nu=0.21, density = 7.89)
 

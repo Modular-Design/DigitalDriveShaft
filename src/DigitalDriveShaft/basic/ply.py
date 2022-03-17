@@ -1,5 +1,6 @@
 import numpy as np
-from .materials import Material
+from .materials import Material, get_plane_stress_stiffness
+
 
 
 class Ply:
@@ -7,7 +8,7 @@ class Ply:
         self.material = material
         self.thickness = thickness
         self.rotation = rotation
-        self.stiffness = self.material.get_stiffness()
+        self.plane_stress = get_plane_stress_stiffness(self.material)
 
     def rotate(self, angle) -> "Ply":
         angle = angle * np.pi / 180  # convert to radians
@@ -22,7 +23,7 @@ class Ply:
         T2 = np.matrix([[m ** 2, n ** 2, m * n],
                         [n ** 2, m ** 2, -m * n],
                         [-2 * m * n, 2 * m * n, m ** 2 - n ** 2]])
-        stiffness_rot = np.linalg.inv(T1) * self.stiffness * T2
+        stiffness_rot = np.linalg.inv(T1) * self.plane_stress * T2
         return stiffness_rot
 
     def get_material(self):

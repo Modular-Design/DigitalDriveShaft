@@ -45,7 +45,7 @@ class MAPDLFailure(IMAPDLFailure):
             mapdl.fc(mat_id,  "EPEL", key, value)
 
 
-class OrthotropicMaxStressFailure(MAPDLFailure, IFailure):
+class PlaneMaxStressFailure(MAPDLFailure, IFailure):
     def __init__(self,
                  tens_l: float, tens_t: float,
                  shear_lt: float, shear_tt: float,
