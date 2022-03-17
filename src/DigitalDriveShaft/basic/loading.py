@@ -13,10 +13,10 @@ class Vector(BaseModel):
 
 
 class Loading(BaseModel):
-    fx: Optional[float] = 0 #N
-    fy: Optional[float] = 0 #N
-    fz: Optional[float] = 0 #N
-    mx: Optional[float] = 0 #Nm
-    my: Optional[float] = 0 #Nm
-    mz: Optional[float] = 0 #Nm
-    rpm: Optional[float] = 0 #U/min
+    fx: Optional[float] = 0     # N
+    fy: Optional[float] = 0     # N
+    fz: Optional[float] = 0     # N
+    mx: Optional[float] = 0     # Nm
+    my: Optional[float] = 0     # Nm
+    mz: Optional[float] = 0     # Nm
+    rpm: Optional[float] = 0    # U/min
