@@ -3,9 +3,8 @@ from .econtour import *
 from .loading import *
 from .failure import *
 
-# 1 internal dependencies
+# ordered to minimize imports
 from .materials import *
-
-# 2 internal dependencies
+from .ply import *
 from .stackup import *
 from .driveshaft import *
