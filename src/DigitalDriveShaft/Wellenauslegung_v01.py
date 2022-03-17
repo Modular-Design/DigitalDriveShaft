@@ -1,37 +1,22 @@
 # -*- coding: utf-8 -*-
-from freier_Bereich import freier_Bereich
-from load import Vector
+from pydantic import BaseModel
+from typing import Optional
+
+from basic import Vector, Loading, Material, Ply, Stackup, SimpleDriveShaft
+from analysis import calc_strength
 
 
-
-# Definition der Materialklasse
-class Material(object):
-    def __init__(self, materialname):
-        self.Materialname = materialname
-
-#Definition der Materialklasse
-class Last(object):
-    pass
-
-
-"Parameterdefinition"
+"parameter definition"
 
 Auslegungsziel = 'Fertigung' #Steifigkeit, Masse, Fertigung
 
-"Geometrie"
-Durchmesser_Trennfuge = 171  # mm
-Bauraum_Laenge = 400  # mm
+"Geometry"
+innen_durchmesser = 171  # mm
+wellen_laenge = 400  # mm
 
 "Lasten"
 # x in Längsachse der Welle, y, z out of plane
-Last.Fx = 0      #N
-Last.Fy = 0      #N
-Last.Fz = 0      #N
-Last.Mx = 168960    #Nm
-Last.My = 0      #Nm
-Last.Mz = 0      #Nm
-
-Last.Drehzahl = 136000 #U/min
+load = Last(mz= 168960, drehzahl = 136000)
 
 
 force = Vector()  # N
@@ -69,9 +54,15 @@ Mat_Nabe.R = 1100  # MPa
 
 Mat_Bolzen = Material("Stahl")
 
+composite_mat = OrthotropicMaterial(240, 70, 0.28, 0.28, 2634.2, 2634.2, 1.515)
+# bolzen_mat = IsotropicMaterial()
 
+ply0 = Ply(composite_mat.get_stiffness(), 1)
+ply45 = ply0.rotate(45)
+stackup = Stackup([ply45, ply0, ply45])
 
-
+shaft = SimpleDriveShaft(innen_durchmesser, wellen_laenge, stackup)
+calc_torsionsfestigkeit(shaft, load)
 
 
 "Auslegung freier Bereich"
