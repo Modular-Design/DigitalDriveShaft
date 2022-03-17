@@ -1,5 +1,4 @@
 # 0 internal dependencies
-from .econtour import *
 from .loading import *
 from .failure import *
 
@@ -7,4 +6,3 @@ from .failure import *
 from .materials import *
 from .ply import *
 from .stackup import *
-from .driveshaft import *

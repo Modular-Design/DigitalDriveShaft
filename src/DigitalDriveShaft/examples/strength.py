@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from pydantic import BaseModel
-from typing import Optional
 
 from src.DigitalDriveShaft.basic import *
+from src.DigitalDriveShaft.cylindircal import *
 from src.DigitalDriveShaft.analysis import calc_strength
 
 

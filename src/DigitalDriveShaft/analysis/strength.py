@@ -1,4 +1,5 @@
-from ..basic import DriveShaft, Loading
+from ..cylindircal import DriveShaft
+from ..basic import Loading
 import numpy as np
 
 
