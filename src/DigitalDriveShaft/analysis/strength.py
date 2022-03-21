@@ -37,7 +37,7 @@ def calc_buckling(shaft: DriveShaft, load: Loading):
     E_circ = stackup.get_abd[1, 1] / laminate_thickness  # MPa #20000 bei Sebastian
     
     m_buckling = k_s * k_l * np.pi ** 3 / 6 * (d_shaft_outer / 2) ** (5 / 4) * laminate_thickness ** (9 / 4) / np.sqrt(
-        shaft_length) * E_axial ** (3 / 8) * (E_circ / (1 - stackup.get_Nu12() ** 2)) ** (5 / 8) / 1000
+        shaft_length) * E_axial ** (3 / 8) * (E_circ / (1 - stackup.get_Nu12() * stackup.get_Nu21())) ** (5 / 8) / 1000
     safety_buckling = m_buckling / load.mx
     
     
