@@ -71,26 +71,26 @@ class Stackup:
             return np.matrix(np.where(np.abs(self.abd) < np.max(self.abd) * 1e-6, 0, self.abd))
         return self.abd
     
+    # TODO: @Willi: Bitte bei den folgenden Rechnungen nochmal die Syntax prüfen vor allem vom Aufruf der ABD-Matrix Komponenten
+    
+    def get_E1(self):
+        E1 = 1.0 / self.calc_thickness() * (self.get_abd()[0, 0] - (self.get_abd()[0, 1])**2 / self.get_abd()[1, 1])
+        return E1
+    
+    def get_E2(self):
+        E2 = 1.0 / self.calc_thickness  (self.get_abd()[1, 1] - (self.get_abd()[0, 1])**2 / self.get_abd()[0, 0])
+        return E2
+    
+    def get_G12(self):
+        G12 = 1.0 / self.calc_thickness() * self.get_abd()[2, 2]
+        return G12
+    
     def get_Nu12(self):
-        """
-        Wir brauchen die Querkontraktionszahl des Laminats
-
-        Raises
-        ------
-        NotImplemented
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
-        """
-        raise NotImplemented        # TODO: @Willi: bitte implementieren. Wird bei calc_Buckling benötigt
+        Nu12 = self.get_abd()[0, 1] / self.get_abd()[1, 1]
+        return Nu12
         
     def get_Nu21(self):
-        E_1 = self.get_abd[0, 0] / self.calc_thickness()  
-        E_2 = self.get_abd[1, 1] / self.calc_thickness()
-        Nu21 = self.get_Nu12()*E_2/E_1
+        Nu21 = self.get_Nu12() * self.get_E2() / self.get_E1()
         return Nu21
 
     def apply_load(self, mech_load: np.ndarray) -> np.ndarray:
