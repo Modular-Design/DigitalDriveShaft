@@ -5,10 +5,16 @@ import numpy as np
 
 def calc_strength(shaft: DriveShaft, load: Loading):
     (shaft_radius, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
+<<<<<<< HEAD
     laminate_thickness = stackup.get_thickness()
     d_shaft_inner = 2*shaft_radius
     A_shaft = np.pi/4*(d_shaft_inner**2-(d_shaft_inner + 2 * laminate_thickness)**2) #Cross section of shaft
     d_center_stackup = 2 * shaft_radius + (0.5 - shaft.get_contour_factor()) * laminate_thickness
+=======
+    laminate_thickness = stackup.calc_thickness()
+    A_shaft = shaft.get_Crosssection()
+    d_center_stackup = 2.0 * shaft.get_center_radius()
+>>>>>>> 333abcd91a3e6912de318dd81e3c7011f8be1c62
     circ_shaft = np.pi * d_center_stackup
 
     nx = load.fx/circ_shaft    #N/mm

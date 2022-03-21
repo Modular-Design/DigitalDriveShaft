@@ -8,6 +8,8 @@ from .stackup import CylindricalStackup
 
 from typing import Optional, Union
 
+import numpy as np
+
 
 class DriveShaft:
     def __init__(self,
@@ -39,6 +41,11 @@ class DriveShaft:
     
     def get_length(self):
         return self.form.length()
+    
+    def get_Crosssection(self, iso_z: float, iso_phi: float):
+        radius, stackup = self.get_value_in_iso_scale(iso_z, iso_phi)
+        A_shaft = np.pi/4.0 * (self.get_outer_radius()**2.0 - (self.get_inner_radius())**2.0) #Cross section of shaft
+        return A_shaft
 
     def add_to_mapdl(self, mapdl: Mapdl, start_id: int):
         mapdl.csys(1)
