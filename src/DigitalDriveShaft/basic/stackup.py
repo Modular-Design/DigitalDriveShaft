@@ -16,6 +16,10 @@ class Stackup:
         for ply in self.plies:
             thickness = thickness + ply.thickness
         return thickness
+    
+    def calc_density(self):
+        raise NotImplemented # TODO: @Willi bitte implementieren
+        
 
     def rotate(self, angle) -> "Stackup":
         plies = [0]*len(self.plies)
@@ -66,6 +70,22 @@ class Stackup:
         if truncate is True:
             return np.matrix(np.where(np.abs(self.abd) < np.max(self.abd) * 1e-6, 0, self.abd))
         return self.abd
+    
+    def get_Nu12(self):
+        """
+        Muss Alrik nochmal schauen was wir überhaupt brauchen
+
+        Raises
+        ------
+        NotImplemented
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        raise NotImplemented        # TODO: @Willi: bitte implementieren. Wird bei calc_Buckling benötigt
 
     def apply_load(self, mech_load: np.ndarray) -> np.ndarray:
         """
