@@ -24,15 +24,15 @@ class DriveShaft:
     
     def get_inner_radius(self, iso_z: float, iso_phi: float):
         radius, stackup = self.get_value_in_iso_scale(iso_z, iso_phi)
-        return radius + (0.0-self.get_contour_factor())*stackup.calc_thickness()
+        return radius + (0.0-self.get_contour_factor())*stackup.get_thickness()
 
     def get_center_radius(self, iso_z: float, iso_phi: float):
         radius, stackup = self.get_value_in_iso_scale(iso_z, iso_phi)
-        return radius + (0.5-self.get_contour_factor())*stackup.calc_thickness()
+        return radius + (0.5-self.get_contour_factor())*stackup.get_thickness()
     
     def get_outer_radius(self, iso_z: float, iso_phi: float):
         radius, stackup = self.get_value_in_iso_scale(iso_z, iso_phi)
-        return radius + (1.0-self.get_contour_factor())*stackup.calc_thickness()
+        return radius + (1.0-self.get_contour_factor())*stackup.get_thickness()
     
     def get_length(self):
         return self.form.length()

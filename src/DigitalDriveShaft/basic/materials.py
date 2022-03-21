@@ -21,6 +21,9 @@ class Material(IFailure, IMAPDLMaterial):
     def get_stiffness(self) -> ndarray:
         return np.linalg.inv(self.get_compliance())
 
+    def get_density(self) -> float:
+        return self.attr.get("DENS")
+
     def is_safe(self,
                 stresses: Optional[List[float]] = None,
                 strains: Optional[List[float]]  = None,

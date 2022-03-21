@@ -6,26 +6,37 @@ from .ply import Ply
 class Stackup:
     def __init__(self, plies: List[Ply], thickness=None):
         self.plies = plies
-        if thickness is None:
-            thickness = self.calc_thickness()
+
+        self.calc_thickness()
         self.thickness = thickness
+
+        self.density = self.calc_density()
         self.abd = None
 
     def calc_thickness(self) -> float:
         thickness = 0.0
         for ply in self.plies:
             thickness = thickness + ply.thickness
-        return thickness
-    
-    def calc_density(self):
-        raise NotImplemented # TODO: @Willi bitte implementieren
-        
+        self.thickness = thickness
+        return self.thickness
+
+    def get_thickness(self) -> float:
+        return self.thickness
+
+    def calc_density(self) -> float:
+        thick_density = 0.0
+        for ply in self.plies:
+            thick_density += ply.thickness * ply.get_material().get_density()
+        self.density = thick_density / self.get_thickness()
+        return self.density
+
+    def get_density(self) -> float:
+        return self.density
 
     def rotate(self, angle) -> "Stackup":
         plies = [0]*len(self.plies)
         for i in range(len(self.plies)):
             plies[i] = self.plies[i].rotate(angle)
-
         return Stackup(plies)
 
     def get_abd(self, truncate=True):
