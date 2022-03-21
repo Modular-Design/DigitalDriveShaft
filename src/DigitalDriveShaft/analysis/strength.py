@@ -35,31 +35,31 @@ def calc_strength(shaft: DriveShaft, load: Loading):
 def calc_buckling(shaft: DriveShaft, load: Loading):
     (shaft_radius, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
     laminate_thickness = stackup.calc_thickness()
-    d_shaft_outer = 2 * shaft_radius + 2 * (0.5 - shaft.get_contour_factor()) * laminate_thickness
+    d_shaft_outer = 2 * shaft.get_outer_radius()
     
     k_s = 0.925  # Beiwert für gelenkige Lagerung
     k_l = 0.77  # Beiwert für Imperfektionsanfälligkeit
-    E_axial = stackup.get_abd[0, 0] / laminate_thickness  # MPa #20000 bei Sebastian
-    E_circ = stackup.get_abd[1, 1] / laminate_thickness  # MPa #20000 bei Sebastian
+    E_axial = stackup.get_E1  # MPa # E Modul der Verbundschicht #20000 bei Sebastian 
+    E_circ = stackup.get_E2  # MPa #20000 bei Sebastian
+    Nu12 = stackup.get_Nu12() # Querkontraktionszahl der Verbundschicht
+    Nu21 = stackup.get_Nu21()
     
     m_buckling = k_s * k_l * np.pi ** 3 / 6 * (d_shaft_outer / 2) ** (5 / 4) * laminate_thickness ** (9 / 4) / np.sqrt(
-        shaft_length) * E_axial ** (3 / 8) * (E_circ / (1 - stackup.get_Nu12() * stackup.get_Nu21())) ** (5 / 8) / 1000
+        shaft.get_length()) * E_axial ** (3 / 8) * (E_circ / (1 - Nu12 * Nu21)) ** (5 / 8) / 1000
     safety_buckling = m_buckling / load.mx
-    
     
     return safety_buckling
 
 
 def calc_dynamicStability(shaft: DriveShaft, load: Loading):
     (shaft_radius, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
-    laminate_thickness = stackup.calc_thickness()
-    d_shaft_outer = 2 * shaft_radius + 2 * (0.5 - shaft.get_contour_factor()) * laminate_thickness
+    d_shaft_outer = 2 * shaft.get_outer_radius()
     
     
-    E_axial = stackup.get_abd[0, 0] / laminate_thickness  # MPa #20000 bei Sebastian
+    E_axial = stackup.get_E1  # MPa # E Modul der Verbundschicht #20000 bei Sebastian 
     
     # Formel für Berechnung von Biegekritischer Drehzahl aus Sebastians Excel
-    RPM_crit = 60 / 2 * np.pi / np.sqrt(8) * d_shaft_outer / shaft_length ** 2 * np.sqrt(
+    RPM_crit = 60 / 2 * np.pi / np.sqrt(8) * d_shaft_outer / shaft.get_length() ** 2 * np.sqrt(
         1000 ** 3 * E_axial / (stackup.calc_density()))  # u/min
     safety_RPM_crit = RPM_crit / load.rpm
     return safety_RPM_crit
