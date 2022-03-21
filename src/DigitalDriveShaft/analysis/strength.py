@@ -25,7 +25,6 @@ def calc_strength(shaft: DriveShaft, load: Loading):
     return stackup.is_safe(stresses)
 
 
-
 def calc_buckling(shaft: DriveShaft, load: Loading):
     (_, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
     laminate_thickness = stackup.calc_thickness()
@@ -46,7 +45,7 @@ def calc_buckling(shaft: DriveShaft, load: Loading):
     return safety_buckling
 
 
-def calc_dynamicStability(shaft: DriveShaft, load: Loading):
+def calc_dynamic_stability(shaft: DriveShaft, load: Loading):
     (_, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
     d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.5)
     E_axial = stackup.get_E1  # MPa # E Modul der Verbundschicht #20000 bei Sebastian 
