@@ -1,17 +1,18 @@
 from typing import List, Optional
 import numpy as np
 from .ply import Ply
+from .materials import TransverselyIsotropicMaterial, Material
+from .iid import IIDMAPDL, Mapdl
 
 
-class Stackup:
+class Stackup(IIDMAPDL):
     def __init__(self, plies: List[Ply], thickness=None):
         self.plies = plies
 
-        self.calc_thickness()
-        self.thickness = thickness
-
+        self.thickness = self.calc_thickness()
         self.density = self.calc_density()
         self.abd = None
+        self.id = 0
 
     def calc_thickness(self) -> float:
         thickness = 0.0
@@ -25,8 +26,12 @@ class Stackup:
 
     def calc_density(self) -> float:
         thick_density = 0.0
-        for ply in self.plies:
-            thick_density += ply.thickness * ply.get_material().get_density()
+        for i in range(len(self.plies)):
+            ply = self.plies[i]
+            density = ply.get_material().get_density()
+            if density is None:
+                raise ValueError(f"Density is not defined for Material in Layer {i}.")
+            thick_density += ply.thickness * density
         self.density = thick_density / self.get_thickness()
         return self.density
 
@@ -71,38 +76,24 @@ class Stackup:
 
             # Compile the entirety of the ABD matrix.
             self.abd = np.matrix([[A[0, 0], A[0, 1], A[0, 2], B[0, 0], B[0, 1], B[0, 2]],
-                             [A[1, 0], A[1, 1], A[1, 2], B[1, 0], B[1, 1], B[1, 2]],
-                             [A[2, 0], A[2, 1], A[2, 2], B[2, 0], B[2, 1], B[2, 2]],
-                             [B[0, 0], B[0, 1], B[0, 2], D[0, 0], D[0, 1], D[0, 2]],
-                             [B[1, 0], B[1, 1], B[1, 2], D[1, 0], D[1, 1], D[1, 2]],
-                             [B[2, 0], B[2, 1], B[2, 2], D[2, 0], D[2, 1], D[2, 2]]])
+                                  [A[1, 0], A[1, 1], A[1, 2], B[1, 0], B[1, 1], B[1, 2]],
+                                  [A[2, 0], A[2, 1], A[2, 2], B[2, 0], B[2, 1], B[2, 2]],
+                                  [B[0, 0], B[0, 1], B[0, 2], D[0, 0], D[0, 1], D[0, 2]],
+                                  [B[1, 0], B[1, 1], B[1, 2], D[1, 0], D[1, 1], D[1, 2]],
+                                  [B[2, 0], B[2, 1], B[2, 2], D[2, 0], D[2, 1], D[2, 2]]])
 
         # Truncate very small values.
         if truncate is True:
             return np.matrix(np.where(np.abs(self.abd) < np.max(self.abd) * 1e-6, 0, self.abd))
         return self.abd
-    
-    # TODO: @Willi: Bitte bei den folgenden Rechnungen nochmal die Syntax prüfen vor allem vom Aufruf der ABD-Matrix Komponenten
-    
-    def get_E1(self):
-        E1 = 1.0 / self.calc_thickness() * (self.get_abd()[0, 0] - (self.get_abd()[0, 1])**2 / self.get_abd()[1, 1])
-        return E1
-    
-    def get_E2(self):
-        E2 = 1.0 / self.calc_thickness  (self.get_abd()[1, 1] - (self.get_abd()[0, 1])**2 / self.get_abd()[0, 0])
-        return E2
-    
-    def get_G12(self):
-        G12 = 1.0 / self.calc_thickness() * self.get_abd()[2, 2]
-        return G12
-    
-    def get_Nu12(self):
-        Nu12 = self.get_abd()[0, 1] / self.get_abd()[1, 1]
-        return Nu12
-        
-    def get_Nu21(self):
-        Nu21 = self.get_Nu12() * self.get_E2() / self.get_E1()
-        return Nu21
+
+    def calc_homogenized(self) -> TransverselyIsotropicMaterial:
+        scale = 1.0 / self.get_thickness()
+        e_1 = scale * (self.get_abd()[0, 0] - (self.get_abd()[0, 1]) ** 2 / self.get_abd()[1, 1])
+        e_2 = scale * (self.get_abd()[1, 1] - (self.get_abd()[0, 1]) ** 2 / self.get_abd()[0, 0])
+        g_12 = scale * self.get_abd()[2, 2]
+        nu_12 = self.get_abd()[0, 1] / self.get_abd()[1, 1]
+        return TransverselyIsotropicMaterial(e_1, e_2, nu_12, nu_12, g_12, g_12, self.get_density())
 
     def apply_load(self, mech_load: np.ndarray) -> np.ndarray:
         """
@@ -195,3 +186,82 @@ class Stackup:
                 return False
         return True
 
+    def set_id(self, id: int):
+        self.id = id
+
+    def get_id(self) -> float:
+        return self.id
+
+    def add_to_mapdl(self, mapdl: Mapdl, element_id: int):
+        mapdl.et(element_id, "SHELL181")
+        """
+        Element stiffness:
+            0 -- Bending and membrane stiffness (default)
+            1 -- Membrane stiffness only
+            2 -- Stress/strain evaluation only
+        """
+        mapdl.keyopt(element_id, 1, 0)
+
+        """
+        Integration option:
+            0 -- Reduced integration with hourglass control (default)
+            2 -- Full integration with incompatible modes
+        """
+        mapdl.keyopt(element_id, 3, 0)
+
+        """
+        Shell normal orientation option:
+            0 -- Calculated from element connectivity (default)
+            1 -- Controlled by the z coordinate direction of a local coordinate system
+        """
+        mapdl.keyopt(element_id, 4, 0)
+
+        """
+        Curved shell formulation:
+            0 -- Standard shell formulation (default)
+            1 -- Advanced curved-shell formation
+            2 -- Simplified curved-shell formation
+        """
+        mapdl.keyopt(element_id, 5, 0)
+
+        """
+        Specify layer data storage:
+            0 -- For multi-layer elements, store data for bottom of bottom layer 
+                    and top of top layer. For single-layer elements, store data for TOP and BOTTOM. 
+                    (Default)
+            1 -- Store data for TOP and BOTTOM, for all layers (multi-layer elements)
+            2 -- Store data for TOP, BOTTOM, and MID for all layers; applies to single- and multi-layer elements
+        """
+        mapdl.keyopt(element_id, 8, 1)
+
+        """
+        User thickness option:
+            0 -- No user subroutine to provide initial thickness (default)
+            1 -- Read initial thickness data from user-defined subroutine UTHICK
+        """
+        mapdl.keyopt(element_id, 9, 0)
+
+        """
+        Thickness normal stress (Sz) output option:
+            0 -- Sz not modified (default, Sz = 0)
+            1 -- Recover and output Sz from applied pressure load 
+        """
+        mapdl.keyopt(element_id, 10, 0)
+
+        """
+        Default element x axis (x0) orientation:
+            0 -- First parametric direction at the element centroid (default)
+            1 -- Pointing from element node I to element node J
+        """
+        mapdl.keyopt(element_id, 11, 0)
+
+        mapdl.sectype(element_id, "SHELL")
+        for i in range(len(self.plies)):
+            ply = self.plies[i]
+            mat_id = ply.get_material().get_id()
+            if mat_id == 0:
+                raise ValueError(f"No material id given for ply {i}")
+            mapdl.secdata(ply.get_thickness(),
+                          mat_id,
+                          ply.get_rotation(),
+                          3)  # Integration Points

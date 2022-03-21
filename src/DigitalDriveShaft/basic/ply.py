@@ -2,7 +2,6 @@ import numpy as np
 from .materials import Material, get_plane_stress_stiffness
 
 
-
 class Ply:
     def __init__(self, material: Material, thickness: float, rotation=0.0):
         self.material = material
@@ -26,8 +25,14 @@ class Ply:
         stiffness_rot = np.linalg.inv(T1) * self.plane_stress * T2
         return stiffness_rot
 
-    def get_material(self):
+    def get_material(self) -> Material:
         return self.material
+
+    def get_thickness(self) -> float:
+        return self.thickness
+
+    def get_rotation(self) -> float:
+        return self.rotation
 
     def get_local_stress(self, stress):
         angle = self.rotation  # TODO: Maby -self.rotation

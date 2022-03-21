@@ -96,6 +96,8 @@ mapdl.run("/clear")
 mapdl.run("/facet,fine")  # feinere Aufteilung der Facetten
 
 mapdl.prep7()
+
+
 mapdl.csys(1)  # activate  global cylindrical coordinate system (now: x = R, y = Theta, z = Z)
 
 start_id = 1
@@ -134,7 +136,7 @@ mapdl.arotat(nl1="ALL",
              arc=arc,
              nseg=narc,)
 
-mapdl.aplot()
+mapdl.lplot()
 mapdl.amesh("ALL")
 mapdl.eplot()
 mapdl.exit()
