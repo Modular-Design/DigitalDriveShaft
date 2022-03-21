@@ -73,7 +73,7 @@ class Stackup:
     
     def get_Nu12(self):
         """
-        Muss Alrik nochmal schauen was wir überhaupt brauchen
+        Wir brauchen die Querkontraktionszahl des Laminats
 
         Raises
         ------
@@ -86,6 +86,12 @@ class Stackup:
 
         """
         raise NotImplemented        # TODO: @Willi: bitte implementieren. Wird bei calc_Buckling benötigt
+        
+    def get_Nu21(self):
+        E_1 = self.get_abd[0, 0] / self.calc_thickness()  
+        E_2 = self.get_abd[1, 1] / self.calc_thickness()
+        Nu21 = self.get_Nu12()*E_2/E_1
+        return Nu21
 
     def apply_load(self, mech_load: np.ndarray) -> np.ndarray:
         """
