@@ -4,25 +4,19 @@ import numpy as np
 
 
 def calc_strength(shaft: DriveShaft, load: Loading):
-    (shaft_radius, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
-<<<<<<< HEAD
-    laminate_thickness = stackup.get_thickness()
-    d_shaft_inner = 2*shaft_radius
-    A_shaft = np.pi/4*(d_shaft_inner**2-(d_shaft_inner + 2 * laminate_thickness)**2) #Cross section of shaft
-    d_center_stackup = 2 * shaft_radius + (0.5 - shaft.get_contour_factor()) * laminate_thickness
-=======
+    (_, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
     laminate_thickness = stackup.calc_thickness()
-    A_shaft = shaft.get_Crosssection()
-    d_center_stackup = 2.0 * shaft.get_center_radius()
->>>>>>> 333abcd91a3e6912de318dd81e3c7011f8be1c62
+    A_shaft = shaft.get_Crosssection(0.5, 0.5)
+    d_center_stackup = 2.0 * shaft.get_center_radius(0.5, 0.5)
     circ_shaft = np.pi * d_center_stackup
 
-    nx = load.fx/circ_shaft    #N/mm
-    ny = 0                  #N/mm   
-    nxy = load.mx/1000/(d_center_stackup/2/circ_shaft) + np.sqrt((load.fy)**2 + (load.fz)**2)/A_shaft*laminate_thickness  #N/mm 
-    mx = 0                  #N      
-    my = np.sqrt((load.my/1000/d_center_stackup/2)**2 + (load.mz/1000/d_center_stackup/2)**2)     #N
-    mxy = 0                         
+    nx = load.fx / circ_shaft  # N/mm
+    ny = 0  # N/mm
+    nxy = load.mx / 1000 / (d_center_stackup / 2 / circ_shaft) + np.sqrt(
+        (load.fy) ** 2 + (load.fz) ** 2) / A_shaft * laminate_thickness  # N/mm
+    mx = 0  # N
+    my = np.sqrt((load.my / 1000 / d_center_stackup / 2) ** 2 + (load.mz / 1000 / d_center_stackup / 2) ** 2)  # N
+    mxy = 0
 
     mech_load = np.array([nx, ny, nxy, mx, my, mxy])
     deformation = stackup.apply_load(mech_load)
@@ -33,16 +27,17 @@ def calc_strength(shaft: DriveShaft, load: Loading):
 
 
 def calc_buckling(shaft: DriveShaft, load: Loading):
-    (shaft_radius, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
+    (_, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
     laminate_thickness = stackup.calc_thickness()
-    d_shaft_outer = 2 * shaft.get_outer_radius()
+    d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.5)
     
     k_s = 0.925  # Beiwert für gelenkige Lagerung
     k_l = 0.77  # Beiwert für Imperfektionsanfälligkeit
-    E_axial = stackup.get_E1  # MPa # E Modul der Verbundschicht #20000 bei Sebastian 
-    E_circ = stackup.get_E2  # MPa #20000 bei Sebastian
-    Nu12 = stackup.get_Nu12() # Querkontraktionszahl der Verbundschicht
-    Nu21 = stackup.get_Nu21()
+    homogenization = stackup.calc_homogenized()
+    E_axial = homogenization.get_E1()  # MPa # E Modul der Verbundschicht #20000 bei Sebastian
+    E_circ = homogenization.get_E2()  # MPa #20000 bei Sebastian
+    Nu12 = homogenization.get_Nu12() # Querkontraktionszahl der Verbundschicht
+    Nu21 = homogenization.get_Nu21()
     
     m_buckling = k_s * k_l * np.pi ** 3 / 6 * (d_shaft_outer / 2) ** (5 / 4) * laminate_thickness ** (9 / 4) / np.sqrt(
         shaft.get_length()) * E_axial ** (3 / 8) * (E_circ / (1 - Nu12 * Nu21)) ** (5 / 8) / 1000
@@ -52,10 +47,8 @@ def calc_buckling(shaft: DriveShaft, load: Loading):
 
 
 def calc_dynamicStability(shaft: DriveShaft, load: Loading):
-    (shaft_radius, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
-    d_shaft_outer = 2 * shaft.get_outer_radius()
-    
-    
+    (_, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
+    d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.5)
     E_axial = stackup.get_E1  # MPa # E Modul der Verbundschicht #20000 bei Sebastian 
     
     # Formel für Berechnung von Biegekritischer Drehzahl aus Sebastians Excel
