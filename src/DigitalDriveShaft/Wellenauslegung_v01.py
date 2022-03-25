@@ -32,9 +32,7 @@ Sicherheit = 1.6
 
 "Materialauswahl"
 # benötigte Materialkarten importieren
-Mat_Comp = Material("HTS40")
-Mat_Comp.Ex = 240  # GPa
-Mat_Comp.Ey = 70  # GPa
+Mat_Comp = Material("HTS40/Epoxy")
 Mat_Comp.E1 = 145200 #MPa
 Mat_Comp.E2 = 6272.7 #MPa
 Mat_Comp.Ny12 = 0.28
