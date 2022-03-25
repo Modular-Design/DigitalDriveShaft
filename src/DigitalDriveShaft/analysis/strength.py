@@ -4,10 +4,10 @@ import numpy as np
 
 
 def calc_strength(shaft: DriveShaft, load: Loading):
-    (_, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
+    (_, stackup) = shaft.get_value_in_iso_scale(0.5, 0.0)
     laminate_thickness = stackup.calc_thickness()
-    A_shaft = shaft.get_Crosssection(0.5, 0.5)
-    d_center_stackup = 2.0 * shaft.get_center_radius(0.5, 0.5)
+    A_shaft = shaft.get_Crosssection(0.5, 0.0)
+    d_center_stackup = 2.0 * shaft.get_center_radius(0.5, 0.0)
     circ_shaft = np.pi * d_center_stackup
 
     nx = load.fx / circ_shaft  # N/mm
@@ -26,16 +26,16 @@ def calc_strength(shaft: DriveShaft, load: Loading):
 
 
 def calc_buckling(shaft: DriveShaft, load: Loading):
-    (_, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
+    (_, stackup) = shaft.get_value_in_iso_scale(0.5, 0.0)
     laminate_thickness = stackup.calc_thickness()
-    d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.5)
+    d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.0)
     
-    k_s = 0.925  # Beiwert für gelenkige Lagerung
-    k_l = 0.77  # Beiwert für Imperfektionsanfälligkeit
+    k_s = 0.925     # Beiwert für gelenkige Lagerung
+    k_l = 0.77      # Beiwert für Imperfektionsanfälligkeit
     homogenization = stackup.calc_homogenized()
-    E_axial = homogenization.get_E1()  # MPa # E Modul der Verbundschicht #20000 bei Sebastian
-    E_circ = homogenization.get_E2()  # MPa #20000 bei Sebastian
-    Nu12 = homogenization.get_Nu12() # Querkontraktionszahl der Verbundschicht
+    E_axial = homogenization.get_E1()   # MPa # E Modul der Verbundschicht #20000 bei Sebastian
+    E_circ = homogenization.get_E2()    # MPa #20000 bei Sebastian
+    Nu12 = homogenization.get_Nu12()    # Querkontraktionszahl der Verbundschicht
     Nu21 = homogenization.get_Nu21()
     
     m_buckling = k_s * k_l * np.pi ** 3 / 6 * (d_shaft_outer / 2) ** (5 / 4) * laminate_thickness ** (9 / 4) / np.sqrt(
@@ -46,9 +46,9 @@ def calc_buckling(shaft: DriveShaft, load: Loading):
 
 
 def calc_dynamic_stability(shaft: DriveShaft, load: Loading):
-    (_, stackup) = shaft.get_value_in_iso_scale(0.5, 0.5)
-    d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.5)
-    E_axial = stackup.get_E1  # MPa # E Modul der Verbundschicht #20000 bei Sebastian 
+    (_, stackup) = shaft.get_value_in_iso_scale(0.5, 0.0)
+    d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.0)
+    E_axial = stackup.get_E1            # MPa # E Modul der Verbundschicht #20000 bei Sebastian
     
     # Formel für Berechnung von Biegekritischer Drehzahl aus Sebastians Excel
     RPM_crit = 60 / 2 * np.pi / np.sqrt(8) * d_shaft_outer / shaft.get_length() ** 2 * np.sqrt(

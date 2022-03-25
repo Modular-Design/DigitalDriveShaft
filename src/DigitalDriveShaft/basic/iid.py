@@ -11,6 +11,6 @@ class IID:
         raise NotImplementedError()
 
 
-class IIDMAPDL(IID, ABC):
-    def add_to_mapdl(self, mapdl: Mapdl, id: int):
+class IMAPDL(ABC):
+    def add_to_mapdl(self, mapdl: Mapdl, **kwargs):
         raise NotImplementedError()
