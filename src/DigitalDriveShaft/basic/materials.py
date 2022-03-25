@@ -1,12 +1,12 @@
 import numpy as np
 from ansys.mapdl.core import Mapdl
 from .failure import IFailure, IMAPDLFailure
-from .iid import IIDMAPDL
+from .iid import IMAPDL, IID
 from typing import Optional, List
 from numpy import ndarray
 
 
-class Material(IFailure, IIDMAPDL):
+class Material(IFailure, IMAPDL, IID):
     def __init__(self, attr: dict, failure: Optional[IFailure] = None):
         self.id = 0
         self.attr = attr
@@ -35,7 +35,10 @@ class Material(IFailure, IIDMAPDL):
     def get_id(self) -> float:
         return self.id
 
-    def add_to_mapdl(self, mapdl: Mapdl, mat_id: int):
+    def add_to_mapdl(self, mapdl: Mapdl, **kwargs):
+        mat_id = kwargs.get("id")
+        if mat_id is None and self.id is None:
+            raise KeyError("'id' must be defined!")
         for (key, value) in self.attr.items():
             mapdl.mp(key, self.id, value)
         if self.failure is not None:
@@ -190,7 +193,7 @@ class TransverselyIsotropicMaterial(OrthotropicMaterial):
         return self.get_nu12() * self.get_E2() / self.get_E1()
 
     def get_compliance(self) -> ndarray:
-        compliance = np.zeros((6,6))
+        compliance = np.zeros((6, 6))
         compliance[0, 0] = 1 / self.E_l
         compliance[1, 1] = 1 / self.E_t
         compliance[2, 2] = 1 / self.E_t
