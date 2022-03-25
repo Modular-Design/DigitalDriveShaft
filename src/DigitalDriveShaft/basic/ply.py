@@ -9,9 +9,8 @@ class Ply:
         self.rotation = rotation
         self.plane_stress = get_plane_stress_stiffness(self.material)
 
-    def rotate(self, angle) -> "Ply":
-        angle = angle * np.pi / 180  # convert to radians
-        return Ply(self.material, self.thickness, self.rotation + angle)
+    def rotate(self, rad) -> "Ply":
+        return Ply(self.material, self.thickness, self.rotation + rad)
 
     def get_stiffness(self):
         m = np.cos(self.rotation)
@@ -32,10 +31,13 @@ class Ply:
         return self.thickness
 
     def get_rotation(self) -> float:
+        """
+        returns Rotation in [RAD]
+        """
         return self.rotation
 
     def get_local_stress(self, stress):
-        angle = self.rotation  # TODO: Maby -self.rotation
+        angle = self.rotation  # TODO: Maybe -self.rotation
         m = np.cos(angle)
         n = np.sin(angle)
         T1_inv = np.matrix([[m ** 2, n ** 2, 2 * m * n],
@@ -45,7 +47,7 @@ class Ply:
         return np.ravel(stress_rot)
 
     def get_local_strain(self, strain):
-        angle = self.rotation  # TODO: Maby -self.rotation
+        angle = self.rotation  # TODO: Maybe -self.rotation
         m = np.cos(angle)
         n = np.sin(angle)
         T2_inv = np.matrix([[m ** 2, n ** 2, m * n],

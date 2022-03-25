@@ -2,17 +2,17 @@ from typing import List, Optional
 import numpy as np
 from .ply import Ply
 from .materials import TransverselyIsotropicMaterial, Material
-from .iid import IIDMAPDL, Mapdl
 
 
-class Stackup(IIDMAPDL):
-    def __init__(self, plies: List[Ply], thickness=None):
+class Stackup:
+    def __init__(self, plies: List[Ply]):
         self.plies = plies
-
         self.thickness = self.calc_thickness()
         self.density = self.calc_density()
         self.abd = None
-        self.id = 0
+
+    def get_plies(self):
+        return self.plies
 
     def calc_thickness(self) -> float:
         thickness = 0.0
@@ -38,10 +38,13 @@ class Stackup(IIDMAPDL):
     def get_density(self) -> float:
         return self.density
 
-    def rotate(self, angle) -> "Stackup":
+    def rotate(self, rad) -> "Stackup":
+        """
+        returns Rotation in [RAD]
+        """
         plies = [0]*len(self.plies)
         for i in range(len(self.plies)):
-            plies[i] = self.plies[i].rotate(angle)
+            plies[i] = self.plies[i].rotate(rad)
         return Stackup(plies)
 
     def get_abd(self, truncate=True):
@@ -185,83 +188,3 @@ class Stackup(IIDMAPDL):
             if not material.is_safe(stresses=ply_stress):
                 return False
         return True
-
-    def set_id(self, id: int):
-        self.id = id
-
-    def get_id(self) -> float:
-        return self.id
-
-    def add_to_mapdl(self, mapdl: Mapdl, element_id: int):
-        mapdl.et(element_id, "SHELL181")
-        """
-        Element stiffness:
-            0 -- Bending and membrane stiffness (default)
-            1 -- Membrane stiffness only
-            2 -- Stress/strain evaluation only
-        """
-        mapdl.keyopt(element_id, 1, 0)
-
-        """
-        Integration option:
-            0 -- Reduced integration with hourglass control (default)
-            2 -- Full integration with incompatible modes
-        """
-        mapdl.keyopt(element_id, 3, 0)
-
-        """
-        Shell normal orientation option:
-            0 -- Calculated from element connectivity (default)
-            1 -- Controlled by the z coordinate direction of a local coordinate system
-        """
-        mapdl.keyopt(element_id, 4, 0)
-
-        """
-        Curved shell formulation:
-            0 -- Standard shell formulation (default)
-            1 -- Advanced curved-shell formation
-            2 -- Simplified curved-shell formation
-        """
-        mapdl.keyopt(element_id, 5, 0)
-
-        """
-        Specify layer data storage:
-            0 -- For multi-layer elements, store data for bottom of bottom layer 
-                    and top of top layer. For single-layer elements, store data for TOP and BOTTOM. 
-                    (Default)
-            1 -- Store data for TOP and BOTTOM, for all layers (multi-layer elements)
-            2 -- Store data for TOP, BOTTOM, and MID for all layers; applies to single- and multi-layer elements
-        """
-        mapdl.keyopt(element_id, 8, 1)
-
-        """
-        User thickness option:
-            0 -- No user subroutine to provide initial thickness (default)
-            1 -- Read initial thickness data from user-defined subroutine UTHICK
-        """
-        mapdl.keyopt(element_id, 9, 0)
-
-        """
-        Thickness normal stress (Sz) output option:
-            0 -- Sz not modified (default, Sz = 0)
-            1 -- Recover and output Sz from applied pressure load 
-        """
-        mapdl.keyopt(element_id, 10, 0)
-
-        """
-        Default element x axis (x0) orientation:
-            0 -- First parametric direction at the element centroid (default)
-            1 -- Pointing from element node I to element node J
-        """
-        mapdl.keyopt(element_id, 11, 0)
-
-        mapdl.sectype(element_id, "SHELL")
-        for i in range(len(self.plies)):
-            ply = self.plies[i]
-            mat_id = ply.get_material().get_id()
-            if mat_id == 0:
-                raise ValueError(f"No material id given for ply {i}")
-            mapdl.secdata(ply.get_thickness(),
-                          mat_id,
-                          ply.get_rotation(),
-                          3)  # Integration Points
