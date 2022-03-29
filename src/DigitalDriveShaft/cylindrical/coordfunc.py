@@ -13,16 +13,17 @@ class CylindricalCoordFunction:
         self.z_max = z_max
         self.z_min = z_min
 
-    def get_value(self, z: float, phi=0.0):
+    def get_value(self, z: float, phi: float, iso=True):
+        """
+        if iso:
+            z in [0,1]
+            phi in [-pi, pi]
+        else:
+            no restrictions
+        """
+        if iso:
+            z = z * (self.max_z() - self.min_z()) + self.min_z()
         return self.func(z, phi)
-
-    def get_value_in_iso_scale(self, iso_z: float, phi: float):
-        """
-        iso_z in [0,1]
-        phi in [-pi, pi]
-        """
-        z = iso_z * (self.max_z() - self.min_z()) + self.min_z()
-        return self.get_value(z, phi)
 
     def min_z(self) -> float:
         return self.z_min
