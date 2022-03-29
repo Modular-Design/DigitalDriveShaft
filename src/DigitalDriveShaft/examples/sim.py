@@ -1,5 +1,5 @@
 from ansys.mapdl.core import launch_mapdl, find_ansys
-from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply
+from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, IsotropicMaterial
 from src.DigitalDriveShaft.cylindrical import DriveShaft, Stackup, CylindricalStackup, CylindricalForm
 import re
 import math
@@ -14,6 +14,8 @@ CONSTANTS
 """
 length = 100  # mm
 r_inner = 30  # mm
+z_div = 30.0
+phi_div = 10.0
 
 
 """
@@ -22,7 +24,7 @@ Form Definitions
 
 
 def shape_func(z, phi):
-    return r_inner * np.sin(z / length * np.pi) + r_inner
+    return r_inner * 0.5 * np.sin(z * 1.0 / (4.0 * length) * 2 * np.pi) + r_inner
 
 
 form = CylindricalForm(shape_func, length)
@@ -38,14 +40,15 @@ composite_HTS40 = TransverselyIsotropicMaterial(E_l=240e6, E_t=70e6,
                                                 density=1.515,
                                                 )  # "HTS40"
 composite_HTS40.set_id(1)
+
 # steel = IsotropicMaterial(Em=210, nu=0.21, density = 7.89)
 
 ply0 = Ply(material=composite_HTS40,
-           thickness=1)
+           thickness=0.1)
 ply45 = ply0.rotate(np.pi/4)  # 45°
 
-# stackup = Stackup([ply45, ply0, ply45])
-layer = Stackup([ply0])
+layer = Stackup([ply45, ply0, ply45])
+# layer = Stackup([ply0])
 
 
 def stackup_func(z, phi):
@@ -61,7 +64,7 @@ shaft = DriveShaft(form, stackup)
 ANSYS SIMULATION
 """
 
-mapdl = launch_mapdl(mode="grpc", loglevel="ERROR", log_apdl='shell_log.txt')  # "INFO", "ERROR"
+mapdl = launch_mapdl(mode="grpc", loglevel="ERROR", log_apdl='sim_log.txt')  # "INFO", "ERROR"
 mapdl.finish()
 mapdl.clear()
 mapdl.verify()
@@ -71,8 +74,10 @@ mapdl.run("/facet,fine")  # feinere Aufteilung der Facetten
 mapdl.prep7()
 
 composite_HTS40.add_to_mapdl(mapdl)
-shaft.add_to_mapdl(mapdl)
-mapdl.eplot(show_bounds=True, show_node_numbering=True)
+shaft.add_to_mapdl(mapdl, dz=length/z_div, phi_max=np.pi, phi_min=-np.pi, dphi=np.pi/(2*phi_div))
+mapdl.asel("ALL")
+# mapdl.nplot(vtk=True, nnum=True, background="", cpos="iso", show_bounds=True, point_size=10)
+# mapdl.eplot(show_bounds=True, show_node_numbering=True)
 
 mapdl.nummrg("NODE")
 
@@ -89,8 +94,7 @@ mapdl.d("ALL", "ALL", 0)
 # mapdl.f("ALL", "FZ", 1 / n_nodes)
 
 mapdl.lsel("S", "LOC", "Z", form.max_z())
-mapdl.sfl("ALL", "PRES", 1)
-
+mapdl.sfl("ALL", "PRES", -1)
 # very important!!
 # leaving this out can result in wrong results in 50% of the cases
 mapdl.allsel()
@@ -117,12 +121,14 @@ post_processing()
 
 
 def plot_nodal_disp():
+    # Define global cartesian coordinate system.
+    # mapdl.csys(0)
     mapdl.post_processing.plot_nodal_displacement(
         title="Nodal Displacements",
-        component="NORM",
+        component="Z",
         cpos="zx",
         scalar_bar_args={"title": "Nodal Displacements", "vertical": True},
-        show_node_numbering=True,
+        # show_node_numbering=True,
         show_axes=True,
         show_edges=True,
     )

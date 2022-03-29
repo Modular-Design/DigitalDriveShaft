@@ -7,7 +7,7 @@ class Shell181(Element):
         super().__init__(element_id, "SHELL181")
         self.secdata = list()
 
-    def set_element_fitness(self, value: int):
+    def set_element_stiffness(self, value: int):
         """
         Element stiffness:
             0 -- Bending and membrane stiffness (default)
@@ -82,6 +82,6 @@ class Shell181(Element):
     def add_to_mapdl(self, mapdl: Mapdl):
         super().add_to_mapdl(mapdl)
 
-        mapdl.sectype(self.element_id, "SHELL")
+        mapdl.sectype(secid=self.element_id, type_="SHELL", name=f"shell181_{self.element_id}")
         for data in self.secdata:
             mapdl.secdata(data[0], data[1], data[2], data[3])
