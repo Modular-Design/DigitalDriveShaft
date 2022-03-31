@@ -83,7 +83,7 @@ class DriveShaft(IMAPDL):
         if element_type == "SHELL":
             self.__mesh_with_shell__(mapdl)
         elif element_type == "SOLID":
-            self.__mesh_with_shell__(mapdl)
+            self.__mesh_with_solid__(mapdl)
 
     def __mesh_with_shell__(self, mapdl: Mapdl):
         start_id = 1
@@ -144,27 +144,92 @@ class DriveShaft(IMAPDL):
             mapdl.amesh("ALL")
 
     def __mesh_with_solid__(self, mapdl: Mapdl):
-        dz = 1.0
-        dphi = 45.0
         start_id = 1
         zs = np.arange(self.form.min_z(), self.form.max_z() + self.dz, self.dz)
-        phis = np.arange(0, self.form.max_phi() + self.dphi, self.dphi)
+        phis = np.arange(self.phi_min, self.phi_max + self.dphi, self.dphi)
         k_start = start_id
         k_id = k_start
 
-        for i in range(len(phis)):
-            for j in range(len(zs)):
+        n_plies = len(self.stackup.get_value(0, 0).get_plies())
 
-                r = self.form.get_value(zs[j], phis[i])
-                mapdl.k(k_id, r, phis[i], zs[j])
+        for phi in phis:
+            for z in zs:
+                laminat = self.stackup.get_value(z, phi, iso=False)
+                plies = laminat.get_plies()
+
+                r = self.get_inner_radius(z, phi, iso=False)
+                mapdl.k(k_id, r, phi / np.pi * 180, z)
                 k_id += 1
+                for ply in plies:
+                    r += ply.get_thickness()
+                    mapdl.k(k_id, r, phi / np.pi * 180, z)
+                    k_id += 1
         k_end = k_id - 1
+        # mapdl.kplot(show_bounds=True, show_keypoint_numbering=True)
 
-        dots_in_z_direction = len(zs)
-        combinations = (len(phis) - 1) * (len(zs) - 1)
-        rel_positions = [0] * combinations
+        n_phis = len(phis)
+        n_zs = len(zs)
+        z_offset = n_plies + 1
+        phi_offset = n_zs * z_offset
+        v_id = 1
+        mapdl.et(1, "SOLID186")
+        # mapdl.smrtsize("OFF")
+        for j in range(n_phis - 1):
+            for i in range(n_zs - 1):
+                """
+                d - c
+                |   |
+                a - b
+                """
+                a = j * phi_offset + i * z_offset
+                b = (j + 1) * phi_offset + i * z_offset
+                c = (j + 1) * phi_offset + (i + 1) * z_offset
+                d = j * phi_offset + (i + 1) * z_offset
 
+                z_mid = (zs[i] + zs[i + 1]) / 2.0
+                phi_mid = (phis[j] + phis[j + 1]) / 2.0
+                laminat = self.stackup.get_value(z_mid, phi_mid, False)
+                plies = laminat.get_plies()
 
+                self.stackup.get_value(0, 0).get_plies()
+                for p in range(n_plies):
+                    """
+                    top:
+                    p8 - p7
+                    |    |
+                    p5 - p6
+                    
+                    bottom 
+                    p4 - p3
+                    |    |
+                    p1 - p2
+                    """
+                    p1 = a + p + 1
+                    p2 = b + p + 1
+                    p3 = c + p + 1
+                    p4 = d + p + 1
+
+                    p5 = a + p + 2
+                    p6 = b + p + 2
+                    p7 = c + p + 2
+                    p8 = d + p + 2
+                    mapdl.v(p1, p2, p3, p4, p5, p6, p7, p8)
+                    # if v_id > 10:
+                    #     print(v_id)
+                    #     mapdl.vsel("S", "VOLU", '', "ALL")
+                    #     mapdl.vplot()
+                    mapdl.vsel("S", "VOLU", '', v_id)
+                    mapdl.esize(0, 1)
+                    mapdl.mat(plies[p].get_material().get_id())
+                    mapdl.vmesh("ALL")
+                    mapdl.local(v_id, 1, 0, 0, 0, plies[p].get_rotation() / np.pi * 180.0 + 90)
+                    mapdl.esel("S", "ELEM", "", v_id)
+                    mapdl.emodif("all", "ESYS", v_id)
+                    v_id += 1
+
+        k_end = k_id - 1
+        mapdl.vsel("S", "VOLU", '', "ALL")
+        mapdl.esel("S", "ELEM", "", "ALL")
 
 
 
