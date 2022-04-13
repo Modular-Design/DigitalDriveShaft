@@ -1,8 +1,10 @@
 from ansys.mapdl.core import launch_mapdl, find_ansys
 from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, IsotropicMaterial
-from src.DigitalDriveShaft.cylindrical import DriveShaft, Stackup, CylindricalStackup, CylindricalForm
+from src.DigitalDriveShaft.cylindrical import DriveShaft, \
+    Stackup, CylindricalStackup, CylindricalForm, EContour
 import re
 import math
+
 import numpy as np
 
 """
@@ -12,12 +14,16 @@ https://mapdldocs.pyansys.com/examples/06-verif-manual/vm-006-pinched_cylinder.h
 """
 CONSTANTS
 """
-length = 100  # mm
-r_inner = 10  # 30 # mm
-z_div = 20.0  # 30
-phi_div = 10.0  # 10
-mesh_type = "SOLID" # choose between SOLID or SHELL
+length = 10  # 100  # mm
+r_inner = 5  # 30 # mm
+z_div = 10.0  # 30
+phi_div = 32.0  # 10
+mesh_type = "SHELL"  # choose between SOLID or SHELL
 
+dz = length / z_div
+phi_max = np.pi
+phi_min = -np.pi
+dphi = (phi_max - phi_min) / phi_div
 
 """
 Form Definitions
@@ -25,7 +31,7 @@ Form Definitions
 
 
 def shape_func(z, phi):
-    return r_inner + r_inner * 0.5 * np.sin(z * 1.0 / (4.0 * length) * 2 * np.pi)
+    return r_inner  # + r_inner * 0.5 * np.sin(z * 1.0 / (4.0 * length) * 2 * np.pi)
 
 
 form = CylindricalForm(shape_func, length)
@@ -35,20 +41,29 @@ form = CylindricalForm(shape_func, length)
 Layer Definitions
 """
 
-composite_HTS40 = TransverselyIsotropicMaterial(E_l=240e6, E_t=70e6,
-                                                nu_lt=0.28, nu_tt=0.28,
-                                                G_lt=2634.2, G_tt=2634.2,
-                                                density=1.515,
-                                                )  # "HTS40"
-composite_HTS40.set_id(1)
+# composite = TransverselyIsotropicMaterial(E_l=240e6, E_t=70e6,
+#                                           nu_lt=0.28, nu_tt=0.28,
+#                                           G_lt=2634.2, G_tt=2634.2,
+#                                           density=1.515,
+#                                           )  # "HTS40"
+
+composite = TransverselyIsotropicMaterial(E_l=1.21e5, E_t=8600,  # MPa bzw. N / mm^2
+                                          nu_lt=0.27, nu_tt=0.4,
+                                          G_lt=4700, G_tt=3100,
+                                          density=1.49e-6,  # kg / mm^2
+                                          )  # "230GPa Prepreg"
+
+
+composite.set_id(1)
 
 # steel = IsotropicMaterial(Em=210, nu=0.21, density = 7.89)
 
-ply0 = Ply(material=composite_HTS40,
+ply0 = Ply(material=composite,
            thickness=1)
 ply45 = ply0.rotate(np.pi/4)  # 45°
+ply90 = ply0.rotate(np.pi/2)
 
-layer = Stackup([ply45, ply0, ply45])
+layer = Stackup([ply0])  # ply45, ply45
 # layer = Stackup([ply0])
 
 
@@ -57,8 +72,7 @@ def stackup_func(z, phi):
 
 
 stackup = CylindricalStackup(stackup_func)
-
-shaft = DriveShaft(form, stackup)
+shaft = DriveShaft(form, stackup, EContour.OUTER)
 
 
 """
@@ -74,11 +88,7 @@ mapdl.run("/facet,fine")  # feinere Aufteilung der Facetten
 
 mapdl.prep7()
 
-composite_HTS40.add_to_mapdl(mapdl)
-dz = length/z_div
-phi_max = np.pi/2
-phi_min = 0
-dphi = (phi_max - phi_min)/(phi_div)
+composite.add_to_mapdl(mapdl)
 shaft.add_to_mapdl(mapdl, dz=dz, phi_max=phi_max, phi_min=phi_min, dphi=dphi, type=mesh_type)
 mapdl.asel("ALL")
 # mapdl.nplot(vtk=True, nnum=True, background="", cpos="iso", show_bounds=True, point_size=10)
@@ -121,30 +131,44 @@ def plot_nodal_disp():
         show_edges=True,
     )
 
+def plot_nodal_stress():
+    # Define global cartesian coordinate system.
+    # mapdl.csys(0)
+    mapdl.post1()
+    mapdl.set(1)
+    mapdl.post_processing.plot_nodal_eqv_stress()
 
 
-
-
-def axial_loading():
-    mapdl.run("/solu")
-    # Displacements
-
+def fixation():
     if mesh_type == "SHELL":
         mapdl.nsel("S", "LOC", "Z", form.min_z())
         mapdl.d("ALL", "UZ", 0)
         mapdl.nsel("R", "LOC", "Y", 0)
         mapdl.d("ALL", "ALL", 0)
-        mapdl.lsel("S", "LOC", "Z", form.max_z())
-        mapdl.sfl("ALL", "PRES", -1)
     else:
         mapdl.nsel("S", "LOC", "X", shaft.get_inner_radius(0, 0))
         mapdl.d("ALL", "UX", 0)
         mapdl.d("ALL", "UY", 0)
         mapdl.nsel("R", "LOC", "Z", form.min_z())
         mapdl.d("ALL", "UZ", 0)
+    """
+    mapdl.nsel("S", "LOC", "Z", form.min_z())
+    mapdl.d("ALL", "UZ", 0)
+    mapdl.d("ALL", "UY", 0)
+    mapdl.d("ALL", "UZ", 0)
+    mapdl.run("ALLS")
+    """
 
+
+def axial_loading():
+    mapdl.run("/solu")
+    # Displacements
+    fixation()
+    if mesh_type == "SHELL":
+        mapdl.lsel("S", "LOC", "Z", form.max_z())
+        mapdl.sfl("ALL", "PRES", -1)
+    else:
         mapdl.asel("S", "LOC", "Z", form.max_z())
-        # mapdl.aplot(show_bounds=True)
         mapdl.sfa("ALL", "", "PRES", -1)
     # very important!!
     # leaving this out can result in wrong results in 50% of the cases
@@ -168,6 +192,7 @@ def axial_loading():
     p1max = mapdl.mesh.nodes[s1list.index(s1max)]
     p2max = mapdl.mesh.nodes[s2list.index(s2max)]
     plot_nodal_disp()
+    plot_nodal_stress()
     return p1max, p2max
 
 
@@ -178,11 +203,7 @@ def modal_analysis():
     # Modual-Analysis
     mapdl.run("/SOLU")
     mapdl.omega("", "", 1)
-    mapdl.nsel("S", "LOC", "Z", form.min_z())
-    mapdl.d("ALL", "UZ", 0)
-    mapdl.d("ALL", "UY", 0)
-    mapdl.d("ALL", "UZ", 0)
-    mapdl.run("ALLS")
+    fixation()
     mapdl.outres("ALL", "ALL")
 
     mapdl.antype("MODAL")

@@ -136,7 +136,7 @@ class DriveShaft(IMAPDL):
                 mat_id = material.get_id()
                 if mat_id == 0:
                     raise ValueError(f"No material id given for ply {i}")
-                mapdl.secdata(ply.get_thickness(), mat_id, ply.get_rotation(), 5)
+                mapdl.secdata(ply.get_thickness(), mat_id, ply.get_rotation() * 180 / np.pi + 90, 5)
             mapdl.asel("S", "AREA", '', i+1)
             mapdl.esize(0, 1)
             mapdl.type(1)
