@@ -9,7 +9,8 @@ HTS40_Epoxy = TransverselyIsotropicMaterial(E_l=145200,  # MPa
                                             E_t=6272.7,  # MPa
                                             nu_lt=0.28,  # MPa
                                             G_lt=2634.2,  # MPa
-                                            density=1.58)  # g/cm^3
+                                            density=1.58,  # g/cm^3
+                                            R_1c = 630.93) #MPa
 
 ply_0 = Ply(material=HTS40_Epoxy,
            thickness=10.1/4)
