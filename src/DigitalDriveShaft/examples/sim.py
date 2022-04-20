@@ -72,7 +72,7 @@ def stackup_func(z, phi):
 
 
 stackup = CylindricalStackup(stackup_func)
-shaft = DriveShaft(form, stackup, EContour.OUTER)
+shaft = DriveShaft(form, stackup, EContour.INNER)
 
 
 """
