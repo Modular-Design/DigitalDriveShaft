@@ -7,8 +7,41 @@ class IFailure:
     def is_safe(self,
                 stresses: Optional[List[float]] = None,
                 strains: Optional[List[float]]  = None,
-                temperature: Optional[List[float]] = None):
+                temperature: Optional[List[float]] = None,
+                Material):
         raise NotImplementedError
+        
+        #E1     E-Modulus in fibre direction
+        #R_1t   tensile strength in fibre direction
+        #R_1c   compressive strength in fibre direction
+        #R_2t   tensile strength perpendicular to fibre direction
+        #R_2c   compressive strength perpendicular to fibre direction
+        #R_21   In-plane shear strength
+        
+        #epsilon_xt tensile strain in fibre direction
+        #epsilon_xc compressive strain in fibre direction
+        #sigma_yt   tensile stress perpendicular to fibre direction
+        #sigma_yc   compressive stress perpendicular to fibre direction
+        #sigma_y    stress perpendicular to fibre direction
+        #tau_yx     in-plane shear stress
+        
+        
+        my_21 = 0.3 #Reibungs-/Materialparameter 0 < My > 0.3
+        m = 2.5     #Interaktionsfaktor 2,5 < m < 3,1
+        
+        #Reserve factors for single layer according to Cuntze
+        RF_1sigma = Material.R_1t / (strains.epsilon_xt * Material.E1)    #FF1
+        RF_1tau = Material.R_1c / (abs(strains.epsilon_xc) * Material.E1) #FF2
+        
+        RF_2sigma = Material.R_2t /stresses.sigma_yt             #IFF1
+        RF_2tau = Material.R_2c / abs(stresses.sigma_yc)         #IFF2
+        RF_21 = (Material.R_21 - my_21 * stresses.sigma_y) / abs(stresses.tau_yx)  #IFF2
+        
+        #total Reservefactor
+        RF_ges = 1/((1/RF_1sigma)**m + (1/RF_1tau)**m + (1/RF_2sigma)**m + (1/RF_2tau)**m + (1/RF_21)**m)**(1/m)
+        
+        
+        return RF_ges
 
 
 class IMAPDLFailure:
