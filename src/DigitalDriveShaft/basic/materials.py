@@ -7,10 +7,12 @@ from numpy import ndarray
 
 
 class Material(IFailure, IMAPDL, IID):
-    def __init__(self, attr: dict, failure: Optional[IFailure] = None):
+    def __init__(self, attr: dict, failures: Optional[List[IFailure]] = None):
         self.id = 0
         self.attr = attr
-        self.failure = failure
+        if failures is None:
+            failures = []
+        self.failures = failures
 
     def get_compliance(self) -> ndarray:
         raise NotImplementedError
@@ -21,14 +23,18 @@ class Material(IFailure, IMAPDL, IID):
     def get_density(self) -> float:
         return self.attr.get("DENS")
 
-    def is_safe(self,
-                stresses: Optional[List[float]] = None,
-                strains: Optional[List[float]]  = None,
-                temperature: Optional[List[float]] = None,
-                material):
-        if self.failure is not None:
-            return self.failure.is_safe(stresses, strains, temperature, material)
-        return True
+    def get_failure(self,
+                    stresses: Optional[List[float]] = None,
+                    strains: Optional[List[float]]  = None,
+                    temperature: Optional[List[float]] = None):
+        """
+        returns
+        {"max_stress": 1.0, "cuntze": 0.5}
+        """
+        result = dict()
+        for failure in self.failures:
+            result.update(failure.get_failure(stresses, strains, temperature))
+        return result
 
     def set_id(self, id: int):
         self.id = id
@@ -169,11 +175,13 @@ class IsotropicMaterial(Material):
 class TransverselyIsotropicMaterial(OrthotropicMaterial):
     def __init__(self,
                  E_l: float, E_t: float,
-                 nu_lt: float, G_lt: float, G_tt: float, density: float, 
-                 R_1t: float, R_1c: float, R_2t: float, R_2c:float, R_21: float, **kwargs):
+                 nu_lt: float, nu_tt: float,
+                 G_lt: float, G_tt: float, density: float,
+                 **kwargs):
         self.E_l = E_l
         self.E_t = E_t
         self.nu_lt = nu_lt
+        self.nu_tt = nu_tt
         self.G_lt = G_lt        
         super().__init__(E_x=E_l, E_y=E_t, E_z=E_t,
                          nu_xy=nu_lt, nu_xz=nu_lt, nu_yz=nu_tt,

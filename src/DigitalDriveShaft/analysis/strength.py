@@ -3,6 +3,17 @@ from ..basic import Loading
 import numpy as np
 
 
+def get_relevant_loading(failures: list, compr=max) -> float:
+    result = []
+    for failure in failures:
+        if isinstance(failure, list):
+            result += get_relevant_loading(failure, compr)
+        else:
+            result += dict(failures).values()
+
+    return compr(result)
+
+
 def calc_strength(shaft: DriveShaft, load: Loading):
     (_, stackup) = shaft.get_value(0.5, 0.0)
     laminate_thickness = stackup.calc_thickness()
@@ -21,8 +32,9 @@ def calc_strength(shaft: DriveShaft, load: Loading):
     mech_load = np.array([nx, ny, nxy, mx, my, mxy])
     deformation = stackup.apply_load(mech_load)
     strains = stackup.get_strains(deformation)
-    stresses = stackup.get_stresses(strains)
-    return stackup.is_safe(stresses)
+    stresses = stackup.get_stresses(strains)  # [[bot_0, top_0],[bot_1, top_1],...] with bot/top = [s_x, s_y, t_xy]
+    max_loading = get_relevant_loading(stresses)
+    return max_loading
 
 
 def calc_buckling(shaft: DriveShaft, load: Loading):

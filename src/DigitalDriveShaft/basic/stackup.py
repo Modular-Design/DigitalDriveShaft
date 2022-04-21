@@ -42,9 +42,9 @@ class Stackup:
         """
         returns Rotation in [RAD]
         """
-        plies = [0]*len(self.plies)
-        for i in range(len(self.plies)):
-            plies[i] = self.plies[i].rotate(rad)
+        plies = []
+        for ply in self.plies:
+            plies.append(ply.rotate(rad))
         return Stackup(plies)
 
     def get_abd(self, truncate=True):
@@ -108,19 +108,19 @@ class Stackup:
         Returns
         -------
         deformation : vector
-            This deformation consists of :math:`(\varepsilon_x, \varepsilon_y
-            \varepsilon_{xy},\kappa_x, \kappa_y, \kappa_{xy})^T`
+            This deformation consists of :math:`(varepsilon_x, varepsilon_y
+            varepsilon_{xy},kappa_x, kappa_y, kappa_{xy})^T`
         """
         return np.ravel(np.linalg.inv(self.get_abd()).dot(mech_load))
 
     def apply_deformation(self, deformation: np.ndarray) -> np.ndarray:
-        r"""
+        """
         Calculate the running load and moment of the plate under a given using Kichhoff plate theory.
         Parameters
         ----------
         deformation : vector
-            This deformation consists of :math:`(\varepsilon_x, \varepsilon_y,
-            \varepsilon_{xy},\kappa_x, \kappa_y, \kappa_{xy})^T`
+            This deformation consists of :math:`(varepsilon_x, varepsilon_y,
+            varepsilon_{xy},kappa_x, kappa_y, kappa_{xy})^T`
         Returns
         -------
         load : vector
@@ -181,10 +181,11 @@ class Stackup:
 
         return stresses
 
-    def is_safe(self, stresses):
+    def get_failure(self, stresses):
+        failures = []
         for i in range(len(stresses)):
             ply_stress = stresses[i]
             material = self.plies[i].get_material()
-            if not material.is_safe(stresses=ply_stress):
-                return False
-        return True
+            failures.append([material.get_failure(stresses=ply_stress[0]),
+                             material.get_failure(stresses=ply_stress[1])])
+        return failures

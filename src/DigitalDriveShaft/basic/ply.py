@@ -37,6 +37,11 @@ class Ply:
         return self.rotation
 
     def get_local_stress(self, stress):
+        """
+
+        Returns:
+            object: 
+        """
         angle = self.rotation  # TODO: Maybe -self.rotation
         m = np.cos(angle)
         n = np.sin(angle)

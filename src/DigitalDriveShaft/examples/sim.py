@@ -14,7 +14,7 @@ https://mapdldocs.pyansys.com/examples/06-verif-manual/vm-006-pinched_cylinder.h
 """
 CONSTANTS
 """
-length = 10  # 100  # mm
+length = 10  # 1000  # mm
 r_inner = 5  # 30 # mm
 z_div = 10.0  # 30
 phi_div = 32.0  # 10
@@ -60,8 +60,8 @@ composite.set_id(1)
 
 ply0 = Ply(material=composite,
            thickness=1)
-ply45 = ply0.rotate(np.pi/4)  # 45°
-ply90 = ply0.rotate(np.pi/2)
+# ply45 = ply0.rotate(np.pi/4)  # 45°
+# ply90 = ply0.rotate(np.pi/2)
 
 layer = Stackup([ply0])  # ply45, ply45
 # layer = Stackup([ply0])
