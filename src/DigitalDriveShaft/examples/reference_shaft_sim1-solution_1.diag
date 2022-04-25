@@ -1,73 +1,74 @@
 
-*** 12:55:23 *** 
+*** 13:25:02 *** 
 Starting Nastran Exporter
 
-*** 12:55:23 *** 
+*** 13:25:02 *** 
 Writing file 
 C:\Users\s0166875\Documents\GitHub\DigitalDriveShaft\src\DigitalDriveShaft\examples\reference_shaft_sim1-solution_1.dat
  
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing SIMCENTER NASTRAN 2021.1 compatible deck
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Nastran System section
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing File Management section
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Executive Control section
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Case Control section
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Bulk Data section
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Nodes
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Elements
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Material Coordinate System Overrides
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Physical Properties
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Materials
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Degree-of-Freedom Sets
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Loads and Constraints
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Writing Coordinate Systems
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Validating Solution Setup
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Summary of Bulk Data cards written
 
 +----------+----------+
 |   NAME   |  NUMBER  |
 +----------+----------+
-| CHEXA    | 320      |
-| CORD2R   | 105      |
-| FORCE    | 64       |
-| GRID     | 704      |
+| CHEXA    | 1280     |
+| CORD2R   | 177      |
+| GRID     | 1761     |
 | MAT11    | 1        |
-| MATCID   | 318      |
+| MATCID   | 1272     |
+| MOMENT   | 1        |
 | PARAM    | 6        |
-| PCOMPS   | 1        |
-| SPC      | 64       |
+| PCOMPS   | 4        |
+| RBE3     | 1        |
+| SPC      | 160      |
 +----------+----------+
 
-*** 12:55:23 *** 
+*** 13:25:03 *** 
 Nastran Deck Successfully Written
 
