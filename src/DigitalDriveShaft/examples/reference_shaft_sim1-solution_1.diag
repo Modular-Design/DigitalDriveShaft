@@ -1,57 +1,57 @@
 
-*** 12:36:57 *** 
+*** 12:55:23 *** 
 Starting Nastran Exporter
 
-*** 12:36:57 *** 
+*** 12:55:23 *** 
 Writing file 
 C:\Users\s0166875\Documents\GitHub\DigitalDriveShaft\src\DigitalDriveShaft\examples\reference_shaft_sim1-solution_1.dat
  
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing SIMCENTER NASTRAN 2021.1 compatible deck
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Nastran System section
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing File Management section
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Executive Control section
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Case Control section
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Bulk Data section
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Nodes
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Elements
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Material Coordinate System Overrides
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Physical Properties
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Materials
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Degree-of-Freedom Sets
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Loads and Constraints
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Writing Coordinate Systems
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Validating Solution Setup
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Summary of Bulk Data cards written
 
 +----------+----------+
@@ -68,6 +68,6 @@ Summary of Bulk Data cards written
 | SPC      | 64       |
 +----------+----------+
 
-*** 12:36:58 *** 
+*** 12:55:23 *** 
 Nastran Deck Successfully Written
 

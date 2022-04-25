@@ -11,7 +11,7 @@ $*        SOLUTION TYPE: SOL 101 Linear Statics - Global Constraints
 $*
 $*    SOLVER INPUT FILE: reference_shaft_sim1-solution_1.dat
 $*        CREATION DATE: 25-Apr-2022
-$*        CREATION TIME: 12:36:58
+$*        CREATION TIME: 12:55:23
 $*             HOSTNAME: MLKP531
 $*      NASTRAN LICENSE: Desktop Bundle
 $*
@@ -2459,7 +2459,7 @@ $*
 $*  Property: Laminate1 - Extrusion
 $*  Zone: 1
 PCOMPS         3       0      13                 20.0000  0.0000        +
-+              1       11.000000  0.0000                     YES     ABS
++              1       11.000000 90.0000                     YES     ABS
 $*
 $* MATERIAL CARDS
 $*
@@ -3022,4 +3022,4 @@ CORD2R*              105               00.0000000000E+000.0000000000E+00+
 *       0.0000000000E+006.3439058256E-01-7.730126705E-01-2.239141928E-06+
 *       -1.066096474E-05-5.852522058E-06-9.999999999E-01                +
 *
-ENDDATA 54620fc9
+ENDDATA ef921aab
