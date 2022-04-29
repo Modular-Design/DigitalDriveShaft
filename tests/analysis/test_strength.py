@@ -27,5 +27,11 @@ shaft = SimpleDriveShaft(85.5*2, 100, stackup)
 
 loading = Loading(mz=168960)  # Nm
 
-print(calc_strength(shaft, loading))
+safety = 1
 
+reference_stress_compr = 630.3
+
+
+def test_stress(shaft, loading, reference_stress, safety):
+    result = calc_strength(shaft, loading)
+    assert result == {"max_stress": reference_stress_compr}
