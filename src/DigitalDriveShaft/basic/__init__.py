@@ -4,6 +4,6 @@ from .failure import *
 from .iid import *
 
 # ordered to minimize imports
-from .materials import *
+from .material import *
 from .ply import *
 from .stackup import *
