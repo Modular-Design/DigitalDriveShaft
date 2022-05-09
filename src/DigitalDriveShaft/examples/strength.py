@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from src.DigitalDriveShaft.basic import *
-from src.DigitalDriveShaft.cylindircal import *
+from src.DigitalDriveShaft.cylindrical import *
 from src.DigitalDriveShaft.analysis import calc_strength
 
 
@@ -18,13 +18,11 @@ load = Loading(mz=168960, rpm=136000)
 
 "Materialauswahl"
 
-HTS40_max_stress_failure = PlaneMaxStressFailure(tens_l=850, compr_l=630.93,
-                                          tens_t=55, compr_t=200,
-                                          shear_lt=120, shear_tt=120
-                                          )  # MPa
+HTS40_max_stress_failure = MaxStressFailure([(-630.93, 850),
+                                             (-200, 55),
+                                             120])  # MPa
 
-HTS40_cuntze_failure = CuntzeFailure(
-                                          )  # MPa
+HTS40_cuntze_failure = CuntzeFailure(240, 2200, 1850, 55, -200, 120)  # MPa Values are only placeholder
 
 HTS40_mat = TransverselyIsotropicMaterial(E_l=240, E_t=70,
                                           nu_lt=0.28, nu_tt=0.28,
