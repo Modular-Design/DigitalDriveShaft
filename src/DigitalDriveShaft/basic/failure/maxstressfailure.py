@@ -69,9 +69,9 @@ class MaxStressFailure(MAPDLFailure, IFailure):
         super().__init__(stress_attr=attr)
 
     def get_failure(self,
-                stresses: Optional[List[float]] = None,
-                strains: Optional[List[float]] = None,
-                temperature: Optional[float] = None):
+                    stresses: Optional[List[float]] = None,
+                    strains: Optional[List[float]] = None,
+                    temperature: Optional[float] = None):
         if stresses is None:
             raise ValueError("Need stress tensor in Voigt notation!")
         length = len(stresses)
