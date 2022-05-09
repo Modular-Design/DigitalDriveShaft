@@ -1,15 +1,57 @@
 from ..cylindrical import DriveShaft
 from ..basic import Loading
+from typing import List, Union, Callable, Optional
 import numpy as np
 
 
-def get_relevant_loading(failures: list, compr=max) -> float:
+def get_relevant_value(values: list,
+                       compr: Optional[Callable] = max) -> float:
+    """
+    Extrect the relevant value, by using a comparator.
+
+    Parameters
+    ----------
+    values : list
+        nested list, which somewhere include
+
+
+    compr : func
+        comperator function
+
+    Returns
+    -------
+    float
+        Relevant Failure value
+
+    Examples
+    --------
+
+    You can use it for:
+
+    - normal values and lists
+
+       >>> values = [0.0, [1, 2, 3], [4, 5, 6]]
+       Get the maximum value
+       >>> get_relevant_value(values)
+       Get the minimum value
+       >>> get_relevant_value(values, compr=min)
+       return 0.0
+
+    - dicts
+
+       >>> failures = [{"max-stress": 2.0}, [{"max-stress": 1.0}, {"max-stress": 0.0}]]
+       Get the maximum failure value
+       >>> get_relevant_value(failures)
+       return 2.0
+    """
     result = []
-    for failure in failures:
-        if isinstance(failure, list):
-            result += get_relevant_loading(failure, compr)
+    for value in values:
+        if isinstance(value, list):
+            result += get_relevant_value(value, compr)
+        elif isinstance(value, dict):
+            result += dict(values).values()
         else:
-            result += dict(failures).values()
+            result.append(value)
 
     return compr(result)
 
@@ -33,7 +75,8 @@ def calc_strength(shaft: DriveShaft, load: Loading):
     deformation = stackup.apply_load(mech_load)
     strains = stackup.get_strains(deformation)
     stresses = stackup.get_stresses(strains)  # [[bot_0, top_0],[bot_1, top_1],...] with bot/top = [s_x, s_y, t_xy]
-    max_loading = get_relevant_loading(stresses) #TODO @Willi: Ich finde diesen Begriff irreführend. Letztendlich sind das auch Beanspruchungen und damit Stresses und keine Loads
+    failures = stackup.get_failure(stresses)
+    max_loading = get_relevant_value(failures)
     return max_loading
 
 
