@@ -20,6 +20,8 @@ class CylindricalCoordFunction:
             phi in [-pi, pi]
         else:
             no restrictions
+        Returns:
+            radius
         """
         if iso:
             z = z * (self.max_z() - self.min_z()) + self.min_z()

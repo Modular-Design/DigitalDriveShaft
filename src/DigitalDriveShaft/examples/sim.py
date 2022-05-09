@@ -2,8 +2,6 @@ from ansys.mapdl.core import launch_mapdl, find_ansys
 from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, IsotropicMaterial
 from src.DigitalDriveShaft.cylindrical import DriveShaft, \
     Stackup, CylindricalStackup, CylindricalForm, EContour
-import re
-import math
 
 import numpy as np
 
@@ -18,7 +16,7 @@ length = 10  # 1000  # mm
 r_inner = 5  # 30 # mm
 z_div = 10.0  # 30
 phi_div = 32.0  # 10
-mesh_type = "SHELL"  # choose between SOLID or SHELL
+mesh_type = "SOLID"  # choose between SOLID or SHELL
 
 dz = length / z_div
 phi_max = np.pi
@@ -60,8 +58,8 @@ composite.set_id(1)
 
 ply0 = Ply(material=composite,
            thickness=1)
-# ply45 = ply0.rotate(np.pi/4)  # 45°
-# ply90 = ply0.rotate(np.pi/2)
+ply45 = ply0.rotate(np.pi/4)  # 45°
+ply90 = ply0.rotate(np.pi/2)  # 90°
 
 layer = Stackup([ply0])  # ply45, ply45
 # layer = Stackup([ply0])
@@ -136,20 +134,28 @@ def plot_nodal_stress():
     # mapdl.csys(0)
     mapdl.post1()
     mapdl.set(1)
-    mapdl.post_processing.plot_nodal_eqv_stress()
+    # mapdl.post_processing.plot_nodal_eqv_stress()
+    mapdl.post_processing.plot_nodal_principal_stress('1')
+    mapdl.post_processing.plot_nodal_principal_stress('2')
+
 
 
 def fixation():
     if mesh_type == "SHELL":
         mapdl.nsel("S", "LOC", "Z", form.min_z())
-        mapdl.d("ALL", "UZ", 0)
-        mapdl.nsel("R", "LOC", "Y", 0)
-        mapdl.d("ALL", "ALL", 0)
-    else:
-        mapdl.nsel("S", "LOC", "X", shaft.get_inner_radius(0, 0))
+        # mapdl.d("ALL", "UZ", 0)
+        # mapdl.nsel("R", "LOC", "Y", 0)
         mapdl.d("ALL", "UX", 0)
         mapdl.d("ALL", "UY", 0)
-        mapdl.nsel("R", "LOC", "Z", form.min_z())
+        mapdl.d("ALL", "UZ", 0)
+    else:
+        # mapdl.nsel("S", "LOC", "X", shaft.get_inner_radius(0, 0))
+        # mapdl.d("ALL", "UX", 0)
+        # mapdl.d("ALL", "UY", 0)
+        mapdl.nsel("S", "LOC", "Z", form.min_z())
+        # mapdl.d("ALL", "UZ", 0)
+        mapdl.d("ALL", "UX", 0)
+        mapdl.d("ALL", "UY", 0)
         mapdl.d("ALL", "UZ", 0)
     """
     mapdl.nsel("S", "LOC", "Z", form.min_z())
@@ -164,12 +170,18 @@ def axial_loading():
     mapdl.run("/solu")
     # Displacements
     fixation()
+    max_z = form.max_z()
+
     if mesh_type == "SHELL":
-        mapdl.lsel("S", "LOC", "Z", form.max_z())
-        mapdl.sfl("ALL", "PRES", -1)
+        radius = shaft.get_center_radius(max_z, 0, False)
+        mapdl.lsel("S", "LOC", "Z", max_z)
+        # mapdl.f("ALL", "FZ", 1)
+        mapdl.sfl("ALL", "PRES", - 1 / (2 * np.pi * radius))
     else:
+        inner_radius = shaft.get_inner_radius(max_z, 0, False)
+        outer_radius = shaft.get_outer_radius(max_z, 0, False)
         mapdl.asel("S", "LOC", "Z", form.max_z())
-        mapdl.sfa("ALL", "", "PRES", -1)
+        mapdl.sfa("ALL", "", "PRES", -1 / (np.pi * (outer_radius ** 2 - inner_radius ** 2)))
     # very important!!
     # leaving this out can result in wrong results in 50% of the cases
     mapdl.allsel()
@@ -202,7 +214,7 @@ print(axial_loading())
 def modal_analysis():
     # Modual-Analysis
     mapdl.run("/SOLU")
-    mapdl.omega("", "", 1)
+    mapdl.omega("", "", "1")
     fixation()
     mapdl.outres("ALL", "ALL")
 
@@ -216,11 +228,12 @@ def modal_analysis():
     mapdl.post1()
 
     result = mapdl.result
+    result.animate_nodal_solution(0)
     f = result.time_values
     return f
 
 
-print(modal_analysis())
+# print(modal_analysis())
 
 
 mapdl.exit()

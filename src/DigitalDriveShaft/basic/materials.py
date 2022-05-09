@@ -48,9 +48,9 @@ class Material(IFailure, IMAPDL, IID):
             raise KeyError("'id' must be defined!")
         for (key, value) in self.attr.items():
             mapdl.mp(key, self.id, value)
-        if self.failure is not None:
-            if isinstance(self.failure, IMAPDLFailure):
-                self.failure.add_to_mapdl(mapdl, mat_id)
+        for failure in self.failures:
+            if isinstance(failure, IMAPDLFailure):
+                failure.add_to_mapdl(mapdl, mat_id)
 
 
 def get_plane_stress_stiffness(material):

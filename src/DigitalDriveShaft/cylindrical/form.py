@@ -12,8 +12,8 @@ class CylindricalForm(CylindricalCoordFunction):
                  z_max: float, z_min: Optional[float] = 0):
         super().__init__(r_func, z_max, z_min)
 
-    def get_radius(self, z: float, phi=0.0) -> float:
-        return super().get_value(z, phi)
+    def get_radius(self, z: float, phi=0.0, iso=True) -> float:
+        return super().get_value(z, phi, iso)
 
 
 class Cylinder(CylindricalForm):
