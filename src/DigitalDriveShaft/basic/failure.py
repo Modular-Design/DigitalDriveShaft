@@ -1,5 +1,5 @@
 from ansys.mapdl.core import Mapdl #TODO: @Willi: Pfad funktioniert nicht
-from typing import Optional, List
+from typing import Optional, List, Tuple, Union
 import numpy as np
 
 
@@ -7,19 +7,38 @@ class IFailure:
     def get_failure(self,
                 stresses: Optional[List[float]] = None,
                 strains: Optional[List[float]] = None,
-                temperature: Optional[List[float]] = None) -> dict:
+                temperature: Optional[float] = None) -> dict:
         """
-            kapazität: 100, Beanspruchung: 70 -> 100 / 70
-            belastung / kapazität -> f < 1.0 -> sicher, f > 1.0 unsicher
-            Anstrengung
-            f < 1/1.5
-        Args:
-            stresses:
-            strains:
-            temperature:
+        Computes the loading dependent failure value.
 
-        Returns:
-            {"failure_id": }
+        Parameters
+        ----------
+        stresses : List[float], optional
+            stress tensor in Voigt notation
+
+        strains : List[float], optional
+            strain tensor using the Voigt notation:
+
+        temperature: List[float, optional
+            Temperature in [K]
+
+        Notes
+        -----
+        - **stress** tensor in Voigt notation:
+
+          + 2D: [sigma_11, sigma_22, sigma_12]
+          + 3D: [sigma_11, sigma_22, sigma_33, sigma_23, sigma_13, sigma_12]
+
+        - **strain** tensor using the Voigt notation:
+
+          + 2D: [eps_11, eps_22, 2*eps_12]
+          + 3D: [eps_11, eps_22, eps_33, 2*eps_23, 2*eps_13, 2*eps_12]
+
+        Returns
+        -------
+        dict
+            Dictionary of failure id and value.
+            Values larger 1.0 a equivalent to a failure of the material.
         """
         raise NotImplementedError
 
@@ -58,44 +77,91 @@ class MAPDLFailure(IMAPDLFailure):
             mapdl.fc(mat_id,  "EPEL", key, value)
 
 
-class PlaneMaxStressFailure(MAPDLFailure, IFailure):
+class MaxStressFailure(MAPDLFailure, IFailure):
     def __init__(self,
-                 tens_l: float, tens_t: float,
-                 shear_lt: float, shear_tt: float,
-                 compr_l: float, compr_t: float):
-        self.sl_max = tens_l
-        self.st_max = tens_t
-        self.sl_min = compr_l
-        self.st_min = compr_t
-        self.tlt = shear_lt
-        self.ttt = shear_tt
+                 stress_strength: List[Union[float, Tuple[float, float]]]):
+        """
+        Maximum-Stress Failure Criteria
 
-        attr = dict(XTEN=tens_l, YTEN=tens_t, ZTEN=tens_t,
-                    XCMP=compr_l, YCMP=compr_t, ZCMP=compr_t,
-                    XY=shear_lt, XZ=shear_lt, YZ=shear_tt,
+        Parameters
+        ----------
+        stress_strength : List[Tuple[float, float]]
+            strength tensor in Voigt notation
+
+        Notes
+        -----
+        - strength tensor in Voigt notation with compression/min (comp) and tensile/max (tens) strength
+
+          * 2D: [(comp_11, tens_11),
+            (comp_22, tens_22),
+            (comp_12, sigma_12)]
+          * 3D: [(comp_11, tens_11),
+            (comp_22, tens_22),
+            (comp_33, tens_33),
+            (comp_23, sigma_23),
+            (comp_13, sigma_13),
+            (comp_12, sigma_12)]
+
+        - if **one** value is used instead of the tuple, then the is considerd the maximum value (so it should be positive)
+          and the minimum will be assumed to be the negative version
+
+        Examples
+        --------
+        Create a Plane-Maximum-Stress Failure Criteria
+
+        >>> criteria = MaxStressFailure([(0.0, 2.0), (-2.0, 2.0), 2.0])
+        >>> crit_loading = [4.0, 2.0, 0.0]
+        >>> criteria.get_failure(stresses=crit_loading)
+        returns {``max-stress``: 2.0}
+
+        >>> uncrit_loading = [1.0, 1.0, 1.0]
+        >>> criteria.get_failure(stresses=crit_loading)
+        returns {``max-stress``: 0.5}
+        """
+
+        self.stress_mapping = [0, 1, 2, 3, 4, 5]
+        length = len(stress_strength)
+        if length == 3:
+            self.stress_mapping = [0, 1, 1, 2, 2, 2]
+        elif length != 3 or length != 6:
+            raise ValueError(f"Stress-Strength Tensor has to be size 3 or 6! (Got: {length})")
+
+        self.strength = []
+        # generalize to s11, s22, s33, s23, s13, s12
+        # note: sXY are tuples with (min, max)
+        for i in range(6):
+            strength = stress_strength[self.stress_mapping[i]]
+            if not isinstance(strength, tuple):
+                strength = (-strength, strength)
+            self.strength.append(strength)
+
+        attr = dict(XTEN=self.strength[0][1], YTEN=self.strength[1][1], ZTEN=self.strength[2][1],
+                    XCMP=self.strength[0][0], YCMP=self.strength[1][0], ZCMP=self.strength[2][0],
+                    XY=self.strength[5][1], XZ=self.strength[4][1], YZ=self.strength[3][1],
                     XYCP=-1, XZCP=-1, YZCP=-1)
         super().__init__(stress_attr=attr)
 
     def get_failure(self,
                 stresses: Optional[List[float]] = None,
                 strains: Optional[List[float]] = None,
-                temperature: Optional[List[float]] = None):
+                temperature: Optional[float] = None):
         if stresses is None:
-            raise ValueError("stresses should be given")
-        if len(stresses) != 3:  # TODO: should actually be 6 to be more general
-            raise ValueError("stresses need to be in the format [sigma_ll, sigma_tt, tau_lt]")
+            raise ValueError("Need stress tensor in Voigt notation!")
+        length = len(stresses)
+        if length != 3 or length != 6:
+            raise ValueError("Stresses has to be of length 3 (2d stress)")
 
-        sl, st, tlt = stresses
+        load = []
+        for i in range(6):
+            load.append(stresses[self.stress_mapping[i]])
 
-        sl_middle = (self.sl_max + self.sl_min) / 2
-        sl_dist = (self.sl_max - self.sl_min) / 2
-        sl_factor = abs(sl - sl_middle) / sl_dist
-
-        st_middle = (self.st_max + self.st_min) / 2
-        st_dist = (self.st_max - self.st_min) / 2
-        st_factor = abs(st - st_middle) / st_dist
-        shear_factor = np.abs(tlt) / self.tlt  # ignore ttt
-        return {"max_stress": max(sl_factor, st_factor, shear_factor)}
+        factor = []
+        for i in range(6):
+            s_min, s_max = self.strength[i]
+            middle = (s_max + s_min) / 2
+            dist = (s_max - s_min) / 2
+            factor.append(abs(load[i] - middle) / dist)
+        return {"max_stress": max(factor)}
 
 
 class CuntzeFailure(IFailure):
@@ -104,6 +170,20 @@ class CuntzeFailure(IFailure):
                  R_1t: float, R_1c: float,
                  R_2t: float, R_2c:float, R_21: float,
                  my_21: Optional[float] = 0.3, interaction: Optional[float] = 2.5):
+        """
+
+        Parameters
+        ----------
+        E1
+        R_1t
+        R_1c
+        R_2t
+        R_2c
+        R_21
+        my_21
+        interaction
+        """
+        # tes
         """
 
         Args:
@@ -130,7 +210,7 @@ class CuntzeFailure(IFailure):
     def get_failure(self,
                     stresses: Optional[List[float]] = None,
                     strains: Optional[List[float]] = None,
-                    temperature: Optional[List[float]] = None):
+                    temperature: Optional[float] = None):
 
         # epsilon_xt tensile strain in fibre direction
         # epsilon_xc compressive strain in fibre direction
