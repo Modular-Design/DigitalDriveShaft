@@ -1,6 +1,6 @@
 from abc import ABC
 
-from ansys.mapdl.core import Mapdl
+from .mapdl import Mapdl
 
 
 class IID:
