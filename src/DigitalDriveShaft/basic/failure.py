@@ -1,4 +1,4 @@
-from ansys.mapdl.core import Mapdl
+from ansys.mapdl.core import Mapdl #TODO: @Willi: Pfad funktioniert nicht
 from typing import Optional, List
 import numpy as np
 
