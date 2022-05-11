@@ -2,3 +2,4 @@ from .material import Material
 from .ansiotropicmaterial import AnsiotropicMaterial
 from .orthotropicmaterial import OrthotropicMaterial
 from .transverselyisotropicmaterial import TransverselyIsotropicMaterial
+from .isotropicmaterial import IsotropicMaterial
