@@ -1,5 +1,5 @@
 from ansys.mapdl.core import launch_mapdl, find_ansys
-from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, IsotropicMaterial
+from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply
 from src.DigitalDriveShaft.cylindrical import DriveShaft, \
     Stackup, CylindricalStackup, CylindricalForm, EContour
 
@@ -12,10 +12,10 @@ https://mapdldocs.pyansys.com/examples/06-verif-manual/vm-006-pinched_cylinder.h
 """
 CONSTANTS
 """
-length = 10  # 1000  # mm
-r_inner = 5  # 30 # mm
-z_div = 10.0  # 30
-phi_div = 32.0  # 10
+length = 1000  # 10  # 1000  # mm
+r_inner = 30.0  # 5  # 30 # mm
+z_div = 15.0  # 30
+phi_div = 16.0  # 10
 mesh_type = "SOLID"  # choose between SOLID or SHELL
 
 dz = length / z_div
@@ -26,14 +26,15 @@ dphi = (phi_max - phi_min) / phi_div
 """
 Form Definitions
 """
+form_id = "crazy"
+form_func = {"normal": lambda z, phi: r_inner,
+             "cone": lambda z, phi: r_inner * (3.0 - 2.0 * z / length),
+             "invers": lambda z, phi: r_inner * (3.0 - 2.0 * np.cos(z / (4.0 * length) * 2 * np.pi)),
+             "optimal": lambda z, phi: r_inner * (3.0 - 2.0 * (z / (length)) ** 2),
+             "crazy": lambda z, phi: r_inner * (3.0 - 2.0 * (z / (length)) ** 2) *
+                                     (1.0 + 0.5 * np.cos(z / (1.0 * length) * 5 * np.pi))}
 
-
-def shape_func(z, phi):
-    return r_inner  # + r_inner * 0.5 * np.sin(z * 1.0 / (4.0 * length) * 2 * np.pi)
-
-
-form = CylindricalForm(shape_func, length)
-
+form = CylindricalForm(form_func[form_id], length)
 
 """
 Layer Definitions
@@ -51,17 +52,18 @@ composite = TransverselyIsotropicMaterial(E_l=1.21e5, E_t=8600,  # MPa bzw. N / 
                                           density=1.49e-6,  # kg / mm^2
                                           )  # "230GPa Prepreg"
 
-
 composite.set_id(1)
 
 # steel = IsotropicMaterial(Em=210, nu=0.21, density = 7.89)
 
 ply0 = Ply(material=composite,
-           thickness=1)
-ply45 = ply0.rotate(np.pi/4)  # 45°
-ply90 = ply0.rotate(np.pi/2)  # 90°
+           thickness=0.5)
+ply45 = ply0.rotate(np.pi / 4)  # 45°
+ply90 = ply0.rotate(np.pi / 2)  # 90°
 
-layer = Stackup([ply0])  # ply45, ply45
+layer = Stackup([ply90, ply45, ply0, ply45, ply90])  # ply45, ply45
+
+
 # layer = Stackup([ply0])
 
 
@@ -71,7 +73,6 @@ def stackup_func(z, phi):
 
 stackup = CylindricalStackup(stackup_func)
 shaft = DriveShaft(form, stackup, EContour.INNER)
-
 
 """
 ANSYS SIMULATION
@@ -119,15 +120,30 @@ def plot_nodal_disp():
     # mapdl.csys(0)
     mapdl.post1()
     mapdl.set(1)
+    # mapdl.post_processing.plot_nodal_displacement(
+    #     title="Nodal Displacements",
+    #     component="Z",
+    #     cpos="zx",
+    #     scalar_bar_args={"title": "Nodal Displacements", "vertical": True},
+    #     # show_node_numbering=True,
+    #     show_axes=True,
+    #     show_edges=True,
+    # )
+
     mapdl.post_processing.plot_nodal_displacement(
-        title="Nodal Displacements",
+        title="", # Nodal Displacements
         component="Z",
         cpos="zx",
-        scalar_bar_args={"title": "Nodal Displacements", "vertical": True},
+        scalar_bar_args={"vertical": True},
+        # scalar_bar_args={"title": "Nodal Displacements", "vertical": True},
         # show_node_numbering=True,
         show_axes=True,
-        show_edges=True,
+        # show_edges=True,
+        savefig=f"{form_id}_driveshaft.png",
+        window_size=[1024, 512],
+        # off_screen=True
     )
+
 
 def plot_nodal_stress():
     # Define global cartesian coordinate system.
@@ -135,9 +151,10 @@ def plot_nodal_stress():
     mapdl.post1()
     mapdl.set(1)
     # mapdl.post_processing.plot_nodal_eqv_stress()
-    mapdl.post_processing.plot_nodal_principal_stress('1')
-    mapdl.post_processing.plot_nodal_principal_stress('2')
-
+    mapdl.post_processing.plot_nodal_principal_stress('1', savefig=f"{form_id}_driveshaft.png",
+                                                      cpos='iso', window_size=[1024, 512],
+                                                      off_screen=True)
+    # mapdl.post_processing.plot_nodal_principal_stress('2')
 
 
 def fixation():
@@ -204,11 +221,13 @@ def axial_loading():
     p1max = mapdl.mesh.nodes[s1list.index(s1max)]
     p2max = mapdl.mesh.nodes[s2list.index(s2max)]
     plot_nodal_disp()
-    plot_nodal_stress()
+    # plot_nodal_stress()
     return p1max, p2max
 
 
 print(axial_loading())
+
+quit()
 
 
 def modal_analysis():
@@ -237,4 +256,3 @@ def modal_analysis():
 
 
 mapdl.exit()
-
