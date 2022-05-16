@@ -1,5 +1,4 @@
-from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, \ #TODO @ Willi: Pfade funktionieren alle niche
-    Ply, Stackup, Loading
+from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
 from src.DigitalDriveShaft.analysis import calc_strength
 import numpy as np
