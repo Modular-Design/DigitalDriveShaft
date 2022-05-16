@@ -192,7 +192,7 @@ class Stackup:
                 z_bot = z_top
 
             # Compile the entirety of the ABD matrix.
-            self.abd = np.matrix([[A[0, 0], A[0, 1], A[0, 2], B[0, 0], B[0, 1], B[0, 2]],
+            self.abd = np.array([[A[0, 0], A[0, 1], A[0, 2], B[0, 0], B[0, 1], B[0, 2]],
                                   [A[1, 0], A[1, 1], A[1, 2], B[1, 0], B[1, 1], B[1, 2]],
                                   [A[2, 0], A[2, 1], A[2, 2], B[2, 0], B[2, 1], B[2, 2]],
                                   [B[0, 0], B[0, 1], B[0, 2], D[0, 0], D[0, 1], D[0, 2]],
@@ -201,7 +201,7 @@ class Stackup:
 
         # Truncate very small values.
         if truncate is True:
-            return np.matrix(np.where(np.abs(self.abd) < np.max(self.abd) * 1e-6, 0, self.abd))
+            return np.array(np.where(np.abs(self.abd) < np.max(self.abd) * 1e-6, 0, self.abd))
         return self.abd
 
     def calc_homogenized(self) -> TransverselyIsotropicMaterial:

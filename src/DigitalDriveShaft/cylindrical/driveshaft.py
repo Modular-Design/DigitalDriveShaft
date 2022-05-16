@@ -1,5 +1,3 @@
-import numpy as np
-
 from ..basic import Stackup, Mapdl, IMAPDL
 from ..sim.elements import Shell181, Solid185
 from .econtour import EContour
@@ -242,6 +240,6 @@ class SimpleDriveShaft(DriveShaft):
                  ):
         def stackup_func(z, phi):
             return stackup
-        cyl_stackup = CylindricalStackup(stackup_func, 1.0, 0.0, 1.0, 0.0)
+        cyl_stackup = CylindricalStackup(stackup_func)
         super().__init__(Cylinder(diameter, length), cyl_stackup, contour)
 

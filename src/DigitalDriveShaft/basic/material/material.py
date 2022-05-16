@@ -8,6 +8,15 @@ from numpy import ndarray
 
 class Material(IFailure, IMAPDL, IID):
     def __init__(self, attr: dict, failures: Optional[List[IFailure]] = None):
+        """
+
+        Parameters
+        ----------
+        attr : dict
+
+        failures : List[IFailure], optional
+
+        """
         self.id = 0
         self.attr = attr
         if failures is None:

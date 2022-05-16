@@ -59,15 +59,17 @@ class Ply:
         >>> ply = ply.rotate(90, degree=True)
         instead.
         """
+        if degree:
+            rad = rad * np.pi / 180.0
         return Ply(self.material, self.thickness, self.rotation + rad)
 
     def get_stiffness(self) -> np.ndarray:
         m = np.cos(self.rotation)
         n = np.sin(self.rotation)
-        T1 = np.matrix([[m ** 2, n ** 2, 2 * m * n],
+        T1 = np.array([[m ** 2, n ** 2, 2 * m * n],
                         [n ** 2, m ** 2, -2 * m * n],
                         [-m * n, m * n, m ** 2 - n ** 2]])
-        T2 = np.matrix([[m ** 2, n ** 2, m * n],
+        T2 = np.array([[m ** 2, n ** 2, m * n],
                         [n ** 2, m ** 2, -m * n],
                         [-2 * m * n, 2 * m * n, m ** 2 - n ** 2]])
         stiffness_rot = np.linalg.inv(T1) * self.plane_stress * T2
@@ -130,7 +132,7 @@ class Ply:
         angle = self.rotation  # TODO: Maybe -self.rotation
         m = np.cos(angle)
         n = np.sin(angle)
-        T1_inv = np.matrix([[m ** 2, n ** 2, 2 * m * n],
+        T1_inv = np.array([[m ** 2, n ** 2, 2 * m * n],
                             [n ** 2, m ** 2, -2 * m * n],
                             [-m * n, m * n, m ** 2 - n ** 2]])
         stress_rot = T1_inv * stress
@@ -152,7 +154,7 @@ class Ply:
         angle = self.rotation  # TODO: Maybe -self.rotation
         m = np.cos(angle)
         n = np.sin(angle)
-        T2_inv = np.matrix([[m ** 2, n ** 2, m * n],
+        T2_inv = np.array([[m ** 2, n ** 2, m * n],
                             [n ** 2, m ** 2, -m * n],
                             [-2 * m * n, 2 * m * n, m ** 2 - n ** 2]])
         return np.ravel(T2_inv.dot(strain))
