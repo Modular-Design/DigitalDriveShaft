@@ -1,4 +1,4 @@
-from .orthotropicmaterial import OrthotropicMaterial, ndarray, np
+from .orthotropicmaterial import OrthotropicMaterial, ndarray, np, IFailure, Optional, List
 
 
 class TransverselyIsotropicMaterial(OrthotropicMaterial):
@@ -6,15 +6,18 @@ class TransverselyIsotropicMaterial(OrthotropicMaterial):
                  E_l: float, E_t: float,
                  nu_lt: float,
                  G_lt: float, density: float,
-                 **kwargs):
+                 nu_tt: Optional[float] = None,
+                 failures: Optional[List[IFailure]] = None):
         self.E_l = E_l
         self.E_t = E_t
         self.nu_lt = nu_lt
+        if nu_tt is None:
+            self.nu_tt = nu_lt
         self.G_lt = G_lt
         super().__init__(E_x=E_l, E_y=E_t, E_z=E_t,
                          nu_xy=nu_lt, nu_xz=nu_lt, nu_yz=0.0,
                          G_xy=G_lt, G_xz=G_lt, G_yz=0.0,
-                         density=density, **kwargs)
+                         density=density, failures=failures)
 
     def get_E1(self) -> float:
         return self.E_t

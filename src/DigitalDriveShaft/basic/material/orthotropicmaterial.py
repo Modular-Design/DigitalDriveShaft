@@ -1,4 +1,4 @@
-from .material import Material, np, ndarray
+from .material import Material, np, ndarray, Optional, List, IFailure
 
 
 class OrthotropicMaterial(Material):
@@ -6,7 +6,8 @@ class OrthotropicMaterial(Material):
                  E_x: float, E_y: float, E_z: float,
                  nu_xy: float, nu_xz: float, nu_yz: float,
                  G_xy: float, G_xz: float, G_yz: float,
-                 density: float, **kwargs):
+                 density: float,
+                 failures: Optional[List[IFailure]] = None):
         self.E_x = E_x
         self.E_y = E_y
         self.E_z = E_z
@@ -20,7 +21,7 @@ class OrthotropicMaterial(Material):
                     PRXY=nu_xy, PRXZ=nu_xz, PRYZ=nu_yz,
                     GXY=G_xy, GXZ=G_xz, GYZ=G_yz,
                     DENS=density)
-        super().__init__(attr, **kwargs)
+        super().__init__(attr, failures=failures)
 
     def get_compliance(self) -> ndarray:
         compliance = np.zeros((6,6))
@@ -28,7 +29,7 @@ class OrthotropicMaterial(Material):
         compliance[1, 1] = 1 / self.E_y
         compliance[2, 2] = 1 / self.E_z
         compliance[3, 3] = 1 / self.G_yz
-        compliance[4, 4] = 1 / self.G_zx
+        compliance[4, 4] = 1 / self.G_xz
         compliance[5, 5] = 1 / self.G_xy
 
         compliance[1, 0] = compliance[0, 1] = - self.nu_xy / self.E_x
