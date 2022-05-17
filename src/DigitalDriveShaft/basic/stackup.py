@@ -181,9 +181,9 @@ class Stackup:
                 Q_bar = ply.get_stiffness()
 
                 # Calculate the contribution to the A, B and D matrix of this layer.
-                Ai = Q_bar * (z_bot - z_top)
-                Bi = 1 / 2 * Q_bar * (z_bot ** 2 - z_top ** 2)
-                Di = 1 / 3 * Q_bar * (z_bot ** 3 - z_top ** 3)
+                Ai = Q_bar * (z_top - z_bot)
+                Bi = 1 / 2.0 * Q_bar * (z_top ** 2 - z_bot ** 2)
+                Di = 1 / 3.0 * Q_bar * (z_top ** 3 - z_bot ** 3)
 
                 # Summ this layer to the previous ones.
                 A = A + Ai
