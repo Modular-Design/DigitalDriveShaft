@@ -39,9 +39,9 @@ class TransverselyIsotropicMaterial(OrthotropicMaterial):
 
         compliance[1, 0] = compliance[0, 1] = - self.nu_lt / self.E_l
         compliance[2, 0] = compliance[0, 2] = - self.nu_lt / self.E_l
-        compliance[2, 1] = compliance[1, 2] = - self.nu_lt / self.E_l
+        compliance[2, 1] = compliance[1, 2] = - self.nu_tt / self.E_l
 
-        compliance[3, 3] = 2 * (1.0 + self.nu_lt) / self.E_l
+        compliance[3, 3] = 2 * (1.0 + self.nu_tt) / self.E_l
         compliance[4, 4] = 1 / self.G_lt
         compliance[5, 5] = 1 / self.G_lt
 
