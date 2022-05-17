@@ -14,7 +14,7 @@ class TransverselyIsotropicMaterial(OrthotropicMaterial):
         super().__init__(E_x=E_l, E_y=E_t, E_z=E_t,
                          nu_xy=nu_lt, nu_xz=nu_lt, nu_yz=0.0,
                          G_xy=G_lt, G_xz=G_lt, G_yz=0.0,
-                         density=density)
+                         density=density, **kwargs)
 
     def get_E1(self) -> float:
         return self.E_t

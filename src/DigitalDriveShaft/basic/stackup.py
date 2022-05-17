@@ -338,12 +338,16 @@ class Stackup:
 
         return stresses
 
-    def get_failure(self, stresses: List[Tuple[np.ndarray, np.ndarray]]) -> List[Tuple[dict, dict]]:
+    def get_failure(self,
+                    stresses: List[Tuple[np.ndarray, np.ndarray]],
+                    strains: List[Tuple[np.ndarray, np.ndarray]]) -> List[Tuple[dict, dict]]:
         """
         Return the failures in the plies.
 
         Parameters
         ----------
+        strains : list
+            list of strains in plies
         stresses : list
             list of stresses in plies
 
@@ -356,7 +360,8 @@ class Stackup:
         failures = []
         for i in range(len(stresses)):
             ply_stress = stresses[i]
+            ply_strains = strains[i]
             material = self.plies[i].get_material()
-            failures.append((material.get_failure(stresses=ply_stress[0]),
-                             material.get_failure(stresses=ply_stress[1])))
+            failures.append((material.get_failure(stresses=ply_stress[0], strains=ply_strains[0]),
+                             material.get_failure(stresses=ply_stress[1], strains=ply_strains[1])))
         return failures

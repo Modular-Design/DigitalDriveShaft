@@ -17,9 +17,7 @@ def mat_HTS40():
     HTS40_Epoxy = TransverselyIsotropicMaterial(E_l=145200,  # MPa
                                                 E_t=6272.7,  # MPa
                                                 nu_lt=0.28,  # MPa
-                                                nu_tt=0.28,
                                                 G_lt=2634.2,  # MPa
-                                                G_tt=2634.2,
                                                 density=1.58,  # g/cm^3
                                                 failures=[HTS40_cuntze])  # MPa
     return HTS40_Epoxy

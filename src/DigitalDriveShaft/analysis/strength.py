@@ -75,7 +75,7 @@ def calc_strength(shaft: DriveShaft, load: Loading):
     deformation = stackup.apply_load(mech_load)
     strains = stackup.get_strains(deformation)
     stresses = stackup.get_stresses(strains)  # [[bot_0, top_0],[bot_1, top_1],...] with bot/top = [s_x, s_y, t_xy]
-    failures = stackup.get_failure(stresses)
+    failures = stackup.get_failure(stresses, strains)
     max_loading = get_relevant_value(failures)
     return max_loading
 
