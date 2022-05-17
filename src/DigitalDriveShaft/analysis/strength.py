@@ -7,7 +7,7 @@ import numpy as np
 def get_relevant_value(values: list,
                        compr: Optional[Callable] = max) -> float:
     """
-    Extrect the relevant value, by using a comparator.
+    Extracts the relevant value, by using a comparator.
 
     Parameters
     ----------
