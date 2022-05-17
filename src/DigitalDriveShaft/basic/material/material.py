@@ -59,7 +59,8 @@ class Material(IFailure, IMAPDL, IID):
 
         """
         elems = [0, 1, 5]  # ignore the s_zz, s_xy and s_yz row and column
-        return self.get_stiffness()[elems][:, elems]
+        stiffness = self.get_stiffness()
+        return stiffness[elems][:, elems]
 
     def get_plane_strain_stiffness(self):
         """

@@ -4,17 +4,16 @@ from .orthotropicmaterial import OrthotropicMaterial, ndarray, np
 class TransverselyIsotropicMaterial(OrthotropicMaterial):
     def __init__(self,
                  E_l: float, E_t: float,
-                 nu_lt: float, nu_tt: float,
-                 G_lt: float, G_tt: float, density: float,
+                 nu_lt: float,
+                 G_lt: float, density: float,
                  **kwargs):
         self.E_l = E_l
         self.E_t = E_t
         self.nu_lt = nu_lt
-        self.nu_tt = nu_tt
         self.G_lt = G_lt
         super().__init__(E_x=E_l, E_y=E_t, E_z=E_t,
-                         nu_xy=nu_lt, nu_xz=nu_lt, nu_yz=nu_tt,
-                         G_xy=G_lt, G_xz=G_lt, G_yz=G_tt,
+                         nu_xy=nu_lt, nu_xz=nu_lt, nu_yz=0.0,
+                         G_xy=G_lt, G_xz=G_lt, G_yz=0.0,
                          density=density)
 
     def get_E1(self) -> float:
@@ -35,11 +34,11 @@ class TransverselyIsotropicMaterial(OrthotropicMaterial):
         compliance[1, 1] = 1 / self.E_t
         compliance[2, 2] = 1 / self.E_t
 
-        compliance[1, 0] = compliance[0, 1] = - self.nu_lt / self.E_x
-        compliance[2, 0] = compliance[0, 2] = - self.nu_lt / self.E_x
-        compliance[2, 1] = compliance[1, 2] = - self.nu_tt / self.E_y
+        compliance[1, 0] = compliance[0, 1] = - self.nu_lt / self.E_l
+        compliance[2, 0] = compliance[0, 2] = - self.nu_lt / self.E_l
+        compliance[2, 1] = compliance[1, 2] = - self.nu_lt / self.E_l
 
-        compliance[3, 3] = (compliance[1, 1] - compliance[1, 2]) / 2
+        compliance[3, 3] = 2 * (1.0 + self.nu_lt) / self.E_l
         compliance[4, 4] = 1 / self.G_lt
         compliance[5, 5] = 1 / self.G_lt
 

@@ -31,7 +31,8 @@ class Ply:
         if degree:
             rotation = rotation * np.pi / 180.0
         self.rotation = rotation
-        self.plane_stress = self.material.get_plane_stress_stiffness()
+        compl = self.material.get_plane_strain_stiffness()
+        self.plane_strain = self.material.get_plane_strain_stiffness()
 
     def rotate(self, rad, degree=False) -> "Ply":
         """
@@ -64,15 +65,16 @@ class Ply:
         return Ply(self.material, self.thickness, self.rotation + rad)
 
     def get_stiffness(self) -> np.ndarray:
-        m = np.cos(self.rotation)
-        n = np.sin(self.rotation)
-        T1 = np.array([[m ** 2, n ** 2, 2 * m * n],
-                        [n ** 2, m ** 2, -2 * m * n],
-                        [-m * n, m * n, m ** 2 - n ** 2]])
-        T2 = np.array([[m ** 2, n ** 2, m * n],
-                        [n ** 2, m ** 2, -m * n],
-                        [-2 * m * n, 2 * m * n, m ** 2 - n ** 2]])
-        stiffness_rot = np.linalg.inv(T1) * self.plane_stress * T2
+        c = np.cos(self.rotation)
+        s = np.sin(self.rotation)
+        t_sigma = np.array([[c ** 2, s ** 2, - 2 * s * c],
+                            [s ** 2, c ** 2, 2 * s * c],
+                            [s * c, - s * c, c ** 2 - s ** 2]])
+
+        t_sigmat = np.array([[c ** 2, s ** 2, s * c],
+                             [s ** 2, c ** 2, -s * c],
+                             [-2 * s * c, 2 * s * c, c ** 2 - s ** 2]])
+        stiffness_rot = np.matmul(t_sigma, np.matmul(self.plane_strain, t_sigmat))
         return stiffness_rot
 
     def get_material(self) -> Material:
@@ -133,10 +135,9 @@ class Ply:
         m = np.cos(angle)
         n = np.sin(angle)
         T1_inv = np.array([[m ** 2, n ** 2, 2 * m * n],
-                            [n ** 2, m ** 2, -2 * m * n],
-                            [-m * n, m * n, m ** 2 - n ** 2]])
-        stress_rot = T1_inv * stress
-        return np.ravel(stress_rot)
+                           [n ** 2, m ** 2, -2 * m * n],
+                           [-m * n, m * n, m ** 2 - n ** 2]])
+        return np.ravel(T1_inv.dot(stress))
 
     def get_local_strain(self, strain: np.ndarray) -> np.ndarray:
         """
@@ -155,6 +156,6 @@ class Ply:
         m = np.cos(angle)
         n = np.sin(angle)
         T2_inv = np.array([[m ** 2, n ** 2, m * n],
-                            [n ** 2, m ** 2, -m * n],
-                            [-2 * m * n, 2 * m * n, m ** 2 - n ** 2]])
+                           [n ** 2, m ** 2, -m * n],
+                           [-2 * m * n, 2 * m * n, m ** 2 - n ** 2]])
         return np.ravel(T2_inv.dot(strain))
