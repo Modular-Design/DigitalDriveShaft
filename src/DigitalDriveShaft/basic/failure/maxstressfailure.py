@@ -65,7 +65,6 @@ class MaxStressFailure(IFailure):
                     XCMP=self.strength[0][0], YCMP=self.strength[1][0], ZCMP=self.strength[2][0],
                     XY=self.strength[5][1], XZ=self.strength[4][1], YZ=self.strength[3][1],
                     XYCP=-1, XZCP=-1, YZCP=-1)
-        super().__init__(stress_attr=attr)
 
     def get_failure(self,
                     stresses: Optional[List[float]] = None,
@@ -74,8 +73,8 @@ class MaxStressFailure(IFailure):
         if stresses is None:
             raise ValueError("Need stress tensor in Voigt notation!")
         length = len(stresses)
-        if length != 3 or length != 6:
-            raise ValueError("Stresses has to be of length 3 (2d stress)")
+        if length != 3 and length != 6:
+            raise ValueError(f"Stresses has to be of length 3 (2d stress), but got length {length}")
 
         load = []
         for i in range(6):

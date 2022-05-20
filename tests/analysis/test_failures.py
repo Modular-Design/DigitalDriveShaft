@@ -3,8 +3,8 @@ from src.DigitalDriveShaft.basic.failure import *
 
 
 @pytest.fixture
-def planestressfailure():
-    return PlaneMaxStressFailure(1.0, 1.0, 1.0, 1.0, -1.0, -1.0)
+def stressfailure():
+    return MaxStressFailure([1.0, 1.0, 1.0])
 
 
 @pytest.mark.parametrize("stress, safety", [
@@ -15,6 +15,6 @@ def planestressfailure():
     ([1.2, 1.0, 1.0], 1.2),
     ([-1.2, 1.0, 1.0], 1.2),
 ])
-def test_failure(planestressfailure, stress, safety):
-    result = planestressfailure.get_failure(stress)
+def test_failure(stressfailure, stress, safety):
+    result = stressfailure.get_failure(stress)
     assert result == {"max_stress": safety}
