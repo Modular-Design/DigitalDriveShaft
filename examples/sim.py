@@ -3,6 +3,8 @@ from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply
 from src.DigitalDriveShaft.cylindrical import DriveShaft, \
     Stackup, CylindricalStackup, CylindricalForm, EContour
 
+from src.DigitalDriveShaft.sim import material_to_mapdl, driveshaft_to_mapdl
+
 import numpy as np
 
 """
@@ -48,11 +50,9 @@ Layer Definitions
 
 composite = TransverselyIsotropicMaterial(E_l=1.21e5, E_t=8600,  # MPa bzw. N / mm^2
                                           nu_lt=0.27, nu_tt=0.4,
-                                          G_lt=4700, G_tt=3100,
+                                          G_lt=4700,
                                           density=1.49e-6,  # kg / mm^2
                                           )  # "230GPa Prepreg"
-
-composite.set_id(1)
 
 # steel = IsotropicMaterial(Em=210, nu=0.21, density = 7.89)
 
@@ -87,8 +87,8 @@ mapdl.run("/facet,fine")  # feinere Aufteilung der Facetten
 
 mapdl.prep7()
 
-composite.add_to_mapdl(mapdl)
-shaft.add_to_mapdl(mapdl, dz=dz, phi_max=phi_max, phi_min=phi_min, dphi=dphi, type=mesh_type)
+material_to_mapdl(mapdl, composite, 1)
+driveshaft_to_mapdl(mapdl, shaft, dz=dz, phi_max=phi_max, phi_min=phi_min, dphi=dphi, type=mesh_type)
 mapdl.asel("ALL")
 # mapdl.nplot(vtk=True, nnum=True, background="", cpos="iso", show_bounds=True, point_size=10)
 # mapdl.vplot(show_bounds=True)

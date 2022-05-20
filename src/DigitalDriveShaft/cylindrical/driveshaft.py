@@ -1,14 +1,12 @@
 from .econtour import EContour
 from .form import CylindricalForm, Cylinder
-from .stackup import CylindricalStackup
-
-
+from .stackup import CylindricalStackup, Stackup
 from typing import Optional, Union
 
 import numpy as np
 
 
-class DriveShaft(IMAPDL):
+class DriveShaft:
     def __init__(self,
                  form: CylindricalForm,
                  stackup: CylindricalStackup,
@@ -50,7 +48,7 @@ class DriveShaft(IMAPDL):
     def get_length(self):
         return self.form.length()
     
-    def get_Crosssection(self, z: float, phi: float, iso=True):
+    def get_cross_section(self, z: float, phi: float, iso=True):
         return np.pi/4.0 * (self.get_outer_radius(z, phi, iso) ** 2.0 - (self.get_inner_radius(z, phi, iso)) ** 2.0)  # Cross section of shaft
 
 

@@ -3,7 +3,7 @@ from ansys.mapdl.core import Mapdl
 from .failure import failure_to_mapdl
 
 
-def material_to_mapdl(self, mapdl: Mapdl, material: Material, mat_id: int):
+def material_to_mapdl(mapdl: Mapdl, material: Material, mat_id: int):
 
     stiffness = material.get_stiffness()
     # TB, Lab, MATID, NTEMP, NPTS, TBOPT, --, FuncName

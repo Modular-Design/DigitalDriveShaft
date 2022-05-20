@@ -59,7 +59,7 @@ def get_relevant_value(values: list,
 def calc_strength(shaft: DriveShaft, load: Loading):
     (_, stackup) = shaft.get_value(0.5, 0.0)
     laminate_thickness = stackup.calc_thickness()
-    A_shaft = shaft.get_Crosssection(0.5, 0.0)
+    A_shaft = shaft.get_cross_section(0.5, 0.0)
     d_center_stackup = 2.0 * shaft.get_center_radius(0.5, 0.0)
     circ_shaft = np.pi * d_center_stackup
 
