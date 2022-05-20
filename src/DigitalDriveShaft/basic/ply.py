@@ -64,17 +64,19 @@ class Ply:
             rad = rad * np.pi / 180.0
         return Ply(self.material, self.thickness, self.rotation + rad)
 
-    def get_stiffness(self) -> np.ndarray:
+    def get_stiffness(self, local=False) -> np.ndarray:
+        if local:
+            return self.plane_strain
         c = np.cos(self.rotation)
         s = np.sin(self.rotation)
         t_sigma = np.array([[c ** 2, s ** 2, - 2 * s * c],
                             [s ** 2, c ** 2, 2 * s * c],
                             [s * c, - s * c, c ** 2 - s ** 2]])
 
-        t_sigmat = np.array([[c ** 2, s ** 2, s * c],
+        t_sigma_t = np.array([[c ** 2, s ** 2, s * c],
                              [s ** 2, c ** 2, -s * c],
                              [-2 * s * c, 2 * s * c, c ** 2 - s ** 2]])
-        stiffness_rot = np.matmul(t_sigma, np.matmul(self.plane_strain, t_sigmat))
+        stiffness_rot = np.matmul(t_sigma, np.matmul(self.plane_strain, t_sigma_t))
         return stiffness_rot
 
     def get_material(self) -> Material:
@@ -131,13 +133,13 @@ class Ply:
         array
             2d stress tensor in Voigt notation
         """
-        angle = self.rotation  # TODO: Maybe -self.rotation
-        m = np.cos(angle)
-        n = np.sin(angle)
-        T1_inv = np.array([[m ** 2, n ** 2, 2 * m * n],
-                           [n ** 2, m ** 2, -2 * m * n],
-                           [-m * n, m * n, m ** 2 - n ** 2]])
-        return np.ravel(T1_inv.dot(stress))
+        angle = self.rotation
+        c = np.cos(angle)
+        s = np.sin(angle)
+        t_sigma_inv = np.array([[c ** 2, s ** 2, 2 * c * s],
+                                [s ** 2, c ** 2, -2 * c * s],
+                                [-c * s, c * s, c ** 2 - s ** 2]])
+        return np.ravel(t_sigma_inv.dot(stress))
 
     def get_local_strain(self, strain: np.ndarray) -> np.ndarray:
         """
@@ -152,10 +154,10 @@ class Ply:
         array
             2d strain tensor in Voigt notation
         """
-        angle = self.rotation  # TODO: Maybe -self.rotation
-        m = np.cos(angle)
-        n = np.sin(angle)
-        T2_inv = np.array([[m ** 2, n ** 2, m * n],
-                           [n ** 2, m ** 2, -m * n],
-                           [-2 * m * n, 2 * m * n, m ** 2 - n ** 2]])
-        return np.ravel(T2_inv.dot(strain))
+        angle = self.rotation
+        c = np.cos(angle)
+        s = np.sin(angle)
+        t_epsilon_inv = np.array([[c ** 2, s ** 2, c * s],
+                                  [s ** 2, c ** 2, -c * s],
+                                  [-2 * c * s, 2 * c * s, c ** 2 - s ** 2]])
+        return np.ravel(t_epsilon_inv.dot(strain))

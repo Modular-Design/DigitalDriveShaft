@@ -328,9 +328,9 @@ class Stackup:
             strain_lt_bot, strain_lt_top = strains[i]
 
             # Convert strains into stresses.
-            Q = self.plies[i].get_stiffness()
-            stress_lt_top = Q.dot(strain_lt_top)
-            stress_lt_bot = Q.dot(strain_lt_bot)
+            stiffness = self.plies[i].get_stiffness(local=True)
+            stress_lt_top = stiffness.dot(strain_lt_top)
+            stress_lt_bot = stiffness.dot(strain_lt_bot)
 
             # Store the stress values of this ply.
             stress_ply = (stress_lt_bot, stress_lt_top)
