@@ -1,5 +1,3 @@
-from ..basic import Stackup, Mapdl, IMAPDL
-from ..sim.elements import Shell181, Solid185
 from .econtour import EContour
 from .form import CylindricalForm, Cylinder
 from .stackup import CylindricalStackup
@@ -54,8 +52,6 @@ class DriveShaft(IMAPDL):
     
     def get_Crosssection(self, z: float, phi: float, iso=True):
         return np.pi/4.0 * (self.get_outer_radius(z, phi, iso) ** 2.0 - (self.get_inner_radius(z, phi, iso)) ** 2.0)  # Cross section of shaft
-
-
 
 
 class SimpleDriveShaft(DriveShaft):
