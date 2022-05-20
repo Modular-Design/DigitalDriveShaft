@@ -1,4 +1,4 @@
-from .imapdlfailure import IMAPDLFailure, Mapdl
+from .imapdlfailure import IMAPDLFailure
 from typing import Optional
 
 
@@ -19,13 +19,3 @@ class MAPDLFailure(IMAPDLFailure):
         if temperature_attr is None:
             temperature_attr = dict()
         self.temperature_attr = temperature_attr
-
-    def add_to_mapdl(self, mapdl: Mapdl, mat_id: int):
-        for (key, value) in self.stress_attr.items():
-            mapdl.fc(mat_id,  "S", key, value)
-
-        for (key, value) in self.strain_attr.items():
-            mapdl.fc(mat_id,  "TEMP", key, value)
-
-        for (key, value) in self.temperature_attr.items():
-            mapdl.fc(mat_id,  "EPEL", key, value)

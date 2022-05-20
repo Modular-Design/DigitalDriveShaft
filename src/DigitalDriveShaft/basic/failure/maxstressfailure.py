@@ -1,9 +1,8 @@
-from .mapdlfailure import MAPDLFailure
 from .ifalure import IFailure
 from typing import Optional, List, Tuple, Union
 
 
-class MaxStressFailure(MAPDLFailure, IFailure):
+class MaxStressFailure(IFailure):
     def __init__(self,
                  stress_strength: List[Union[float, Tuple[float, float]]]):
         """
