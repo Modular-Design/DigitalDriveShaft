@@ -26,3 +26,24 @@ def test_abd_a(plies: list, a_mat):
     for i in range(3):
         for j in range(3):
             assert round(abd[i, j], 1) == a_mat[i, j]
+
+
+@pytest.mark.parametrize(
+    "plies, b_mat",
+    [
+        ([Ply(material, 1.0, 0)], np.array([[11846.1, 274.6, 0.0],
+                                            [274.6, 784.7, 0.0],
+                                            [0.0, 0.0, 375.0]])),
+        ([Ply(material, 1.0, 45.0, degree=True)], np.array([[3670.0, 2920.0, 2765.4],
+                                                            [2920.0, 3670.0, 2765.4],
+                                                            [2765.4, 2765.4, 3020.4]])),
+        ([Ply(material, 1.0, -45.0, degree=True)], np.array([[3670.0, 2920.0, -2765.4],
+                                                             [2920.0, 3670.0, -2765.4],
+                                                             [-2765.4, -2765.4, 3020.4]]))
+    ]
+)
+def test_abd_b(plies: list, b_mat):
+    abd = Stackup(plies).get_abd()
+    for i in range(3):
+        for j in range(3):
+            assert round(abd[i + 3, j + 3], 1) == b_mat[i, j]
