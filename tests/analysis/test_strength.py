@@ -63,8 +63,8 @@ def shaft(generate_stackup):
 def test_stress(shaft, loading, result_stress):
     _, stresses, failures = calc_static_porperties(shaft, loading)
     rel_stress = get_relevant_value(stresses)
-    # assert rel_stress == result_stress
-    # FALSE: 0.013718731682037019 != 630.3
+    assert rel_stress == result_stress
+    FALSE: 0.013718731682037019 != 630.3
 
     # rel_failure = calc_strength(failures)
     # assert rel_failure == result_stress
