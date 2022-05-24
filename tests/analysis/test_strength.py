@@ -20,25 +20,25 @@ def test_get_relevant_value(values, compr, result):
 
 # to learn more, visit: https://docs.pytest.org/en/7.1.x/how-to/fixtures.html
 @pytest.fixture
-def mat_HTS40():
-    HTS40_cuntze = CuntzeFailure(
+def mat_hts40():
+    hts40_cuntze = CuntzeFailure(
                                     E1=145200,  # MPa
                                     R_1t=852.0, R_1c=630.93,  # MPa
                                     R_2t=852.0, R_2c=630.93, R_21=630.93  # MPa
                                 )
 
-    HTS40_Epoxy = TransverselyIsotropicMaterial(E_l=145200,  # MPa
-                                                E_t=6272.7,  # MPa
-                                                nu_lt=0.28,  # MPa
-                                                G_lt=2634.2,  # MPa
-                                                density=1.58,  # g/cm^3
-                                                failures=[HTS40_cuntze])  # MPa
-    return HTS40_Epoxy
+    hts40_mat = TransverselyIsotropicMaterial(E_l=145200,  # MPa
+                                              E_t=6272.7,  # MPa
+                                              nu_lt=0.28,  # MPa
+                                              G_lt=2634.2,  # MPa
+                                              density=1.58,  # g/cm^3
+                                              failures=[hts40_cuntze])  # MPa
+    return hts40_mat
 
 
 @pytest.fixture
-def generate_stackup(mat_HTS40):
-    ply_0 = Ply(material=mat_HTS40,
+def generate_stackup(mat_hts40):
+    ply_0 = Ply(material=mat_hts40,
            thickness=10.1/4)
 
     ply_45 = ply_0.rotate(45, degree=True)  # 45°
