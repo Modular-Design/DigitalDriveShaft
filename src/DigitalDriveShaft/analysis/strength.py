@@ -49,7 +49,7 @@ def get_relevant_value(values: list,
     for value in values:
         if isinstance(value, list):
             result.append(get_relevant_value(value, compr))
-        if isinstance(value, tuple):
+        elif isinstance(value, tuple):
             for val in value:
                 result.append(get_relevant_value(val, compr))
         elif isinstance(value, dict):
