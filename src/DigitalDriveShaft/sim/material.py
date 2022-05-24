@@ -36,7 +36,7 @@ def material_to_mapdl(mapdl: Mapdl, material: Material, mat_id: int):
                  stiffness[4, 5],
                  stiffness[5, 5])
 
-    density = self.material.get_density()
+    density = material.get_density()
     if density is not None:
         mapdl.mpdata("DENS", mat_id, "", density)
 

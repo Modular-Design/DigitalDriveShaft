@@ -65,6 +65,18 @@ class Ply:
         return Ply(self.material, self.thickness, self.rotation + rad)
 
     def get_stiffness(self, local=False) -> np.ndarray:
+        """Returns the Stiffness or Q-Tensor (always 3x3)
+
+        Parameters
+        ----------
+        local : bool, optional
+            when true return the stiffness in the local coordinate system
+
+        Returns
+        -------
+        array:
+            the stiffness tensor in rotated or local coordinate system
+        """
         if local:
             return self.plane_strain
         c = np.cos(self.rotation)

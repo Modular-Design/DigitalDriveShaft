@@ -1,6 +1,6 @@
 from ..cylindrical import DriveShaft
-from ..basic import Loading
-from typing import List, Union, Callable, Optional
+from ..basic import Loading, extract_failures
+from typing import List, Union, Callable, Optional, Tuple
 import numpy as np
 
 
@@ -33,6 +33,7 @@ def get_relevant_value(values: list,
        >>> values = [0.0, [1, 2, 3], [4, 5, 6]]
        Get the maximum value
        >>> get_relevant_value(values)
+       return 6.0
        Get the minimum value
        >>> get_relevant_value(values, compr=min)
        return 0.0
@@ -47,16 +48,32 @@ def get_relevant_value(values: list,
     result = []
     for value in values:
         if isinstance(value, list):
-            result += get_relevant_value(value, compr)
+            result.append(get_relevant_value(value, compr))
+        if isinstance(value, tuple):
+            for val in value:
+                result.append(get_relevant_value(val, compr))
         elif isinstance(value, dict):
-            result += dict(values).values()
+            result += list(dict(value).values())
         else:
             result.append(value)
 
     return compr(result)
 
 
-def calc_strength(shaft: DriveShaft, load: Loading):
+def calc_static_porperties(shaft: DriveShaft, load: Loading) -> Tuple[
+        List[Tuple[np.ndarray, np.ndarray]], List[Tuple[np.ndarray, np.ndarray]], List[Tuple[dict, dict]]]:
+    """computes the strains, stresses and failures of the driveshaft
+
+    Parameters
+    ----------
+    shaft : DriveShaft
+    load : Loading
+
+    Returns
+    -------
+    list, list, list
+        strains, stresses, failures
+    """
     (_, stackup) = shaft.get_value(0.5, 0.0)
     laminate_thickness = stackup.calc_thickness()
     A_shaft = shaft.get_cross_section(0.5, 0.0)
@@ -74,9 +91,14 @@ def calc_strength(shaft: DriveShaft, load: Loading):
     mech_load = np.array([nx, ny, nxy, mx, my, mxy])
     deformation = stackup.apply_load(mech_load)
     strains = stackup.get_strains(deformation)
-    stresses = stackup.get_stresses(strains)  # [[bot_0, top_0],[bot_1, top_1],...] with bot/top = [s_x, s_y, t_xy]
+    stresses = stackup.get_stresses(strains)  # [(bot_0, top_0),(bot_1, top_1),...] with bot/top = [s_x, s_y, t_xy]
     failures = stackup.get_failure(stresses, strains)
-    max_loading = get_relevant_value(failures)
+    return strains, stresses, failures
+
+
+def calc_strength(failures: List[Tuple[dict, dict]]) -> float:
+    cuntze_failures = extract_failures(failures, ["cuntze"])
+    max_loading = get_relevant_value(cuntze_failures)
     return max_loading
 
 
@@ -84,27 +106,27 @@ def calc_buckling(shaft: DriveShaft, load: Loading):
     (_, stackup) = shaft.get_value(0.5, 0.0)
     laminate_thickness = stackup.calc_thickness()
     d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.0)
-    
-    k_s = 0.925     # Beiwert für gelenkige Lagerung
-    k_l = 0.77      # Beiwert für Imperfektionsanfälligkeit
+
+    k_s = 0.925  # Beiwert für gelenkige Lagerung
+    k_l = 0.77  # Beiwert für Imperfektionsanfälligkeit
     homogenization = stackup.calc_homogenized()
-    E_axial = homogenization.get_E1()   # MPa # E Modul der Verbundschicht #20000 bei Sebastian
-    E_circ = homogenization.get_E2()    # MPa #20000 bei Sebastian
-    Nu12 = homogenization.get_Nu12()    # Querkontraktionszahl der Verbundschicht
+    E_axial = homogenization.get_E1()  # MPa # E Modul der Verbundschicht #20000 bei Sebastian
+    E_circ = homogenization.get_E2()  # MPa #20000 bei Sebastian
+    Nu12 = homogenization.get_Nu12()  # Querkontraktionszahl der Verbundschicht
     Nu21 = homogenization.get_Nu21()
-    
+
     m_buckling = k_s * k_l * np.pi ** 3 / 6 * (d_shaft_outer / 2) ** (5 / 4) * laminate_thickness ** (9 / 4) / np.sqrt(
         shaft.get_length()) * E_axial ** (3 / 8) * (E_circ / (1 - Nu12 * Nu21)) ** (5 / 8) / 1000
     safety_buckling = m_buckling / load.mx
-    
+
     return safety_buckling
 
 
 def calc_dynamic_stability(shaft: DriveShaft, load: Loading):
     (_, stackup) = shaft.get_value(0.5, 0.0)
     d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.0)
-    E_axial = stackup.get_E1            # MPa # E Modul der Verbundschicht #20000 bei Sebastian
-    
+    E_axial = stackup.get_E1  # MPa # E Modul der Verbundschicht #20000 bei Sebastian
+
     # Formel für Berechnung von Biegekritischer Drehzahl aus Sebastians Excel
     RPM_crit = 60 / 2 * np.pi / np.sqrt(8) * d_shaft_outer / shaft.get_length() ** 2 * np.sqrt(
         1000 ** 3 * E_axial / (stackup.calc_density()))  # u/min

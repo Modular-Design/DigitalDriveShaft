@@ -85,15 +85,14 @@ class CuntzeFailure(IFailure):
 
         tau_yx = stresses[2]
 
-        RF_1sigma = self.R_1t / (epsilon_xt * self.E1)  # FF1
-        RF_1tau = self.R_1c / (abs(epsilon_xc) * self.E1)  # FF2
+        eff_1sigma = (epsilon_xt * self.E1) / self.R_1t   # FF1
+        eff_1tau = (abs(epsilon_xc) * self.E1) / self.R_1c   # FF2
 
-        RF_2sigma = self.R_2t / sigma_yt  # IFF1
-        RF_2tau = self.R_2c / abs(sigma_yc)  # IFF2
-        RF_21 = (self.R_21 - self.my_21 * sigma_y) / abs(tau_yx)  # IFF2
+        eff_2sigma = sigma_yt / self.R_2t  # IFF1
+        eff_2tau = abs(sigma_yc) / self.R_2c    # IFF2
+        eff_21 = abs(tau_yx) / (self.R_21 - self.my_21 * sigma_y)   # IFF2
 
         # total Reservefactor
-        RF_ges = 1 / ((1 / RF_1sigma) ** m + (1 / RF_1tau) ** m + (1 / RF_2sigma) ** m + (1 / RF_2tau) ** m + (
-                    1 / RF_21) ** m) ** (1 / m)
+        eff_ges = (eff_1sigma ** m + eff_1tau ** m + eff_2sigma ** m + eff_2tau ** m + eff_21 ** m) ** (1 / m)
 
-        return {"cuntze": RF_ges}
+        return {"cuntze": eff_ges}
