@@ -42,7 +42,7 @@ def generate_stackup(mat_hts40):
            thickness=10.1/4)
 
     ply_45 = ply_0.rotate(45, degree=True)  # 45°
-    ply_n45 = ply_0.rotate(45, degree=True)  # -45°
+    ply_n45 = ply_0.rotate(-45, degree=True)  # -45°
     # ply90 = ply0.rotate(np.pi/2)  # 90°
     stackup = Stackup([ply_45, ply_n45, ply_45, ply_45])
     return stackup
@@ -64,7 +64,7 @@ def test_stress(shaft, loading, result_stress):
     _, stresses, failures = calc_static_porperties(shaft, loading)
     rel_stress = get_relevant_value(stresses)
     assert rel_stress == result_stress
-    FALSE: 0.013718731682037019 != 630.3
+    # FALSE: 0.013718731682037019 != 630.3
 
     # rel_failure = calc_strength(failures)
     # assert rel_failure == result_stress
