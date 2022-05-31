@@ -23,8 +23,8 @@ def test_get_relevant_value(values, compr, result):
 def mat_hts40():
     hts40_cuntze = CuntzeFailure(
                                     E1=145200,  # MPa
-                                    R_1t=852.0, R_1c=630.93,  # MPa
-                                    R_2t=852.0, R_2c=630.93, R_21=630.93  # MPa
+                                    R_1t=852.0, R_1c=631,  # MPa
+                                    R_2t=57, R_2c=274, R_21=132     # MPa
                                 )
 
     hts40_mat = TransverselyIsotropicMaterial(E_l=145200,  # MPa
@@ -44,7 +44,7 @@ def generate_stackup(mat_hts40):
     ply_45 = ply_0.rotate(45, degree=True)  # 45°
     ply_n45 = ply_0.rotate(-45, degree=True)  # -45°
     # ply90 = ply0.rotate(np.pi/2)  # 90°
-    stackup = Stackup([ply_45, ply_n45, ply_45, ply_45])
+    stackup = Stackup([ply_45, ply_n45, ply_n45, ply_45])
     return stackup
 
 
@@ -57,7 +57,7 @@ def shaft(generate_stackup):
 @pytest.mark.parametrize(
     "loading, result_stress",
     [
-        (Loading(mz=168960),  630.3)
+        (Loading(mz=168960 ),  630.0)   # mz in Nm
     ]
 )  # to learn more visit: https://docs.pytest.org/en/7.1.x/example/parametrize.html
 def test_stress(shaft, loading, result_stress):
