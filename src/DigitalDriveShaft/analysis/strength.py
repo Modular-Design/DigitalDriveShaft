@@ -1,6 +1,6 @@
 from ..cylindrical import DriveShaft
 from ..basic import Loading, extract_failures
-from typing import List, Union, Callable, Optional, Tuple
+from typing import List, Callable, Optional, Tuple
 import numpy as np
 
 

@@ -5,7 +5,7 @@ from .cuntzefailure import CuntzeFailure
 from typing import List, Tuple
 
 
-def extract_failures(failures: List[Tuple[dict]], whitelist: List[str]) -> List[dict]:
+def extract_failures(failures: List[Tuple[dict, dict]], whitelist: List[str]) -> List[dict]:
     result = []
     for layers in failures:
         for layer in layers:
