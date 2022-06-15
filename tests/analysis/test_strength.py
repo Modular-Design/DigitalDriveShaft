@@ -1,6 +1,6 @@
 from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading, CuntzeFailure
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
-from src.DigitalDriveShaft.analysis import calc_static_porperties, get_relevant_value, calc_strength
+from src.DigitalDriveShaft.analysis import calc_static_porperties, get_relevant_value, calc_strength, calc_buckling, calc_dynamic_stability
 import pytest
 
 
@@ -65,10 +65,70 @@ def test_stress(shaft, loading, result_stress):
     rel_stress = round(get_relevant_value(stresses), 0)
     assert rel_stress == result_stress
 
+### Buckling and dyn. stability Stackup1###
+@pytest.fixture
+def generate_stackup(mat_hts40):
+    ply_0 = Ply(material=mat_hts40,
+           thickness=15.58/4)
 
-    # rel_failure = calc_strength(failures)
-    # assert rel_failure == result_stress
-    # FALSE: 3.106553198238891e-05 != 630.3
-    # because failure is 'Auslastung', maybe:
-    # 1/ 3.106553198238891e-05 == 32190.016915432232 != 630.3
+    ply_45 = ply_0.rotate(45, degree=True)  # 45°
+    ply_n45 = ply_0.rotate(-45, degree=True)  # -45°
+    # ply90 = ply0.rotate(np.pi/2)  # 90°
+    stackup = Stackup([ply_45, ply_n45, ply_n45, ply_45])
+    return
 
+@pytest.fixture
+def shaft(generate_stackup):
+    shaft = SimpleDriveShaft(diameter=79.42*2, length=400, stackup=generate_stackup)
+    return shaft
+
+@pytest.mark.parametrize(
+    "loading, result_safety_beulen, result_safety_dyn_stability",
+    [
+        (Loading(mz=168960 ),  3.6, 15)   # mz in Nm
+    ]
+)
+def test_buckling(shaft, loading, result_safety_beulen):
+    safety_beulen = calc_buckling(shaft, loading)
+    assert safety_beulen == result_safety_beulen
+
+
+def test_dyn_stability(shaft, loading, result_safety_dyn_stability):
+    safety_dyn_stability = calc_dynamic_stability(shaft, loading)
+    assert safety_dyn_stability == result_safety_dyn_stability
+
+#RPM_crit_Stackup1 = 98839  # u/min
+
+### Buckling and dyn. stability Stackup1###
+@pytest.fixture
+def generate_stackup(mat_hts40):
+    ply_0 = Ply(material=mat_hts40,
+           thickness=11.02/7)
+
+    ply_45 = ply_0.rotate(45, degree=True)  # 45°
+    ply_n45 = ply_0.rotate(-45, degree=True)  # -45°
+    ply_90 = ply_0.rotate(90, degree=True)  # 90°
+    stackup = Stackup([ply_45, ply_n45, ply_90, ply_0, ply_90,ply_n45, ply_45])
+    return
+
+@pytest.fixture
+def shaft(generate_stackup):
+    shaft = SimpleDriveShaft(diameter=79.42*2, length=400, stackup=generate_stackup)
+    return shaft
+@pytest.mark.parametrize(
+    "loading, result_safety_beulen2, result_safety_dyn_stability2",
+    [
+        (Loading(mz=168960),  3.6, 29.9)   # mz in Nm
+    ]
+)
+def test_buckling(shaft, loading, result_safety_beulen2):
+    safety_beulen = calc_buckling(shaft, loading)
+    assert safety_beulen == result_safety_beulen2
+
+def test_dyn_stability(shaft, loading, result_safety_dyn_stability2):
+    safety_dyn_stability = calc_dynamic_stability(shaft, loading)
+    assert safety_dyn_stability == result_safety_dyn_stability2
+
+
+
+#RPM_crit_Stackup2 = 197439  # u/min
