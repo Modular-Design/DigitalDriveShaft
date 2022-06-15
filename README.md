@@ -1,8 +1,7 @@
 # DigitalDriveShaft
+[![Python package](https://github.com/Modular-Design/DigitalDriveShaft/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Modular-Design/DigitalDriveShaft/actions/workflows/ci.yml)
 
-- Python Version: 3.8 (3.9+ is currently not supported by ansys_cobra)
-- Future: 3.10+
-- 3.10 will allow slicker code, but is not needed yet
+- Python Version: 3.8-3.10
 
 ## Installation
 
