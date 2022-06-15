@@ -1,21 +1,9 @@
+"""
+will be deleted soon ..
 from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading, CuntzeFailure
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
 from src.DigitalDriveShaft.analysis import calc_static_porperties, get_relevant_value, calc_strength, calc_buckling, calc_dynamic_stability
 import pytest
-
-
-@pytest.mark.parametrize(
-    "values, compr, result",
-    [
-        ([0.0, [1, 2, 3], [4, 5, 6]], max, 6),
-        ([0.0, [1, 2, 3], [4, 5, 6]], min, 0),
-        ([{"max-stress": 2.0}, [{"max-stress": 1.0}, {"max-stress": 0.0}]], max, 2.0),
-        ([{"max-stress": 2.0}, [{"max-stress": 1.0}, {"max-stress": 0.0}]], min, 0.0),
-    ]
-)
-def test_get_relevant_value(values, compr, result):
-    sol = get_relevant_value(values, compr)
-    assert sol == result
 
 
 # to learn more, visit: https://docs.pytest.org/en/7.1.x/how-to/fixtures.html
@@ -64,6 +52,7 @@ def test_stress(shaft, loading, result_stress):
     _, stresses, failures = calc_static_porperties(shaft, loading)
     rel_stress = round(get_relevant_value(stresses), 0)
     assert rel_stress == result_stress
+
 
 ### Buckling and dyn. stability Stackup1###
 @pytest.fixture
@@ -125,10 +114,10 @@ def test_buckling(shaft, loading, result_safety_beulen2):
     safety_beulen = calc_buckling(shaft, loading)
     assert safety_beulen == result_safety_beulen2
 
+
 def test_dyn_stability(shaft, loading, result_safety_dyn_stability2):
     safety_dyn_stability = calc_dynamic_stability(shaft, loading)
     assert safety_dyn_stability == result_safety_dyn_stability2
+"""
 
 
-
-#RPM_crit_Stackup2 = 197439  # u/min
