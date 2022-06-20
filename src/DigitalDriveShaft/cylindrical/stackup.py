@@ -13,5 +13,5 @@ class CylindricalStackup(CylindricalCoordFunction):
                  z_max: Optional[float] = 1, z_min: Optional[float] = 0):
         super().__init__(laminat_func, z_max, z_min)
 
-    def get_laminat(self, z: float, phi: float) -> Stackup:  # laminat is not dependent on r:
-        return super().get_value(z, phi)
+    def get_laminat(self, z: float, phi: float, iso=True) -> Stackup:  # laminat is not dependent on r:
+        return super().get_value(z, phi, iso)
