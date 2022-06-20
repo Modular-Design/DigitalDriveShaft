@@ -48,7 +48,7 @@ class MaxStressFailure(IFailure):
         length = len(stress_strength)
         if length == 3:
             self.stress_mapping = [0, 1, 1, 2, 2, 2]
-        elif length != 3 or length != 6:
+        elif length != 3 and length != 6:
             raise ValueError(f"Stress-Strength Tensor has to be size 3 or 6! (Got: {length})")
 
         self.strength = []
@@ -73,8 +73,10 @@ class MaxStressFailure(IFailure):
         if stresses is None:
             raise ValueError("Need stress tensor in Voigt notation!")
         length = len(stresses)
-        if length != 3 and length != 6:
-            raise ValueError(f"Stresses has to be of length 3 (2d stress), but got length {length}")
+        allowed_length = max(self.stress_mapping) + 1
+        if length != allowed_length:
+            raise ValueError(f"Stresses has to be of length {allowed_length} ({int(allowed_length / 3 + 1)}d stress), "
+                             f"but got length {length}.")
 
         load = []
         for i in range(6):
