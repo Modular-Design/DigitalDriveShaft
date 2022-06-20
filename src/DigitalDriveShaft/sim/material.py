@@ -1,4 +1,4 @@
-from src.DigitalDriveShaft.basic import Material, IMAPDLFailure
+from src.DigitalDriveShaft.basic import Material, IFailure
 from ansys.mapdl.core import Mapdl
 from .failure import failure_to_mapdl
 
@@ -42,6 +42,6 @@ def material_to_mapdl(mapdl: Mapdl, material: Material, mat_id: int):
 
     failures = material.get_failures()
     for failure in failures:
-        if not isinstance(failure, IMAPDLFailure):
+        if not isinstance(failure, IFailure):
             continue
         failure_to_mapdl(mapdl, failure, mat_id)
