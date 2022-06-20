@@ -45,11 +45,11 @@ def tsai_wu(stress, sl_max, sl_min, st_max, st_min, tlt_max):
     f12 = -1/2 * np.sqrt(f11 * f22)  # This is an approximation
 
     # Apply the criteria itself.
-    Criteria = -f1*sl + f2*st + f11*sl**2 + f22*st**2 + f66*tlt**2 + 2*f12*sl*st
+    criteria = -f1*sl + f2*st + f11*sl**2 + f22*st**2 + f66*tlt**2 + 2*f12*sl*st
 
     # Print a report if failure is occurs.
-    if np.max(Criteria) > 1:
-        error = np.where(Criteria > 1)
+    if np.max(criteria) > 1:
+        error = np.where(criteria > 1)
         print("The Tsai-Wu criteria was violated at:")
         for i in range(len(error[0])):
             print("    - The", loc[error[1][i]], "of layer", error[0][i]+1)

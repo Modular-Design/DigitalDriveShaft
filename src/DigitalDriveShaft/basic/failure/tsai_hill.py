@@ -40,11 +40,11 @@ def tsai_hill(stress, sl_max, sl_min, st_max, st_min, tlt_max):
     stm = ((np.sign(st)+1)/(2))*st_max + ((np.sign(st)-1)/(2))*st_min
 
     # Applying the criteria itelf.
-    Criteria = (sl/slm)**2 + (st/stm)**2 - (sl*st)/(slm**2)+(tlt/tlt_max)**2
+    criteria = (sl/slm)**2 + (st/stm)**2 - (sl*st)/(slm**2)+(tlt/tlt_max)**2
 
     # Print a report if failure is occurs.
-    if np.max(Criteria) > 1:
-        error = np.where(Criteria > 1)
+    if np.max(criteria) > 1:
+        error = np.where(criteria > 1)
         print("The Tsai-Hill criteria was violated at:")
         for i in range(len(error[0])):
             print("    - The", loc[error[1][i]], "of layer", error[0][i]+1)
