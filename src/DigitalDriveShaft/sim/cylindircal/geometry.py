@@ -1,7 +1,7 @@
 from typing import Optional, Union, Literal
 from ansys.mapdl.core import Mapdl
 from src.DigitalDriveShaft.cylindrical import DriveShaft
-from .elements import Shell181, Solid185
+from ..elements import Shell181, Solid185
 import numpy as np
 
 
