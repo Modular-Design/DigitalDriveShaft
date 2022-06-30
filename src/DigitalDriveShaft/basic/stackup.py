@@ -218,7 +218,7 @@ class Stackup:
         e_2 = scale * (self.get_abd()[1, 1] - (self.get_abd()[0, 1]) ** 2 / self.get_abd()[0, 0])
         g_12 = scale * self.get_abd()[2, 2]
         nu_12 = self.get_abd()[0, 1] / self.get_abd()[1, 1]
-        return TransverselyIsotropicMaterial(e_1, e_2, nu_12, nu_12, g_12, g_12, self.get_density())
+        return TransverselyIsotropicMaterial(e_1, e_2, nu_12, g_12, self.get_density())
 
     def apply_load(self, mech_load: np.ndarray) -> np.ndarray:
         """
