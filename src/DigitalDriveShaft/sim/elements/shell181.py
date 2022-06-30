@@ -77,7 +77,7 @@ class Shell181(Element):
         """
         self.options[11] = value
 
-    def add_layer(self, thickness: float, mat_id: int, rotation: float, integration_points: Optional[int] = 5):
+    def add_layer(self, thickness: float, mat_id: int, rotation: float, integration_points: Optional[int] = 3):
         self.secdata.append([thickness, mat_id, rotation, integration_points])
 
     def add_to_mapdl(self, mapdl: Mapdl):

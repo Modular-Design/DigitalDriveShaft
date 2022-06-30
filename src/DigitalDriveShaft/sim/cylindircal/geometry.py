@@ -2,6 +2,7 @@ from typing import Optional, Union, Literal
 from ansys.mapdl.core import Mapdl
 from src.DigitalDriveShaft.cylindrical import DriveShaft
 from ..elements import Shell181, Solid185
+from ..material import material_to_mapdl
 import numpy as np
 
 
@@ -63,22 +64,28 @@ def __mesh_with_shell__(mapdl: Mapdl, shaft: DriveShaft, n_z: int, n_phi: int, p
     element.set_integration(2)
     element.set_layer_storage(1)
     element.add_to_mapdl(mapdl)
+    material_hashes = []
     for i in range(combinations):
         z, phi = rel_positions[i]
         laminat = shaft.stackup.get_value(z, phi)
         plies = laminat.get_plies()
-        id = i+1
-        mapdl.sectype(secid=id, type_="SHELL", name="shell181")
+        sec_id = i+1
+        mapdl.sectype(secid=sec_id, type_="SHELL", name="shell181")
         for ply in plies:
             material = ply.get_material()
-            mat_id = material.get_id()
-            if mat_id == 0:
-                raise ValueError(f"No material id given for ply {i}")
-            mapdl.secdata(ply.get_thickness(), mat_id, ply.get_rotation() * 180 / np.pi + 90, 5)
+            mat_hash = hash(material)
+            if mat_hash in material_hashes:
+                mat_id = material_hashes.index(mat_hash)
+            else:
+                mat_id = len(material_hashes)
+                material_hashes.append(mat_hash)
+                material_to_mapdl(mapdl, material, mat_id + 1)
+
+            mapdl.secdata(ply.get_thickness(), mat_id, ply.get_rotation(degree=True) + 90, 3)
         mapdl.asel("S", "AREA", '', i+1)
         mapdl.esize(0, 1)
         mapdl.type(1)
-        mapdl.secnum(id)
+        mapdl.secnum(sec_id)
         mapdl.amesh("ALL")
 
 

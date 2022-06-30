@@ -14,7 +14,7 @@ setup(
     install_requires=reqs,
     extras_require={
         'develop': ["pytest>=7.1.1", "matplotlib>=3.5"],
-        'ansys': "pyansys>=0.61.3"
+        'ansys': " ansys-mapdl-core>=0.62.1"
     },
 
 )
