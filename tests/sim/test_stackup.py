@@ -1,4 +1,4 @@
-from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Stackup, Ply
+from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Stackup, Ply, CuntzeFailure
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
 from src.DigitalDriveShaft.analysis import get_relevant_value
 import numpy as np
@@ -7,9 +7,12 @@ import pytest
 from ansys.mapdl.core import launch_mapdl
 
 
+composite_failure = CuntzeFailure(141000.0, 2200, 1850, 55, -200, 120)
+
 composite = TransverselyIsotropicMaterial(E_l=141000.0, E_t=9340.0,  # N/mm^2
                                           nu_lt=0.35,
-                                          G_lt=4500.0, density=1.7E-6)  # kg/mm^3
+                                          G_lt=4500.0, density=1.7E-6, # kg/mm^3
+                                          failures=[composite_failure])
 
 
 def extract_stackup_stresses_test():
@@ -58,8 +61,10 @@ def extract_stackup_stresses_test():
     mapdl.finish()
 
     mapdl.post1()
-    stresses, strains, failures = anaylse_stackup(mapdl, shaft.get_stackup(), calculate_failures = False)
+    stresses, strains, failures = anaylse_stackup(mapdl, shaft.get_stackup(), calculate_failures=False)
+    max_stress = get_relevant_value(stresses)
     max_failure = get_relevant_value(failures)
+    print(max_stress)
     print(max_failure)
     mapdl.exit()
     assert False
