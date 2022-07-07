@@ -30,8 +30,8 @@ def generate_stackup(mat, layer_thickness, deg_orientations):
 @pytest.mark.parametrize(
     "l_thickness, l_orientations, ds_diameter, ds_length, loading, result_safety_beulen",
     [
-        (15.58/4, [45, -45, -45, 45], 79.42*2, 400, Loading(mz=168960),  3.77),   # mz in Nm
-        (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400, Loading(mz=168960),  3.17)   # mz in Nm
+        (15.58/4, [45, -45, -45, 45], 79.42*2, 400, Loading(mz=168960),  3.8),   # mz in Nm
+        (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400, Loading(mz=168960),  3.2)   # mz in Nm
     ]
 )
 def test_buckling(l_thickness, l_orientations, ds_diameter, ds_length, loading, result_safety_beulen):
