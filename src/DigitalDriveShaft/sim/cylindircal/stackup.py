@@ -60,6 +60,7 @@ def anaylse_stackup(mapdl: Mapdl,
         strains.append(layer_strain)
 
     mapdl.rsys(0)
+    mapdl.esel("ALL")
     return stresses, strains, failures
 
 
