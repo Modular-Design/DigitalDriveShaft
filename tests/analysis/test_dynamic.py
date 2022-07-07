@@ -27,33 +27,32 @@ def generate_stackup(mat, layer_thickness, deg_orientations):
 
 # l - Layer
 # ds - DriveShaft
-@pytest.mark.skip(reason="test is not finished yet.")
 @pytest.mark.parametrize(
     "l_thickness, l_orientations, ds_diameter, ds_length, loading, result_safety_beulen",
     [
-        (15.58/4, [45, -45, -45, 45], 79.42*2, 400, Loading(mz=168960),  3.6),   # mz in Nm #RPM_crit_Stackup1 = 98839  # u/min
-        (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400, Loading(mz=168960),  3.6)   # mz in Nm  #RPM_crit_Stackup2 = 197439  # u/min
+        (15.58/4, [45, -45, -45, 45], 79.42*2, 400, Loading(mz=168960),  3.77),   # mz in Nm
+        (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400, Loading(mz=168960),  3.17)   # mz in Nm
     ]
 )
 def test_buckling(l_thickness, l_orientations, ds_diameter, ds_length, loading, result_safety_beulen):
     stackup = generate_stackup(hts40_mat, l_thickness, l_orientations)
     shaft = SimpleDriveShaft(diameter=ds_diameter, length=ds_length, stackup=stackup)
-    safety_beulen = calc_buckling(shaft, loading)
+    safety_beulen = round(calc_buckling(shaft, loading), 1)
     assert safety_beulen == result_safety_beulen
 
 
 # l - Layer
 # ds - DriveShaft
-@pytest.mark.skip(reason="test is not finished yet.")
+
 @pytest.mark.parametrize(
     "l_thickness, l_orientations, ds_diameter, ds_length, loading, result_safety_dyn_stability",
     [
-        (15.58/4, [45, -45, -45, 45], 79.42*2, 400, Loading(mz=168960),  15),   # mz in Nm
-        (15.58/4, [45, -45, -45, 45], 79.42*2, 400, Loading(mz=168960),  29.9)   # mz in Nm
+        (15.58/4, [45, -45, -45, 45], 79.42*2, 400, Loading(mz=168960, rpm=6600),  15.0),   # mz in Nm #RPM_crit_Stackup1 = 98839  # u/min
+        (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400, Loading(mz=168960, rpm=6600),  34.1)   # mz in Nm #RPM_crit_Stackup2 = 197439  # u/min
     ]
 )
 def test_dyn_stability(l_thickness, l_orientations, ds_diameter, ds_length, loading, result_safety_dyn_stability):
     stackup = generate_stackup(hts40_mat, l_thickness, l_orientations)
     shaft = SimpleDriveShaft(diameter=ds_diameter, length=ds_length, stackup=stackup)
-    safety_dyn_stability = calc_dynamic_stability(shaft, loading)
+    safety_dyn_stability = round(calc_dynamic_stability(shaft, loading), 1)
     assert safety_dyn_stability == result_safety_dyn_stability
