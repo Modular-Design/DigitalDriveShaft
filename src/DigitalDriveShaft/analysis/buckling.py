@@ -3,7 +3,7 @@ from ..basic import Loading
 import numpy as np
 
 
-def calc_buckling_moment(shaft: DriveShaft):
+def calc_crit_moment(shaft: DriveShaft):
     (_, stackup) = shaft.get_value(0.5, 0.0)
     laminate_thickness = stackup.calc_thickness()
     d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.0)
@@ -20,7 +20,7 @@ def calc_buckling_moment(shaft: DriveShaft):
         shaft.get_length()) * em_axial ** (3 / 8) * (em_circ / (1 - nu_12 * nu_21)) ** (5 / 8) / 1000
 
 
-def calc_buckling_moment_safety(shaft: DriveShaft, load: Loading):
-    mz_buckling = calc_buckling_moment(shaft)
+def calc_moment_safety(shaft: DriveShaft, load: Loading):
+    mz_buckling = calc_crit_moment(shaft)
     safety_buckling = mz_buckling / load.mz
     return safety_buckling
