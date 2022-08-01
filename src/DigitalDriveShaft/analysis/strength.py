@@ -1,63 +1,8 @@
 from ..cylindrical import DriveShaft
 from ..basic import Loading, extract_failures
-from typing import List, Callable, Optional, Tuple
+from .helpers import get_relevant_value
+from typing import List, Tuple
 import numpy as np
-
-
-def get_relevant_value(values: list,
-                       compr: Optional[Callable] = max) -> float:
-    """
-    Extracts the relevant value, by using a comparator.
-
-    Parameters
-    ----------
-    values : list
-        nested list, which somewhere include
-
-
-    compr : func
-        comperator function
-
-    Returns
-    -------
-    float
-        Relevant Failure value
-
-    Examples
-    --------
-
-    You can use it for:
-
-    - normal values and lists
-
-       >>> values = [0.0, [1, 2, 3], [4, 5, 6]]
-       Get the maximum value
-       >>> get_relevant_value(values)
-       return 6.0
-       Get the minimum value
-       >>> get_relevant_value(values, compr=min)
-       return 0.0
-
-    - dicts
-
-       >>> failures = [{"max-stress": 2.0}, [{"max-stress": 1.0}, {"max-stress": 0.0}]]
-       Get the maximum failure value
-       >>> get_relevant_value(failures)
-       return 2.0
-    """
-    result = []
-    for value in values:
-        if isinstance(value, list):
-            result.append(get_relevant_value(value, compr))
-        elif isinstance(value, tuple):
-            for val in value:
-                result.append(get_relevant_value(val, compr))
-        elif isinstance(value, dict):
-            result += list(dict(value).values())
-        else:
-            result.append(value)
-
-    return compr(result)
 
 
 def calc_static_porperties(shaft: DriveShaft, load: Loading) -> Tuple[
@@ -100,37 +45,3 @@ def calc_strength(failures: List[Tuple[dict, dict]]) -> float:
     cuntze_failures = extract_failures(failures, ["cuntze"])
     max_loading = get_relevant_value(cuntze_failures)
     return max_loading
-
-
-def calc_buckling(shaft: DriveShaft, load: Loading):
-    (_, stackup) = shaft.get_value(0.5, 0.0)
-    laminate_thickness = stackup.calc_thickness()
-    d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.0)
-
-    k_s = 0.925  # Beiwert für gelenkige Lagerung
-    k_l = 0.77  # Beiwert für Imperfektionsanfälligkeit
-    homogenization = stackup.calc_homogenized()
-    E_axial = homogenization.get_E1()  # MPa # E Modul der Verbundschicht
-    E_circ = homogenization.get_E2()  # MPa
-    Nu_12 = homogenization.get_nu12()  # Querkontraktionszahl der Verbundschicht
-    Nu_21 = homogenization.get_nu21()
-
-    m_z_buckling = k_s * k_l * np.pi ** 3 / 6 * (d_shaft_outer / 2) ** (5 / 4) * laminate_thickness ** (9 / 4) / np.sqrt(
-        shaft.get_length()) * E_axial ** (3 / 8) * (E_circ / (1 - Nu_12 * Nu_21)) ** (5 / 8) / 1000
-    safety_buckling = m_z_buckling / load.mz
-
-    return safety_buckling
-
-
-def calc_dynamic_stability(shaft: DriveShaft, load: Loading):
-    (_, stackup) = shaft.get_value(0.5, 0.0)
-    d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.0)
-
-    homogenization = stackup.calc_homogenized()
-    E_axial = homogenization.get_E1()  # MPa # E Modul der Verbundschicht
-
-    # Formel für Berechnung von Biegekritischer Drehzahl aus Sebastians Excel
-    RPM_crit = 60 / 2 * np.pi / np.sqrt(8) * d_shaft_outer / shaft.get_length() ** 2 * np.sqrt(
-        1000 ** 3 * E_axial / (stackup.calc_density()))  # u/min
-    safety_RPM_crit = RPM_crit / load.rpm
-    return safety_RPM_crit

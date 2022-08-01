@@ -1,7 +1,7 @@
 from optuna import create_study, TrialPruned
 from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading, CuntzeFailure
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
-from src.DigitalDriveShaft.analysis import calc_buckling, calc_dynamic_stability
+from src.DigitalDriveShaft.analysis import calc_buckling_moment, calc_crit_rpm
 from typing import Union, Sequence
 
 # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
@@ -46,8 +46,8 @@ def objective(trial) -> Union[float, Sequence[float]]:
 
     shaft = SimpleDriveShaft(20, 500, stackup)
     mass = shaft.get_mass()
-    buckling = calc_buckling(shaft, Loading(mz=168960))
-    rpm = calc_dynamic_stability(shaft, Loading(mz=168960, rpm=6600))
+    buckling = calc_buckling_moment(shaft)
+    rpm = calc_crit_rpm(shaft)
     # if buckling < 1.0:
     #     raise TrialPruned
     return mass, buckling, rpm

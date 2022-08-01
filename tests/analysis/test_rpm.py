@@ -1,6 +1,6 @@
 from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading, CuntzeFailure
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
-from src.DigitalDriveShaft.analysis import calc_buckling, calc_dynamic_stability
+from src.DigitalDriveShaft.analysis import calc_rpm_safety
 import pytest
 
 
@@ -24,23 +24,6 @@ def generate_stackup(mat, layer_thickness, deg_orientations):
 
     return Stackup(plies)
 
-
-# l - Layer
-# ds - DriveShaft
-@pytest.mark.parametrize(
-    "l_thickness, l_orientations, ds_diameter, ds_length, loading, result_safety_beulen",
-    [
-        (15.58/4, [45, -45, -45, 45], 79.42*2, 400, Loading(mz=168960),  3.8),   # mz in Nm
-        (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400, Loading(mz=168960),  3.2)   # mz in Nm
-    ]
-)
-def test_buckling(l_thickness, l_orientations, ds_diameter, ds_length, loading, result_safety_beulen):
-    stackup = generate_stackup(hts40_mat, l_thickness, l_orientations)
-    shaft = SimpleDriveShaft(diameter=ds_diameter, length=ds_length, stackup=stackup)
-    safety_beulen = round(calc_buckling(shaft, loading), 1)
-    assert safety_beulen == result_safety_beulen
-
-
 # l - Layer
 # ds - DriveShaft
 
@@ -54,5 +37,5 @@ def test_buckling(l_thickness, l_orientations, ds_diameter, ds_length, loading, 
 def test_dyn_stability(l_thickness, l_orientations, ds_diameter, ds_length, loading, result_safety_dyn_stability):
     stackup = generate_stackup(hts40_mat, l_thickness, l_orientations)
     shaft = SimpleDriveShaft(diameter=ds_diameter, length=ds_length, stackup=stackup)
-    safety_dyn_stability = round(calc_dynamic_stability(shaft, loading), 1)
+    safety_dyn_stability = round(calc_rpm_safety(shaft, loading), 1)
     assert safety_dyn_stability == result_safety_dyn_stability
