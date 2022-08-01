@@ -110,14 +110,14 @@ def calc_buckling(shaft: DriveShaft, load: Loading):
     k_s = 0.925  # Beiwert für gelenkige Lagerung
     k_l = 0.77  # Beiwert für Imperfektionsanfälligkeit
     homogenization = stackup.calc_homogenized()
-    E_axial = homogenization.get_E1()  # MPa # E Modul der Verbundschicht #20000 bei Sebastian
-    E_circ = homogenization.get_E2()  # MPa #20000 bei Sebastian
-    Nu12 = homogenization.get_Nu12()  # Querkontraktionszahl der Verbundschicht
-    Nu21 = homogenization.get_Nu21()
+    E_axial = homogenization.get_E1()  # MPa # E Modul der Verbundschicht
+    E_circ = homogenization.get_E2()  # MPa
+    Nu_12 = homogenization.get_nu12()  # Querkontraktionszahl der Verbundschicht
+    Nu_21 = homogenization.get_nu21()
 
-    m_buckling = k_s * k_l * np.pi ** 3 / 6 * (d_shaft_outer / 2) ** (5 / 4) * laminate_thickness ** (9 / 4) / np.sqrt(
-        shaft.get_length()) * E_axial ** (3 / 8) * (E_circ / (1 - Nu12 * Nu21)) ** (5 / 8) / 1000
-    safety_buckling = m_buckling / load.mx
+    m_z_buckling = k_s * k_l * np.pi ** 3 / 6 * (d_shaft_outer / 2) ** (5 / 4) * laminate_thickness ** (9 / 4) / np.sqrt(
+        shaft.get_length()) * E_axial ** (3 / 8) * (E_circ / (1 - Nu_12 * Nu_21)) ** (5 / 8) / 1000
+    safety_buckling = m_z_buckling / load.mz
 
     return safety_buckling
 
@@ -125,7 +125,9 @@ def calc_buckling(shaft: DriveShaft, load: Loading):
 def calc_dynamic_stability(shaft: DriveShaft, load: Loading):
     (_, stackup) = shaft.get_value(0.5, 0.0)
     d_shaft_outer = 2 * shaft.get_outer_radius(0.5, 0.0)
-    E_axial = stackup.get_E1  # MPa # E Modul der Verbundschicht #20000 bei Sebastian
+
+    homogenization = stackup.calc_homogenized()
+    E_axial = homogenization.get_E1()  # MPa # E Modul der Verbundschicht
 
     # Formel für Berechnung von Biegekritischer Drehzahl aus Sebastians Excel
     RPM_crit = 60 / 2 * np.pi / np.sqrt(8) * d_shaft_outer / shaft.get_length() ** 2 * np.sqrt(
