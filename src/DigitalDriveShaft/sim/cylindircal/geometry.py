@@ -3,33 +3,39 @@ from ansys.mapdl.core import Mapdl
 from src.DigitalDriveShaft.cylindrical import DriveShaft
 from ..elements import Shell181, Solid185
 from ..material import material_to_mapdl
+from .mesh import CylindricMeshBuilder
 import numpy as np
 
 
 def driveshaft_to_mapdl(mapdl: Mapdl, shaft: DriveShaft,
-                        element_type = Union[Literal["SHELL"], Literal["SOLID"]],
-                        n_z: Optional[int] = 10,
-                        n_phi : Optional[int] = 16,
-                        phi_max: Optional[float] = np.pi/2,
-                        phi_min: Optional[float] = 0,
+                        element_type=Union[Literal["SHELL"], Literal["SOLID"]],
+                        mesh_builder: Optional[dict] = None
                         ):
-        mapdl.csys(1)
+    mapdl.csys(1)
 
-        if element_type is None:
-            element_type = "SHELL"
+    if mesh_builder is None:
+        mesh_builder = {}
 
-        if element_type == "SHELL":
-            __mesh_with_shell__(mapdl, shaft, n_z, n_phi, phi_min, phi_max)
-        elif element_type == "SOLID":
-            __mesh_with_solid__(mapdl, shaft, n_z, n_phi, phi_min, phi_max)
+    mesh_builder = CylindricMeshBuilder(**mesh_builder)
+
+    if element_type is None:
+        element_type = "SHELL"
+
+    if element_type == "SHELL":
+        __mesh_with_shell__(mapdl, shaft, mesh_builder)
+    elif element_type == "SOLID":
+        raise NotImplementedError("SOLID is not fully supported yet.")
+        # __mesh_with_solid__(mapdl, shaft, mesh_builder)
 
 
-def __mesh_with_shell__(mapdl: Mapdl, shaft: DriveShaft, n_z: int, n_phi: int, phi_min: float, phi_max: float):
+def __mesh_with_shell__(mapdl: Mapdl,
+                        shaft: DriveShaft,
+                        mesh_builder: CylindricMeshBuilder):
     start_id = 1
-    dz = shaft.form.length() / n_z
-    dphi = (phi_max - phi_min) / n_phi
+    dz = shaft.form.length() / mesh_builder.n_z
+    dphi = (mesh_builder.phi_max - mesh_builder.phi_min) / mesh_builder.n_phi
     zs = np.arange(shaft.form.min_z(), shaft.form.max_z() + dz, dz)
-    phis = np.arange(phi_min, phi_max + dphi, dphi)
+    phis = np.arange(mesh_builder.phi_min, mesh_builder.phi_max + dphi, dphi)
     k_start = start_id
     k_id = k_start
     for phi in phis:
@@ -48,7 +54,7 @@ def __mesh_with_shell__(mapdl: Mapdl, shaft: DriveShaft, n_z: int, n_phi: int, p
     for i in range(phi_divs):
         for j in range(z_divs):
             # counter clockwise
-            rel_positions[index] = ((j + (j+1)) / (2 * len(zs)), (phis[i] + phis[i+1]) / 2)
+            rel_positions[index] = ((j + (j + 1)) / (2 * len(zs)), (phis[i] + phis[i + 1]) / 2)
             index += 1
             """
             d - c
@@ -69,32 +75,35 @@ def __mesh_with_shell__(mapdl: Mapdl, shaft: DriveShaft, n_z: int, n_phi: int, p
         z, phi = rel_positions[i]
         laminat = shaft.stackup.get_value(z, phi)
         plies = laminat.get_plies()
-        sec_id = i+1
+        sec_id = i + 1
         mapdl.sectype(secid=sec_id, type_="SHELL", name="shell181")
         for ply in plies:
             material = ply.get_material()
             mat_hash = hash(material)
             if mat_hash in material_hashes:
-                mat_id = material_hashes.index(mat_hash)
+                mat_id = material_hashes.index(mat_hash) + 1
             else:
-                mat_id = len(material_hashes)
+                mat_id = len(material_hashes) + 1
                 material_hashes.append(mat_hash)
-                material_to_mapdl(mapdl, material, mat_id + 1)
+                material_to_mapdl(mapdl, material, mat_id)
 
             mapdl.secdata(ply.get_thickness(), mat_id, ply.get_rotation(degree=True) + 90, 3)
-        mapdl.asel("S", "AREA", '', i+1)
+        mapdl.asel("S", "AREA", '', i + 1)
         mapdl.esize(0, 1)
         mapdl.type(1)
         mapdl.secnum(sec_id)
         mapdl.amesh("ALL")
 
 
-def __mesh_with_solid__(mapdl: Mapdl, shaft: DriveShaft, n_z: int, n_phi: int, phi_min: float, phi_max: float):
+def __mesh_with_solid__(mapdl: Mapdl,
+                        shaft: DriveShaft,
+                        mesh_builder: CylindricMeshBuilder
+                        ):
     start_id = 1
-    dz = shaft.form.length() / n_z
-    dphi = (phi_max - phi_min) / n_phi
+    dz = shaft.form.length() / mesh_builder.n_z
+    dphi = (mesh_builder.phi_max - mesh_builder.phi_min) / mesh_builder.n_phi
     zs = np.arange(shaft.form.min_z(), shaft.form.max_z() + dz, dz)
-    phis = np.arange(phi_min, phi_max + dphi, dphi)
+    phis = np.arange(mesh_builder.phi_min, mesh_builder.phi_max + dphi, dphi)
     k_start = start_id
     k_id = k_start
     n_plies = len(shaft.stackup.get_value(0, 0).get_plies())
