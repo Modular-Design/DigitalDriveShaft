@@ -27,10 +27,10 @@ def calc_static_porperties(shaft: DriveShaft, load: Loading) -> Tuple[
 
     nx = load.fz / circ_shaft  # N/mm
     ny = 0  # N/mm
-    nxy = load.mz * 1000 / (d_center_stackup / 2 * circ_shaft) + np.sqrt(
+    nxy = load.mz / (d_center_stackup / 2 * circ_shaft) + np.sqrt(
         (load.fy) ** 2 + (load.fx) ** 2) / A_shaft * laminate_thickness  # N/mm
     mx = 0  # N
-    my = np.sqrt((load.my * 1000 / d_center_stackup / 2) ** 2 + (load.mx * 1000 / d_center_stackup / 2) ** 2)  # N
+    my = np.sqrt((load.my / d_center_stackup / 2) ** 2 + (load.mx / d_center_stackup / 2) ** 2)  # N
     mxy = 0
 
     mech_load = np.array([nx, ny, nxy, mx, my, mxy])

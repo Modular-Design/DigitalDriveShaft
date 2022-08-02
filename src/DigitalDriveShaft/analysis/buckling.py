@@ -16,8 +16,12 @@ def calc_crit_moment(shaft: DriveShaft):
     nu_12 = homogenization.get_nu12()  # Querkontraktionszahl der Verbundschicht
     nu_21 = homogenization.get_nu21()
 
-    return k_s * k_l * np.pi ** 3 / 6 * (d_shaft_outer / 2) ** (5 / 4) * laminate_thickness ** (9 / 4) / np.sqrt(
-        shaft.get_length()) * em_axial ** (3 / 8) * (em_circ / (1 - nu_12 * nu_21)) ** (5 / 8) / 1000
+    result = k_s * k_l * np.pi ** 3 / 6
+    result *= (d_shaft_outer / 2) ** (5 / 4)
+    result *= laminate_thickness ** (9 / 4) / np.sqrt(shaft.get_length())
+    result *= em_axial ** (3 / 8)
+    result *= (em_circ / (1 - nu_12 * nu_21)) ** (5 / 8) / 1000
+    return result
 
 
 def calc_moment_safety(shaft: DriveShaft, load: Loading):
