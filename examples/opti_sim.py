@@ -1,7 +1,8 @@
 from optuna import create_study
 from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading, CuntzeFailure
 from src.DigitalDriveShaft.cylindrical import DriveShaft, CylindricalStackup, CylindricalForm
-from src.DigitalDriveShaft.analysis import calc_buckling, calc_dynamic_stability
+from src.DigitalDriveShaft.sim.evaluation import calc_buckling, calc_eigenfreq, calc_strength
+from ansys.mapdl.core import launch_mapdl
 from typing import Union, Sequence
 
 # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
@@ -26,6 +27,7 @@ material_legend = {
     "GFK": None,
 }
 
+mapdl = launch_mapdl(mode="grpc", loglevel="ERROR")
 
 def objective(trial) -> Union[float, Sequence[float]]:
     n_layers = trial.suggest_int("n_layers", 1, 6)
@@ -56,11 +58,12 @@ def objective(trial) -> Union[float, Sequence[float]]:
     shaft = DriveShaft(cyl_form, cyl_stackup)
 
     mass = shaft.get_mass()
-    buckling = calc_buckling(shaft, Loading(mz=168960))
-    rpm = calc_dynamic_stability(shaft, Loading(mz=168960, rpm=6600))
+    cuntze = calc_strength(mapdl, shaft, Loading(mz=1e3))  # Nm
+    buck_moment = calc_buckling(mapdl, shaft, {}, "MOMENT")[0] * 1000.0  # [Nm]
+    rpm = calc_eigenfreq(mapdl, shaft, {})[0] * 60  # [RPM]
     # if buckling < 1.0:
     #     raise TrialPruned
-    return mass, buckling, rpm
+    return mass, cuntze, buck_moment, rpm
 
 
 study = create_study(

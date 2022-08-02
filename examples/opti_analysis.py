@@ -1,7 +1,7 @@
 from optuna import create_study, TrialPruned
 from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading, CuntzeFailure
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
-from src.DigitalDriveShaft.analysis import calc_buckling, calc_dynamic_stability
+from src.DigitalDriveShaft.analysis import calc_crit_moment, calc_crit_rpm, get_relevant_value, calc_static_porperties
 from typing import Union, Sequence
 
 # https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
@@ -46,17 +46,21 @@ def objective(trial) -> Union[float, Sequence[float]]:
 
     shaft = SimpleDriveShaft(20, 500, stackup)
     mass = shaft.get_mass()
-    buckling = calc_buckling(shaft, Loading(mz=168960))
-    rpm = calc_dynamic_stability(shaft, Loading(mz=168960, rpm=6600))
+    _, _, failures = calc_static_porperties(shaft, Loading(mz=1e3))  # Nm
+    cuntze = get_relevant_value(failures)  # auslastung
+    buckling = calc_crit_moment(shaft)
+    rpm = calc_crit_rpm(shaft)
+    # if cuntze > 1.0:
+    #     raise TrialPruned
     # if buckling < 1.0:
     #     raise TrialPruned
-    return mass, buckling, rpm
+    return mass, cuntze, buckling, rpm
 
 
 study = create_study(
-    study_name="analytic_no_pruning",
+    study_name="analytic",
     storage="sqlite:///db.sqlite3",
-    directions=["minimize", "maximize", "maximize"])
-study.optimize(objective, n_trials=10)
+    directions=["minimize", "minimize", "maximize", "maximize"])
+study.optimize(objective, n_trials=10000)
 
 # optuna-dashboard sqlite:///db.sqlite3

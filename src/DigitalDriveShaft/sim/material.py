@@ -9,6 +9,7 @@ def material_to_mapdl(mapdl: Mapdl, material: Material, mat_id: int):
     # TB, Lab, MATID, NTEMP, NPTS, TBOPT, --, FuncName
     # TBDATA,,
     mapdl.tb("ANEL", mat_id, "", "", 0)
+    mapdl.mptemp(mat_id, 0)
     mapdl.tbtemp(0)
     mapdl.tbdata("",
                  stiffness[0, 0],
@@ -39,6 +40,8 @@ def material_to_mapdl(mapdl: Mapdl, material: Material, mat_id: int):
     density = material.get_density()
     if density is not None:
         mapdl.mpdata("DENS", mat_id, "", density)
+    else:
+        raise ValueError("Density is None.")
 
     failures = material.get_failures()
     for failure in failures:
