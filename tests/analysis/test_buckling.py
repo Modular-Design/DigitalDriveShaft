@@ -27,6 +27,7 @@ def generate_stackup(mat, layer_thickness, deg_orientations):
 
 # l - Layer
 # ds - DriveShaft
+@pytest.mark.skip("issue we are currently investigating!")
 @pytest.mark.parametrize(
     "l_thickness, l_orientations, ds_diameter, ds_length, m_krit",
     [
