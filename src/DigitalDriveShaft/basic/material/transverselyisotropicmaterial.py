@@ -20,10 +20,10 @@ class TransverselyIsotropicMaterial(OrthotropicMaterial):
                          density=density, failures=failures)
 
     def get_E1(self) -> float:
-        return self.E_t
+        return self.E_l
 
     def get_E2(self) -> float:
-        return self.E_l
+        return self.E_t
 
     def get_nu12(self) -> float:
         return self.nu_lt
