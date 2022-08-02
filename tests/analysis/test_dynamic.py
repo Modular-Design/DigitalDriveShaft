@@ -1,6 +1,6 @@
 from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading, CuntzeFailure
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
-from src.DigitalDriveShaft.analysis import calc_static_porperties, get_relevant_value, calc_strength, calc_buckling, calc_dynamic_stability
+from src.DigitalDriveShaft.analysis import calc_buckling, calc_dynamic_stability
 import pytest
 
 
