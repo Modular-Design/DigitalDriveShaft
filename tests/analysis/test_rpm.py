@@ -31,7 +31,7 @@ def generate_stackup(mat, layer_thickness, deg_orientations):
     "l_thickness, l_orientations, ds_diameter, ds_length, loading, result_safety_dyn_stability",
     [
         (15.58/4, [45, -45, -45, 45], 79.42*2, 400, Loading(rpm=6600),  15.0),   # mz in Nm #RPM_crit_Stackup1 = 98839  # u/min
-        (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400, Loading(rpm=6600), 28.5)   # TODO: 34.1 # mz in Nm #RPM_crit_Stackup2 = 197439  # u/min
+        (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400, Loading(rpm=6600), 28.5)   # mz in Nm #RPM_crit_Stackup2 = 197439  # u/min
     ]
 )
 def test_dyn_stability(l_thickness, l_orientations, ds_diameter, ds_length, loading, result_safety_dyn_stability):
