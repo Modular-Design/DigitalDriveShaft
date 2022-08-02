@@ -1,6 +1,7 @@
 from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading, CuntzeFailure
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
 from src.DigitalDriveShaft.sim.evaluation import calc_eigenfreq
+from src.DigitalDriveShaft.analysis import calc_crit_rpm
 import pytest
 from ansys.mapdl.core import launch_mapdl
 
@@ -41,3 +42,19 @@ def test_eigenfreq(l_thickness,  l_orientations, ds_diameter, ds_length, eigenfr
     shaft = SimpleDriveShaft(diameter=ds_diameter, length=ds_length, stackup=stackup)
     result = calc_eigenfreq(mapdl, shaft, dict())
     assert abs(result[0] - eigenfreq) < 0.01
+
+
+@pytest.mark.parametrize(
+    "l_thickness, l_orientations, ds_diameter, ds_length",
+    [
+        (1.0, [90], 10, 30),
+        # (15.58/4, [45, -45, -45, 45], 79.42*2, 400),
+        # (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400),
+    ]
+)
+def test_analytic_vs_sim(l_thickness, l_orientations, ds_diameter, ds_length):
+    stackup = generate_stackup(hts40_mat, l_thickness, l_orientations)
+    shaft = SimpleDriveShaft(diameter=ds_diameter, length=ds_length, stackup=stackup)
+    sim = calc_eigenfreq(mapdl, shaft, dict())[0] * 60  # [RPM]
+    analytic = calc_crit_rpm(shaft)
+    assert abs(sim - analytic) < 0.01

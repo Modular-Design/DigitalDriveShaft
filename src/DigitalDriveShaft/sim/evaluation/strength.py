@@ -43,15 +43,18 @@ def calc_strength(mapdl: Mapdl, shaft: DriveShaft, load: Loading, mesh_builder: 
     # Fixation
     mapdl.csys(1)
     mapdl.nsel("S", "LOC", "Z", 0)
-    mapdl.d("ALL", "UX", 0)
     mapdl.d("ALL", "UY", 0)
     mapdl.d("ALL", "UZ", 0)
+    mapdl.d("ALL", "UX", 0)
     mapdl.nsel("ALL")
 
     # Loading
     length = shaft.get_length()
     mapdl.nsel("S", "LOC", "Z", length)
     nodes = mapdl.mesh.nodes
+
+    radius = shaft.get_center_radius(length, 0, False)
+
     fx_i = load.fx / len(nodes)
     fy_i = load.fy / len(nodes)
     fz_i = load.fz / len(nodes)
@@ -65,7 +68,7 @@ def calc_strength(mapdl: Mapdl, shaft: DriveShaft, load: Loading, mesh_builder: 
         phi_deg = phi_rad / np.pi * 180
         mapdl.nsel("S", "LOC", "Z", length)
         mapdl.nsel("R", "LOC", "Y", phi_deg)
-        mapdl.csys(0)
+        mapdl.csys(0)  # INFO: it seems like FCs are always in csys(0), so you might skip this
         mapdl.f("ALL", "FX", fx_i - fm_i * math.sin(phi_rad))
         mapdl.f("ALL", "FY", fy_i + fm_i * math.cos(phi_rad))
         mapdl.f("ALL", "FZ", fz_i)
@@ -86,8 +89,12 @@ def calc_strength(mapdl: Mapdl, shaft: DriveShaft, load: Loading, mesh_builder: 
     mapdl.post1()
     mapdl.set(1)
 
+    # print("# NUMERIC: ")
+    # print("## Stresses: ")
     stresses, strains, failures = anaylse_stackup(mapdl, shaft.get_stackup())
+    # print("## Failures: ")
+    # print(failures)
     max_failure = get_relevant_value(failures)
-
+    # mapdl.post_processing.plot_element_displacement("Z")
     # mapdl.post_processing.plot_nodal_component_stress('z')
-    return 1 / max_failure  # safety
+    return max_failure  # safety

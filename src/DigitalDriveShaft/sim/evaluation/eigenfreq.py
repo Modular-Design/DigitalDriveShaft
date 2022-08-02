@@ -40,24 +40,32 @@ def calc_eigenfreq(mapdl: Mapdl, shaft: DriveShaft, mesh_builder: Optional[dict]
 
     # BCs
     mapdl.slashsolu()
-    mapdl.csys(1)
-    mapdl.omega("", "", 1)  # [Hz]
+    #
+    # mapdl.csys(1)
+    # mapdl.omega("", "", 1e1)  # [Hz]
     # Fixation
-
+    # """
     mapdl.nsel("S", "LOC", "Z", 0)
     mapdl.d("ALL", "UX", 0)
     mapdl.d("ALL", "UY", 0)
     mapdl.d("ALL", "UZ", 0)
+    mapdl.nsel("ALL")
 
     length = shaft.get_length()
     mapdl.nsel("S", "LOC", "Z", length)
-    mapdl.d("ALL", "UX", 0)
+    # mapdl.d("ALL", "UX", 0)
     mapdl.d("ALL", "UZ", 0)
     mapdl.nsel("ALL")
-
+    # """
+    
     # Solver
     mapdl.antype(antype="MODAL")
-    mapdl.modopt(method="LANB", nmode="10", freqb="1.")
+    mapdl.modopt(method="LANB", nmode=10, freqb=1.)
+    mapdl.eqslv("SPAR")
+    mapdl.mxpand(5, "", "", 1)
+    mapdl.pstres(0)
+    mapdl.allsel()
+
     # mapdl.wrfull(ldstep="1")
     mapdl.solve()
     mapdl.finish()
@@ -66,5 +74,22 @@ def calc_eigenfreq(mapdl: Mapdl, shaft: DriveShaft, mesh_builder: Optional[dict]
 
     result = mapdl.result
     f = result.time_values
-
+    
     return f.tolist()  # eigen-frequencies in [Hz]
+    """
+
+    mm = mapdl.math
+    mapdl.antype(antype="MODAL")
+    mapdl.modopt(method="LANB", nmode="10", freqb="1.")
+    mapdl.wrfull(ldstep="1")
+    mapdl.solve()
+    mapdl.finish()
+    mm.free()
+    stiff = mm.stiff(fname="file.full")
+    mass = mm.mass(fname="file.full")
+    nev = 10
+    mat = mm.mat(stiff.nrow, nev)
+    ev = mm.eigs(nev, stiff, mass, phi=mat, fmin=1.0)
+    return ev
+    """
+

@@ -58,11 +58,12 @@ def objective(trial) -> Union[float, Sequence[float]]:
     shaft = DriveShaft(cyl_form, cyl_stackup)
 
     mass = shaft.get_mass()
-    buck_moment = calc_buckling(mapdl, shaft, {}, "MOMENT")
-    rpm = calc_eigenfreq(mapdl, shaft, {})[0] * 60
+    cuntze = calc_strength(mapdl, shaft, Loading(mz=1e3))  # Nm
+    buck_moment = calc_buckling(mapdl, shaft, {}, "MOMENT")[0] * 1000.0  # [Nm]
+    rpm = calc_eigenfreq(mapdl, shaft, {})[0] * 60  # [RPM]
     # if buckling < 1.0:
     #     raise TrialPruned
-    return mass, buck_moment[0], rpm
+    return mass, cuntze, buck_moment, rpm
 
 
 study = create_study(

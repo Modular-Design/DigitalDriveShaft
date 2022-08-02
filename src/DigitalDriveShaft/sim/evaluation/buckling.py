@@ -58,7 +58,19 @@ def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
         mapdl.f("ALL", "FZ", fz_i)
     elif load_mode == "MOMENT":
         mz_i = 1.0 / len(nodes)
-        mapdl.f("ALL", "MZ", mz_i)
+        for node in nodes:
+            x = node[0]
+            y = node[1]
+            radius = math.sqrt(x ** 2 + y ** 2)
+            fm_i = mz_i / radius
+            phi_rad = math.atan2(y, x)
+            phi_deg = phi_rad / np.pi * 180
+            mapdl.nsel("S", "LOC", "Z", length)
+            mapdl.nsel("R", "LOC", "Y", phi_deg)
+            mapdl.csys(0)  # INFO: it seems like FCs are always in csys(0), so you might skip this
+            mapdl.f("ALL", "FX", - fm_i * math.sin(phi_rad))
+            mapdl.f("ALL", "FY", fm_i * math.cos(phi_rad))
+            mapdl.csys(1)
     else:
         raise ValueError(f"load_mode is nether 'FORCE' or 'MOMENT'! (load_mode is: '{load_mode}')")
     mapdl.nsel("ALL")

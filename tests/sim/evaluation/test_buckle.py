@@ -48,13 +48,13 @@ def test_buckle_force(l_thickness,  l_orientations, ds_diameter, ds_length, fkri
     "l_thickness, l_orientations, ds_diameter, ds_length",
     [
         (1.0, [90], 10, 30),
-        (15.58/4, [45, -45, -45, 45], 79.42*2, 400),
-        (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400),
+        # (15.58/4, [45, -45, -45, 45], 79.42*2, 400),
+        # (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400),
     ]
 )
 def test_analytic_vs_sim(l_thickness, l_orientations, ds_diameter, ds_length):
     stackup = generate_stackup(hts40_mat, l_thickness, l_orientations)
     shaft = SimpleDriveShaft(diameter=ds_diameter, length=ds_length, stackup=stackup)
-    sim = calc_buckling(mapdl, shaft, dict(), "MOMENT") * 1000  # [Nm]
+    sim = calc_buckling(mapdl, shaft, dict(), "MOMENT")[0] * 1000  # [Nmm]
     analytic = calc_crit_moment(shaft)
-    assert abs(sim[0] - analytic) < 0.01
+    assert abs(sim - analytic) < 0.01
