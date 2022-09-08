@@ -60,6 +60,7 @@ def objective(trial) -> Union[float, Sequence[float]]:
 study = create_study(
     study_name="analytic",
     storage="sqlite:///db.sqlite3",
+    load_if_exists=True,
     directions=["minimize", "minimize", "maximize", "maximize"])
 study.optimize(objective, n_trials=10000)
 

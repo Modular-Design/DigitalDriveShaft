@@ -17,7 +17,7 @@ hts40_mat = TransverselyIsotropicMaterial(E_l=145200,  # MPa
                                           E_t=6272.7,  # MPa
                                           nu_lt=0.28,  # MPa
                                           G_lt=2634.2,  # MPa
-                                          density=1.58,  # kg/mm^3
+                                          density=1.58,  # g/cm^3 -> 1e-6 kg/mm^3
                                           failures=[hts40_cuntze])  # MPa
 
 
@@ -28,6 +28,7 @@ material_legend = {
 }
 
 mapdl = launch_mapdl(mode="grpc", loglevel="ERROR")
+
 
 def objective(trial) -> Union[float, Sequence[float]]:
     n_layers = trial.suggest_int("n_layers", 1, 6)
@@ -58,9 +59,9 @@ def objective(trial) -> Union[float, Sequence[float]]:
     shaft = DriveShaft(cyl_form, cyl_stackup)
 
     mass = shaft.get_mass()
-    cuntze = calc_strength(mapdl, shaft, Loading(mz=1e3))  # Nm
-    buck_moment = calc_buckling(mapdl, shaft, {}, "MOMENT")[0] * 1000.0  # [Nm]
-    rpm = calc_eigenfreq(mapdl, shaft, {})[0] * 60  # [RPM]
+    cuntze = calc_strength(mapdl, shaft, Loading(mz=1e3), dict())  # Nm
+    buck_moment = calc_buckling(mapdl, shaft, None, "MOMENT")[0] * 1000.0  # [Nm]
+    rpm = calc_eigenfreq(mapdl, shaft, None)[0] * 60  # [RPM]
     # if buckling < 1.0:
     #     raise TrialPruned
     return mass, cuntze, buck_moment, rpm
@@ -68,8 +69,9 @@ def objective(trial) -> Union[float, Sequence[float]]:
 
 study = create_study(
     study_name="simulation",
-    storage="sqlite://db.sqlite3",
-    directions=["minimize", "maximize", "maximize"])
+    storage="sqlite:///db.sqlite3",
+    load_if_exists=True,
+    directions=["minimize", "minimize", "maximize", "maximize"])
 study.optimize(objective, n_trials=100)
 
-# optuna-dashboard sqlite:///db.sqlite3
+# optuna-dashboard.exe sqlite:///examples/db.sqlite3
