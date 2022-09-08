@@ -13,6 +13,22 @@
 2. install requrements with `pip install -e .`
 
 
+## Features
+- Analytic Evaluation
+  - [X] Strength
+  - [X] Buckling
+  - [X] Eigenfrequency
+- Simulation Evaluation
+  - [X] Strength
+  - [ ] Buckling
+  - [ ] Eigenfrequency
+- Optimization
+  - [X] Multi-goal optimization
+
 ## Testing
 
 run `pytest` in venv
+
+
+
+
