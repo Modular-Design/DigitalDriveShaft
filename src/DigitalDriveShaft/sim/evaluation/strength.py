@@ -3,11 +3,11 @@ import math
 from src.DigitalDriveShaft.cylindrical import DriveShaft
 from src.DigitalDriveShaft.basic import Loading
 from src.DigitalDriveShaft.analysis import get_relevant_value
-from ..cylindircal import driveshaft_to_mapdl, anaylse_stackup
+from ..cylindrical import driveshaft_to_mapdl, anaylse_stackup
 from ansys.mapdl.core import Mapdl
 from typing import Optional
 import numpy as np
-from ..cylindircal import CylindricMeshBuilder
+from ..cylindrical import CylindricMeshBuilder
 
 
 def calc_strength(mapdl: Mapdl, shaft: DriveShaft, load: Loading, mesh_builder: Optional[dict] = None) -> float:

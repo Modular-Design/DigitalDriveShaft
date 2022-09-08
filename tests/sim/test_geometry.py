@@ -1,6 +1,6 @@
 from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading, CuntzeFailure
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
-from src.DigitalDriveShaft.sim.cylindircal import driveshaft_to_mapdl, CylindricMeshBuilder
+from src.DigitalDriveShaft.sim.cylindrical import driveshaft_to_mapdl, CylindricMeshBuilder
 import pytest
 from ansys.mapdl.core import launch_mapdl
 import numpy as np

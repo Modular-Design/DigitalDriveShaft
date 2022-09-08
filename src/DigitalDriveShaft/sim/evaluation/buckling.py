@@ -1,11 +1,11 @@
 import math
 
 from src.DigitalDriveShaft.cylindrical import DriveShaft
-from ..cylindircal import driveshaft_to_mapdl, anaylse_stackup
+from ..cylindrical import driveshaft_to_mapdl, anaylse_stackup
 from ansys.mapdl.core import Mapdl
 from typing import Optional, List, Literal
 import numpy as np
-from ..cylindircal import CylindricMeshBuilder
+from ..cylindrical import CylindricMeshBuilder
 
 
 def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
@@ -77,18 +77,22 @@ def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
 
     # source: https://homepage.tudelft.nl/p3r3s/bsc_projects/eindrapport_hogendoorn.pdf
     # compute linear  elastic
-    mapdl.solve()
-    mapdl.finish()
+    # mapdl.solve()
+    # mapdl.finish()
 
     # compute buckling
     mapdl.run("/solu")
     mapdl.pstres('ON')
     mapdl.antype("MODAL")
-    mapdl.modopt("LANB", 1)
-    mapdl.mxpand(20)
+    mapdl.modopt("SUBSP", 10)  # SUBSP, 10
+    mapdl.eqslv("FRONT")
+    mapdl.mxpand(10)
     mapdl.outres("ALL", "ALL")
     mapdl.solve()
     mapdl.finish()
+
+    mapdl.antype("BUCKLE")
+    mapdl.bucopt()
 
     # mapdl.nsel("R", "LOC", "Y", 0)
     # mapdl.f("ALL", "FX", 0.01)  # imperfection

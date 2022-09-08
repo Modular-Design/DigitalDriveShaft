@@ -2,7 +2,7 @@ from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Stackup, 
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
 from src.DigitalDriveShaft.analysis import get_relevant_value
 import numpy as np
-from src.DigitalDriveShaft.sim.cylindircal import anaylse_stackup, driveshaft_to_mapdl
+from src.DigitalDriveShaft.sim.cylindrical import anaylse_stackup, driveshaft_to_mapdl
 import pytest
 from ansys.mapdl.core import launch_mapdl
 
