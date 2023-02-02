@@ -9,6 +9,17 @@ dens10_mat = IsotropicMaterial(1, 0.3, 10)
 
 
 def mix_mats_on_z(z: float, z_crit: float):
+    """
+
+    Parameters
+    ----------
+    z
+    z_crit
+
+    Returns
+    -------
+
+    """
     if z <= z_crit:
         return dens1_mat
     return dens10_mat
@@ -172,7 +183,6 @@ def test_get_mass(form, stackup, density, err):
     assert np.fabs(result - density) <= err
 
 
-
 @pytest.mark.parametrize(
     "form, stackup, density, err",
     [
@@ -190,7 +200,8 @@ def test_get_mass(form, stackup, density, err):
                 CylindricalForm(lambda z, phi: 5, 20),
                 CylindricalStackup(lambda z, phi: Stackup([Ply(dens10_mat, 1), Ply(dens1_mat, 3)])),
                 2.76786, 1e-2
-        ),  # (int int 10 r dr dphi phi=0..2pi r=5..6 + int int 1 r dr dphi phi=0..2pi r=6..9) / (int int r dr dphi phi=0..2pi r=5..9)
+        ),
+        # (int int 10 r dr dphi phi=0..2pi r=5..6 + int int 1 r dr dphi phi=0..2pi r=6..9) / (int int r dr dphi phi=0..2pi r=5..9)
         # (
         #         CylindricalForm(lambda z, phi: 10, 20),
         #         CylindricalStackup(lambda z, phi: Stackup([Ply(mix_mats_on_z(z, 0.5), 1)])),
@@ -202,4 +213,3 @@ def test_get_density(form, stackup, density, err):
     shaft = DriveShaft(form, stackup, 0)
     result = shaft.get_density()
     assert np.fabs(result - density) <= err
-

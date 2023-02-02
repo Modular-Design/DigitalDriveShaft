@@ -46,7 +46,7 @@ def shell_tests(laminat, system, stresses, significance):
         mat_id += 1
     shell.add_to_mapdl(mapdl)
 
-    mapdl.asel("S", "AREA", '', elem_id)
+    mapdl.asel("S", "AREA", '', 1)
     mapdl.esize(0, 1)
     mapdl.type(elem_id)
     mapdl.secnum(elem_id)

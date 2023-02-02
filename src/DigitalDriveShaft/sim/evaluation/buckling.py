@@ -1,16 +1,19 @@
 import math
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
+
 from src.DigitalDriveShaft.cylindrical import DriveShaft
 from ..cylindrical import driveshaft_to_mapdl, anaylse_stackup
 from ansys.mapdl.core import Mapdl
 from typing import Optional, List, Literal
 import numpy as np
+import matplotlib.pyplot as plt
 from ..cylindrical import CylindricMeshBuilder
 
 
 def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
                   mesh_builder: Optional[dict] = None,
-                  load_mode: Literal["FORCE", "MOMENT"] = "MOMENT") -> List[float]:
+                  load_mode: Literal["FORCE", "MOMENT"] = "MOMENT") -> float:
     """
 
     Parameters
@@ -25,6 +28,11 @@ def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
     Returns
     -------
     min_safety
+
+    Notes
+    -----
+    ANSYS Mechanical APDL Verification Manual
+    VM127: Buckling of a Bar with Hinged Ends (Line Elements) p.373
     """
 
     mapdl.finish()
@@ -40,67 +48,89 @@ def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
         mapdl.nummrg("NODE")
 
     # BCs
-    mapdl.run("/solu")
     # Fixation
-    mapdl.csys(1)
+    mapdl.csys(0)
     mapdl.nsel("S", "LOC", "Z", 0)
     mapdl.d("ALL", "UX", 0)
     mapdl.d("ALL", "UY", 0)
     mapdl.d("ALL", "UZ", 0)
+    mapdl.d("ALL", "ROTX", 0)
+    mapdl.d("ALL", "ROTY", 0)
+    mapdl.d("ALL", "ROTZ", 0)
     mapdl.nsel("ALL")
+    mapdl.allsel()
 
     # Loading
     length = shaft.get_length()
     mapdl.nsel("S", "LOC", "Z", length)
     nodes = mapdl.mesh.nodes
     if load_mode == "FORCE":
-        fz_i = 1.0 / len(nodes)
-        mapdl.f("ALL", "FZ", fz_i)
+        mapdl.d("ALL", "UZ", -10)
+        mapdl.d("ALL", "UX", 1)  # imperfection
+        mapdl.allsel()
+
     elif load_mode == "MOMENT":
-        mz_i = 1.0 / len(nodes)
-        for node in nodes:
-            x = node[0]
-            y = node[1]
-            radius = math.sqrt(x ** 2 + y ** 2)
-            fm_i = mz_i / radius
-            phi_rad = math.atan2(y, x)
-            phi_deg = phi_rad / np.pi * 180
-            mapdl.nsel("S", "LOC", "Z", length)
-            mapdl.nsel("R", "LOC", "Y", phi_deg)
-            mapdl.csys(0)  # INFO: it seems like FCs are always in csys(0), so you might skip this
-            mapdl.f("ALL", "FX", - fm_i * math.sin(phi_rad))
-            mapdl.f("ALL", "FY", fm_i * math.cos(phi_rad))
-            mapdl.csys(1)
+        mapdl.csys(1)
+        mapdl.d("ALL", "UY", 10)
+        mapdl.csys(0)
     else:
         raise ValueError(f"load_mode is nether 'FORCE' or 'MOMENT'! (load_mode is: '{load_mode}')")
+    mapdl.allsel("ALL")
     mapdl.nsel("ALL")
 
     # source: https://homepage.tudelft.nl/p3r3s/bsc_projects/eindrapport_hogendoorn.pdf
     # compute linear  elastic
-    # mapdl.solve()
-    # mapdl.finish()
-
-    # compute buckling
-    mapdl.run("/solu")
-    mapdl.pstres('ON')
-    mapdl.antype("MODAL")
-    mapdl.modopt("SUBSP", 10)  # SUBSP, 10
-    mapdl.eqslv("FRONT")
-    mapdl.mxpand(10)
+    mapdl.slashsolu()
+    # mapdl.antype("TRANS")
+    mapdl.antype("static")
+    mapdl.nlgeom("ON")
+    mapdl.autots("ON")
+    mapdl.time(1)
+    mapdl.nsubst(50, 100, 50)
+    # mapdl.pstres('ON')
     mapdl.outres("ALL", "ALL")
-    mapdl.solve()
+    # mapdl.nladaptive()
+    mapdl.allsel("ALL")
+    try:
+        mapdl.solve()
+    except Exception as e:
+        raise RuntimeError("Large deformations detected inside elements! Please refine mesh!")
     mapdl.finish()
 
-    mapdl.antype("BUCKLE")
-    mapdl.bucopt()
-
-    # mapdl.nsel("R", "LOC", "Y", 0)
-    # mapdl.f("ALL", "FX", 0.01)  # imperfection
-
-    # Post Processing
     mapdl.post1()
-
     result = mapdl.result
-    eigen_val = result.time_values
 
-    return eigen_val.tolist()  # safety
+    loads = []
+    for i in range(1, result.n_results + 1):
+        mapdl.set(1, i)
+        mapdl.nsel("S", "LOC", "Z", 0)
+        # mapdl.rforce()
+        mapdl.csys(1)
+        mapdl.fsum()
+        if load_mode == "FORCE":
+            loads.append(-1 * mapdl.get_value("FSUM", '', "ITEM", "FZ"))
+        elif load_mode == "MOMENT":
+            loads.append(-1 * mapdl.get_value("FSUM", '', "ITEM", "MZ"))
+        mapdl.csys(0)
+        #
+        # loads.append(mapdl.get("REAC_1", "FSUM", "", "ITEM", "FZ"))
+        # mapdl.result.plot_nodal_displacement(i - 1, show_displacement=True,
+        #                                     displacement_factor=1.0,
+        #                                     show_edges=True, vtk=True,
+        #                                     )
+        result.plot_nodal_displacement(show_displacement=True,
+                                       displacement_factor=1.0,
+                                       show_edges=True,
+                                       vtk=True, )
+        # """
+    print(loads)
+
+    fig, ax = plt.subplots()
+    ax.plot(result.time_values, loads)
+    plt.show()
+
+    crit = max(loads)
+    if loads[0] > crit or loads[-1] > crit:
+        raise RuntimeError("No critical loading detected! Increase maximum steps!")
+
+    return max(loads)
