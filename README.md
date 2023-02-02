@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/Modular-Design/DigitalDriveShaft/branch/main/graph/badge.svg?token=M2EM6L19BI)](https://codecov.io/gh/Modular-Design/DigitalDriveShaft)
 [![supported Python version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 ---
-
+- Python Framework to evaluate, simulate and optimize composite reinforced driveshaft structures
 - Python Version: 3.8 and newer
 
 ## Installation

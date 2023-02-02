@@ -5,7 +5,7 @@ from .material import TransverselyIsotropicMaterial
 
 
 class Stackup:
-    def __init__(self, plies: List[Ply]):
+    def __init__(self, plies: List[Ply], bot_to_top=True):
         """
         Stackup or Laminat
 
@@ -19,12 +19,16 @@ class Stackup:
         .. [1] J. Ashton and J.M. Whitney, "Theory of Laminated Plates",
            Technomic, vol. 4, 1970
         """
+
         self.plies = plies
+        if not bot_to_top:
+            self.plies.reverse()
+            self.plies = plies
         self.thickness = self.calc_thickness()
         self.density = self.calc_density()
         self.abd = None
 
-    def get_plies(self) -> List[Ply]:
+    def get_plies(self, bot_to_top=True) -> List[Ply]:
         """
         Get plies of stackup.
 
@@ -33,7 +37,12 @@ class Stackup:
         List[Ply]
             lists of plies, order is bottom to top
         """
-        return self.plies
+        if not bot_to_top:
+            copy = self.plies.copy()
+            copy.reverse()
+            return copy
+        else:
+            return self.plies
 
     def calc_thickness(self) -> float:
         """

@@ -4,6 +4,29 @@ from .failure import failure_to_mapdl
 
 
 def material_to_mapdl(mapdl: Mapdl, material: Material, mat_id: int):
+    """
+    Converts the material to an anisotropic MAPDL material.
+
+    Parameters
+    ----------
+    mapdl: Mapdl
+        Mapdl object (``from ansys.mapdl.core import Mapdl``) where the material should be added
+    material: Material
+    mat_id
+
+    Returns
+    -------
+
+
+    Examples
+    --------
+
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> from src.DigitalDriveShaft.basic import IsotropicMaterial
+    >>> mapdl = launch_mapdl(mode="grpc", loglevel="ERROR")
+    >>> material = IsotropicMaterial()
+    >>> material_to_mapdl(mapdl, material, 1)
+    """
 
     stiffness = material.get_stiffness()
     # TB, Lab, MATID, NTEMP, NPTS, TBOPT, --, FuncName
