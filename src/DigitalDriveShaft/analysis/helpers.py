@@ -3,9 +3,9 @@ from typing import List, Callable, Optional, Tuple
 
 
 class Vector(BaseModel):
-    x = 0.0
-    y = 0.0
-    z = 0.0
+    x: Optional[float] = 0.0
+    y: Optional[float] = 0.0
+    z: Optional[float] = 0.0
 
     def as_list(self) -> List[float]:
         return [self.x, self.y, self.z]
