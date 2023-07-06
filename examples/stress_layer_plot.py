@@ -1,4 +1,5 @@
-from src.DigitalDriveShaft.basic import IsotropicMaterial, TransverselyIsotropicMaterial, Stackup, Ply
+from pymaterial.materials import TransverselyIsotropicMaterial
+from pymaterial.combis.clt import Stackup, Ply
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -24,7 +25,7 @@ stacks = [
 
 n_cols = len(stacks)
 
-fig = make_subplots(rows=2, cols=n_cols, specs=[[{}]*n_cols]*2)  # 'type': 'scatter'
+fig = make_subplots(rows=2, cols=n_cols, specs=[[{}] * n_cols] * 2)  # 'type': 'scatter'
 
 for i in range(n_cols):
     stack = stacks[i]
@@ -49,25 +50,21 @@ for i in range(n_cols):
     zs = []
     height = stack.get_thickness()
     plies = stack.get_plies()
-    z = -height/2.0
+    z = -height / 2.0
     for ply in plies:
         zs.append(z)
         z += ply.get_thickness()
         zs.append(z)
 
     fig.add_trace(
-        go.Scatter(
-            x=sxs, y=zs, mode='lines',
-            name='Stress',
-            line={"color": "red"}
-        ), 1, col
+        go.Scatter(x=sxs, y=zs, mode="lines", name="Stress", line={"color": "red"}),
+        1,
+        col,
     )
     fig.add_trace(
-        go.Scatter(
-            x=exs, y=zs, mode='lines',
-            name='Strain',
-            line={"color": "blue"}
-        ), 2, col
+        go.Scatter(x=exs, y=zs, mode="lines", name="Strain", line={"color": "blue"}),
+        2,
+        col,
     )
 
 fig.update_layout(showlegend=False)

@@ -1,4 +1,5 @@
-from src.DigitalDriveShaft.basic import IsotropicMaterial, TransverselyIsotropicMaterial, Stackup, Ply
+from pymaterial.materials import TransverselyIsotropicMaterial
+from pymaterial.combis.clt import Stackup, Ply
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -38,7 +39,9 @@ stacks_bend = [
 
 def create_stackups_stress_strain_per_ply(stacks, loading):
     n_cols = len(stacks)
-    fig = make_subplots(rows=2, cols=n_cols, specs=[[{}]*n_cols]*2)  # 'type': 'scatter'
+    fig = make_subplots(
+        rows=2, cols=n_cols, specs=[[{}] * n_cols] * 2
+    )  # 'type': 'scatter'
 
     for i in range(n_cols):
         stack = stacks[i]
@@ -63,25 +66,23 @@ def create_stackups_stress_strain_per_ply(stacks, loading):
         zs = []
         height = stack.get_thickness()
         plies = stack.get_plies()
-        z = -height/2.0
+        z = -height / 2.0
         for ply in plies:
             zs.append(z)
             z += ply.get_thickness()
             zs.append(z)
 
         fig.add_trace(
-            go.Scatter(
-                x=sxs, y=zs, mode='lines',
-                name='Stress',
-                line={"color": "red"}
-            ), 1, col
+            go.Scatter(x=sxs, y=zs, mode="lines", name="Stress", line={"color": "red"}),
+            1,
+            col,
         )
         fig.add_trace(
             go.Scatter(
-                x=exs, y=zs, mode='lines',
-                name='Strain',
-                line={"color": "blue"}
-            ), 2, col
+                x=exs, y=zs, mode="lines", name="Strain", line={"color": "blue"}
+            ),
+            2,
+            col,
         )
 
     fig.update_layout(showlegend=False)
@@ -90,7 +91,7 @@ def create_stackups_stress_strain_per_ply(stacks, loading):
 
 def create_stackups_stress_strain(stacks):
     n_cols = len(stacks)
-    fig = make_subplots(rows=1, cols=n_cols, specs=[[{}]*n_cols])  # 'type': 'scatter'
+    fig = make_subplots(rows=1, cols=n_cols, specs=[[{}] * n_cols])  # 'type': 'scatter'
     strains = np.arange(0.0, 0.05 + 0.01, 0.01)
     for i in range(n_cols):
         stack = stacks[i]
@@ -101,18 +102,22 @@ def create_stackups_stress_strain(stacks):
 
         fig.add_trace(
             go.Scatter(
-                x=strains, y=stresses, mode='lines',
-                name='Stress',
-                line={"color": "red"}
-            ), 1, col
+                x=strains,
+                y=stresses,
+                mode="lines",
+                name="Stress",
+                line={"color": "red"},
+            ),
+            1,
+            col,
         )
 
     fig.update_layout(showlegend=False)
     fig.show()
 
 
-#create_stackups_stress_strain(stacks_tens)
-create_stackups_stress_strain_per_ply(stacks_tens, [force/10, 0, 0, 0, 0, 0])
+# create_stackups_stress_strain(stacks_tens)
+create_stackups_stress_strain_per_ply(stacks_tens, [force / 10, 0, 0, 0, 0, 0])
 
-#create_stackups_stress_strain(stacks_bend)
-create_stackups_stress_strain_per_ply(stacks_bend, [0, 0, 0, force * 80/10, 0, 0])
+# create_stackups_stress_strain(stacks_bend)
+create_stackups_stress_strain_per_ply(stacks_bend, [0, 0, 0, force * 80 / 10, 0, 0])
