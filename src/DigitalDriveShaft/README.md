@@ -3,7 +3,7 @@
 
 
 ## basic
-> basic classes, such as ``Ply``, ``Stackup``, ``Material`` and ``Failure`` 
+> basic classes, such as ``Ply``, ``Stackup``, ``Material`` and ``Failure``
 
 ## cylindrical
 > Helpers for cylindrical geometries, such as ``CylindricalCoordFunction`` and ``Driveshaft``

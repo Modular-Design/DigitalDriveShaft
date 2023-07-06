@@ -28,7 +28,3 @@
 ## Testing
 
 run `pytest` in venv
-
-
-
-

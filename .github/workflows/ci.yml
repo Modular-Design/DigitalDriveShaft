@@ -42,5 +42,5 @@ jobs:
         coverage run --source=src -m pytest
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v1
-      with: 
+      with:
         fail_ci_if_error: true
