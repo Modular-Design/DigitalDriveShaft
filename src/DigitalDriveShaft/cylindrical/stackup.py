@@ -1,17 +1,19 @@
-import math
 from typing import Optional
-from ..basic import Stackup
+from pymaterial.combis.clt import Stackup
 from .coordfunc import CylindricalCoordFunction
 
 
 class CylindricalStackup(CylindricalCoordFunction):
     """
-            A stackup best described in a cylindrical coordinate system.
+    A stackup best described in a cylindrical coordinate system.
     """
-    def __init__(self,
-                 laminat_func,
-                 z_max: Optional[float] = 1, z_min: Optional[float] = 0):
+
+    def __init__(
+        self, laminat_func, z_max: Optional[float] = 1, z_min: Optional[float] = 0
+    ):
         super().__init__(laminat_func, z_max, z_min)
 
-    def get_laminat(self, z: float, phi: float, iso=True) -> Stackup:  # laminat is not dependent on r:
+    def get_laminat(
+        self, z: float, phi: float, iso=True
+    ) -> Stackup:  # laminat is not dependent on r:
         return super().get_value(z, phi, iso)

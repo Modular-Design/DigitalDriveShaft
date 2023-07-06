@@ -7,11 +7,12 @@ import numpy as np
 
 
 class DriveShaft:
-    def __init__(self,
-                 form: CylindricalForm,
-                 stackup: CylindricalStackup,
-                 contour: Optional[Union[EContour, float]] = EContour.INNER
-                 ):
+    def __init__(
+        self,
+        form: CylindricalForm,
+        stackup: CylindricalStackup,
+        contour: Optional[Union[EContour, float]] = EContour.INNER,
+    ):
         self.form = form
         self.stackup = stackup
 
@@ -36,38 +37,47 @@ class DriveShaft:
     def get_stackup(self) -> CylindricalStackup:
         return self.stackup
 
-    def get_value(self, z: float, phi: float, iso=True) -> (float, Stackup):  # z in [0,1], phi[0,1]
+    def get_value(
+        self, z: float, phi: float, iso=True
+    ) -> (float, Stackup):  # z in [0,1], phi[0,1]
         return self.form.get_value(z, phi, iso), self.stackup.get_value(z, phi, iso)
 
-    def get_radius(self, z: float, phi: float, contour: Optional[Union[EContour, float]],
-                   iso: Optional[bool] = True):
+    def get_radius(
+        self,
+        z: float,
+        phi: float,
+        contour: Optional[Union[EContour, float]],
+        iso: Optional[bool] = True,
+    ):
         radius, stackup = self.get_value(z, phi, iso)
         thickness = stackup.get_thickness()
         if isinstance(contour, EContour):
             contour = contour.value
         return radius + (contour - self.get_contour_factor()) * thickness
-    
+
     def get_inner_radius(self, z: float, phi: float, iso=True):
         radius, stackup = self.get_value(z, phi, iso)
-        return radius + (0.0-self.get_contour_factor()) * stackup.get_thickness()
+        return radius + (0.0 - self.get_contour_factor()) * stackup.get_thickness()
 
     def get_center_radius(self, z: float, phi: float, iso=True):
         radius, stackup = self.get_value(z, phi, iso)
-        return radius + (0.5-self.get_contour_factor()) * stackup.get_thickness()
+        return radius + (0.5 - self.get_contour_factor()) * stackup.get_thickness()
 
     def get_outer_radius(self, z: float, phi: float, iso=True):
         radius, stackup = self.get_value(z, phi, iso)
-        return radius + (1.0-self.get_contour_factor()) * stackup.get_thickness()
-    
+        return radius + (1.0 - self.get_contour_factor()) * stackup.get_thickness()
+
     def get_length(self):
         return self.form.length()
-    
+
     def get_cross_section(self, z: float, iso=True):
         area = 0.0
         dphi = 2.0 * np.pi / self.n_phi
         for phi in np.arange(-np.pi, np.pi, dphi):
             radius, stackup = self.get_value(z, phi, iso)
-            radius = radius + (0.5 - self.get_contour_factor()) * stackup.get_thickness()
+            radius = (
+                radius + (0.5 - self.get_contour_factor()) * stackup.get_thickness()
+            )
             area += radius * stackup.get_thickness()
         area *= dphi
         return area
@@ -127,19 +137,21 @@ class DriveShaft:
 
 
 class SimpleDriveShaft(DriveShaft):
-    def __init__(self,
-                 diameter,
-                 length,
-                 stackup: Stackup,
-                 contour: Optional[Union[EContour, float]] = EContour.INNER
-                 ):
+    def __init__(
+        self,
+        diameter,
+        length,
+        stackup: Stackup,
+        contour: Optional[Union[EContour, float]] = EContour.INNER,
+    ):
         def stackup_func(z, phi):
             return stackup
+
         cyl_stackup = CylindricalStackup(stackup_func)
         super().__init__(Cylinder(diameter, length), cyl_stackup, contour)
 
     def get_cross_section(self, z: float, iso=True):
-        """ returns the crossection of a circle
+        """returns the crossection of a circle
 
         Parameters
         ----------
@@ -150,4 +162,11 @@ class SimpleDriveShaft(DriveShaft):
         -------
 
         """
-        return np.pi/4.0 * (self.get_outer_radius(z, 0.0, iso) ** 2.0 - (self.get_inner_radius(z, 0.0, iso)) ** 2.0)
+        return (
+            np.pi
+            / 4.0
+            * (
+                self.get_outer_radius(z, 0.0, iso) ** 2.0
+                - (self.get_inner_radius(z, 0.0, iso)) ** 2.0
+            )
+        )
