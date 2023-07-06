@@ -1,21 +1,25 @@
-from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading, CuntzeFailure
-from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
-from src.DigitalDriveShaft.sim.cylindrical import driveshaft_to_mapdl, CylindricMeshBuilder
 import pytest
+
+from pymaterial.materials import TransverselyIsotropicMaterial
+from pymaterial.combis.clt import Ply, Stackup
+from pymaterial.failures import CuntzeFailure
+from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
+from src.DigitalDriveShaft.sim.cylindrical import driveshaft_to_mapdl
+
 from ansys.mapdl.core import launch_mapdl
 import numpy as np
 
 hts40_cuntze = CuntzeFailure(
-    E1=145200,  # MPa
-    R_1t=852.0, R_1c=631,  # MPa
-    R_2t=57, R_2c=274, R_21=132  # MPa
+    E1=145200, R_1t=852.0, R_1c=631, R_2t=57, R_2c=274, R_21=132  # MPa  # MPa  # MPa
 )
-hts40_mat = TransverselyIsotropicMaterial(E_l=145200,  # MPa
-                                          E_t=6272.7,  # MPa
-                                          nu_lt=0.28,  # MPa
-                                          G_lt=2634.2,  # MPa
-                                          density=1.58,  # g/cm^3
-                                          failures=[hts40_cuntze])  # MPa
+hts40_mat = TransverselyIsotropicMaterial(
+    E_l=145200,  # MPa
+    E_t=6272.7,  # MPa
+    nu_lt=0.28,  # MPa
+    G_lt=2634.2,  # MPa
+    density=1.58,  # g/cm^3
+    failures=[hts40_cuntze],
+)  # MPa
 
 
 def generate_stackup(mat, layer_thickness, deg_orientations):
@@ -34,7 +38,7 @@ mapdl = launch_mapdl(mode="grpc", loglevel="Error")
     [
         (1.0, [0], 10, 10),  # fz in N
         # (1.0, [90], 10, 10),  # fz in N
-    ]
+    ],
 )
 def test_driveshaft(l_thickness, l_orientations, ds_diameter, ds_length):
     stackup = generate_stackup(hts40_mat, l_thickness, l_orientations)

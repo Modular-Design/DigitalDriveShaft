@@ -1,4 +1,5 @@
-from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply, Stackup, Loading, CuntzeFailure
+from pymaterial.materials import TransverselyIsotropicMaterial
+from pymaterial.combis.clt import Stackup, Ply
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
 from src.DigitalDriveShaft.sim.evaluation import calc_eigenfreq
 from src.DigitalDriveShaft.analysis import calc_crit_rpm
@@ -6,12 +7,13 @@ import pytest
 from ansys.mapdl.core import launch_mapdl
 
 
-hts40_mat = TransverselyIsotropicMaterial(E_l=145200*1e6,  # [MPa]
-                                          E_t=6272.7*1e6,  # [MPa]
-                                          nu_lt=0.28,  # [ ]
-                                          G_lt=2634.2*1e6,  # [MPa]
-                                          density=1.58,  # [g/cm^3]
-                                          )
+hts40_mat = TransverselyIsotropicMaterial(
+    E_l=145200 * 1e6,  # [MPa]
+    E_t=6272.7 * 1e6,  # [MPa]
+    nu_lt=0.28,  # [ ]
+    G_lt=2634.2 * 1e6,  # [MPa]
+    density=1.58,  # [g/cm^3]
+)
 
 
 def generate_stackup(mat, layer_thickness, deg_orientations):
@@ -30,7 +32,7 @@ mapdl = launch_mapdl(mode="grpc", loglevel="ERROR")
     [
         (1.0, [0], 10, 30, 1.027),  # fz in N
         (1.0, [90], 10, 30, 1.041),  # fz in N
-    ]
+    ],
 )
 def test_eigenfreq(l_thickness, l_orientations, ds_diameter, ds_length, eigenfreq):
     stackup = generate_stackup(hts40_mat, l_thickness, l_orientations)
@@ -45,7 +47,7 @@ def test_eigenfreq(l_thickness, l_orientations, ds_diameter, ds_length, eigenfre
         # (1.0e-3, [90], 10e-3, 300e-3),
         (15.58 / 4 * 1e-3, [45, -45, -45, 45], 79.42 * 2e-3, 400e-3),
         # (11.02/7, [45, -45, 90, 0, 90, -45, 45], 79.42*2, 400),
-    ]
+    ],
 )
 def test_analytic_vs_sim(l_thickness, l_orientations, ds_diameter, ds_length):
     stackup = generate_stackup(hts40_mat, l_thickness, l_orientations)
