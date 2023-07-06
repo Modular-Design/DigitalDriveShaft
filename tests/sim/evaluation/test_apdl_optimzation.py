@@ -1,13 +1,16 @@
-import pytest
-
 from pymaterial.materials import TransverselyIsotropicMaterial
-from pymaterial.combis.clt import Ply, Stackup
+from pymaterial.combis.clt import Stackup, Ply
 from pymaterial.failures import CuntzeFailure
 from src.DigitalDriveShaft.cylindrical import SimpleDriveShaft
-from src.DigitalDriveShaft.sim.cylindrical import driveshaft_to_mapdl
-
+from src.DigitalDriveShaft.analysis import Loading
+from src.DigitalDriveShaft.sim.evaluation import (
+    calc_buckling,
+    calc_strength,
+    calc_eigenfreq,
+)
+import pytest
 from ansys.mapdl.core import launch_mapdl
-import numpy as np
+
 
 hts40_cuntze = CuntzeFailure(
     E1=145200, R_1t=852.0, R_1c=631, R_2t=57, R_2c=274, R_21=132  # MPa  # MPa  # MPa
@@ -30,26 +33,29 @@ def generate_stackup(mat, layer_thickness, deg_orientations):
     return Stackup(plies)
 
 
-mapdl = launch_mapdl(mode="grpc", loglevel="Error")
+mapdl = launch_mapdl(mode="grpc", loglevel="ERROR")
 
 
 @pytest.mark.parametrize(
     "l_thickness, l_orientations, ds_diameter, ds_length",
     [
-        (1.0, [0], 10, 10),  # fz in N
-        # (1.0, [90], 10, 10),  # fz in N
+        (1.0, [0], 10, 30),  # fkrit in N
+        (1.0, [90], 20, 60),
     ],
 )
-def test_driveshaft(l_thickness, l_orientations, ds_diameter, ds_length):
+def test_apdl_optimization(l_thickness, l_orientations, ds_diameter, ds_length):
     stackup = generate_stackup(hts40_mat, l_thickness, l_orientations)
     shaft = SimpleDriveShaft(diameter=ds_diameter, length=ds_length, stackup=stackup)
-    mapdl.finish()
-    mapdl.clear()
-    mapdl.prep7()
-    driveshaft_to_mapdl(mapdl, shaft, "SHELL", dict(n_z=1, n_phi=1, phi_max=np.pi / 2))
-    # mapdl.eplot()
-    print("### mplist ###")
-    print(mapdl.mplist(1, lab="DENS"))
-    print("### tblist ###")
-    print(mapdl.tblist())
-    assert True
+
+    strength = calc_strength(mapdl, shaft, Loading(mz=1e3), dict())
+    buck = calc_buckling(mapdl, shaft, dict(), "MOMENT")[0] * 1000
+    rpm = calc_eigenfreq(mapdl, shaft, dict())[0] * 60
+
+    opt_strength = calc_strength(mapdl, shaft, Loading(mz=1e3), dict())
+    assert abs(strength - opt_strength) < 0.1
+
+    opt_buck = calc_buckling(mapdl, shaft, None, "MOMENT")[0] * 1000
+    assert abs(buck - opt_buck) < 0.1
+
+    opt_rpm = calc_eigenfreq(mapdl, shaft, None)[0] * 60
+    assert abs(rpm - opt_rpm) < 0.1

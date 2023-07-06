@@ -1,1 +1,1 @@
-from .material import material_to_mapdl
+from .material import material_to_mapdl  # noqa

@@ -1,14 +1,15 @@
 import pytest
-from src.DigitalDriveShaft.basic import TransverselyIsotropicMaterial, Ply
+from pymaterial.materials import TransverselyIsotropicMaterial
+from pymaterial.combis.clt import Ply
 from src.DigitalDriveShaft.sim import material_to_mapdl
 from src.DigitalDriveShaft.sim.elements import Shell181
 from ansys.mapdl.core import launch_mapdl
 import numpy as np
 
 # default ElamX 2.6 Material
-material = TransverselyIsotropicMaterial(E_l=141000.0, E_t=9340.0,  # N/mm^2
-                                         nu_lt=0.35,
-                                         G_lt=4500.0, density=1.7E-6)  # kg/mm^3
+material = TransverselyIsotropicMaterial(
+    E_l=141000.0, E_t=9340.0, nu_lt=0.35, G_lt=4500.0, density=1.7e-6  # N/mm^2
+)  # kg/mm^3
 
 mapdl = launch_mapdl(mode="grpc", loglevel="ERROR")
 
@@ -46,7 +47,7 @@ def shell_tests(laminat, system, stresses, significance):
         mat_id += 1
     shell.add_to_mapdl(mapdl)
 
-    mapdl.asel("S", "AREA", '', elem_id)
+    mapdl.asel("S", "AREA", "", 1)
     mapdl.esize(0, 1)
     mapdl.type(elem_id)
     mapdl.secnum(elem_id)
@@ -82,7 +83,7 @@ def shell_tests(laminat, system, stresses, significance):
     mapdl.post1()
     mapdl.set(1)
     if system == "local":
-        mapdl.rsys('LSYS')  # stress in coordinate system
+        mapdl.rsys("LSYS")  # stress in coordinate system
     elif system == "global":
         mapdl.rsys(0)
     else:
@@ -94,21 +95,27 @@ def shell_tests(laminat, system, stresses, significance):
         sol_bot, sol_top = stresses[i]
         sign_bot, sign_top = significance[i]
 
-        mapdl.shell('bot')
-        x_stresses = mapdl.post_processing.element_stress('X')  # nodal_component_stress('X')
+        mapdl.shell("bot")
+        x_stresses = mapdl.post_processing.element_stress(
+            "X"
+        )  # nodal_component_stress('X')
         sx_max_bot = float(np.nanmax(x_stresses))
-        y_stresses = mapdl.post_processing.element_stress('Y')  # nodal_component_stress('Y')
+        y_stresses = mapdl.post_processing.element_stress(
+            "Y"
+        )  # nodal_component_stress('Y')
         sy_max_bot = float(np.nanmax(y_stresses))
-        txy_stresses = mapdl.post_processing.element_stress('XY')
+        txy_stresses = mapdl.post_processing.element_stress("XY")
         txy_max_bot = float(np.nanmax(txy_stresses))
         # print(f"bot: {sx_max_bot} | {sy_max_bot} | {txy_max_bot}")
 
-        mapdl.shell('top')
-        x_stresses = mapdl.post_processing.element_stress('X')
+        mapdl.shell("top")
+        x_stresses = mapdl.post_processing.element_stress("X")
         sx_max_top = float(np.nanmax(x_stresses))
-        y_stresses = mapdl.post_processing.element_stress('Y')  # nodal_component_stress('X')
+        y_stresses = mapdl.post_processing.element_stress(
+            "Y"
+        )  # nodal_component_stress('X')
         sy_max_top = float(np.nanmax(y_stresses))
-        txy_stresses = mapdl.post_processing.element_stress('XY')
+        txy_stresses = mapdl.post_processing.element_stress("XY")
         txy_max_top = float(np.nanmax(txy_stresses))
         # print(f"top: {sx_max_top} | {sy_max_top} | {txy_max_top}")
 
@@ -123,27 +130,32 @@ def shell_tests(laminat, system, stresses, significance):
 
 @pytest.mark.slow
 def test_shell():
-    # parameter = "laminat, system, stresses, significance",  # stresses list of layer stress bot -> top (bot, top)
+    # parameter = "laminat, system, stresses, significance",
+    # # stresses list of layer stress bot -> top (bot, top)
     params = [
         (
-            [Ply(material, 1, 0)], "local",
+            [Ply(material, 1, 0)],
+            "local",
             [((142153.51, 3295.743, 0.0), (142153.51, 3295.743, 0.0))],
-            [((-3, -2, 1), (-3, -2, 1))]
+            [((-3, -2, 1), (-3, -2, 1))],
         ),
         (
-            [Ply(material, 1, 0)], "global",
+            [Ply(material, 1, 0)],
+            "global",
             [((142153.51, 3295.743, 0.0), (142153.51, 3295.743, 0.0))],
-            [((-3, -2, 1), (-3, -2, 1))]
+            [((-3, -2, 1), (-3, -2, 1))],
         ),
         (
-            [Ply(material, 1, 90, degree=True)], "local",
+            [Ply(material, 1, 90, degree=True)],
+            "local",
             [((3295.743, 9416.41, 0.0), (3295.743, 9416.41, 0.0))],
-            [((-3, -2, 1), (-3, -2, 1))]
+            [((-3, -2, 1), (-3, -2, 1))],
         ),
         (
-            [Ply(material, 1, 90, degree=True)], "global",
+            [Ply(material, 1, 90, degree=True)],
+            "global",
             [((9416.41, 3295.743, 0.0), (9416.41, 3295.743, 0.0))],
-            [((-3, -2, 1), (-3, -2, 1))]
+            [((-3, -2, 1), (-3, -2, 1))],
         ),
         # (
         #     [Ply(material, 1, 45, degree=True)], "local",
@@ -155,10 +167,10 @@ def test_shell():
             "local",
             [
                 ((-500.872, 21620.41, 0.0), (3295.743, 9416.41, 0.0)),
-                ((142153.51, 3295.743, 0.0), (-44747.727, -502.872, 0.0))
+                ((142153.51, 3295.743, 0.0), (-44747.727, -502.872, 0.0)),
             ],
-            [((-2, -2, 1), (-3, -2, 1)), ((-3, -2, 1), (-3, -2, 1))]
-        )
+            [((-2, -2, 1), (-3, -2, 1)), ((-3, -2, 1), (-3, -2, 1))],
+        ),
     ]
 
     for param in params:

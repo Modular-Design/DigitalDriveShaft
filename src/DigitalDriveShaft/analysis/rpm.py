@@ -1,5 +1,5 @@
 from ..cylindrical import DriveShaft
-from ..basic import Loading
+from .helpers import Loading
 import numpy as np
 
 
@@ -11,8 +11,15 @@ def calc_crit_rpm(shaft: DriveShaft):
     em_axial = homogenization.get_E1()  # MPa # E Modul der Verbundschicht
 
     # Formel für Berechnung von Biegekritischer Drehzahl aus Sebastians Excel
-    rpm_crit = 60 / 2 * np.pi / np.sqrt(8) * d_shaft_outer / shaft.get_length() ** 2 * np.sqrt(
-        1000 ** 3 * em_axial / (stackup.calc_density()))  # u/min
+    rpm_crit = (
+        60
+        / 2
+        * np.pi
+        / np.sqrt(8)
+        * d_shaft_outer
+        / shaft.get_length() ** 2
+        * np.sqrt(1000**3 * em_axial / (stackup.calc_density()))
+    )  # u/min
     return rpm_crit
 
 

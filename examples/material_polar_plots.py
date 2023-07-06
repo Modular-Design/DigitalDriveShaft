@@ -1,4 +1,5 @@
-from src.DigitalDriveShaft.basic import IsotropicMaterial, TransverselyIsotropicMaterial, Stackup, Ply
+from pymaterial.materials import IsotropicMaterial, TransverselyIsotropicMaterial
+from pymaterial.combis.clt import Stackup, Ply
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -51,7 +52,7 @@ def get_rotations(stack: Stackup):
 
 
 n_cols = len(stacks)
-fig = make_subplots(rows=3, cols=n_cols, specs=[[{'type': 'polar'}] * n_cols] * 3)
+fig = make_subplots(rows=3, cols=n_cols, specs=[[{"type": "polar"}] * n_cols] * 3)
 
 for i in range(n_cols):
     stack = stacks[i]
@@ -61,24 +62,28 @@ for i in range(n_cols):
 
     fig.add_trace(
         go.Scatterpolar(
-            r=ems, theta=phis, mode='lines',
-            name='E-Module',
-            line={"color": "red"}
-        ), 1, col
+            r=ems, theta=phis, mode="lines", name="E-Module", line={"color": "red"}
+        ),
+        1,
+        col,
     )
     fig.add_trace(
         go.Scatterpolar(
-            r=gs, theta=phis, mode='lines',
-            name='G-Modlue',
-            line={"color": "blue"}
-        ), 2, col
+            r=gs, theta=phis, mode="lines", name="G-Modlue", line={"color": "blue"}
+        ),
+        2,
+        col,
     )
     fig.add_trace(
         go.Scatterpolar(
-            r=nus, theta=phis, mode='lines',
-            name='Querkontraktionszahl',
-            line={"color": "green"}
-        ), 3, col
+            r=nus,
+            theta=phis,
+            mode="lines",
+            name="Querkontraktionszahl",
+            line={"color": "green"},
+        ),
+        3,
+        col,
     )
 
 fig.update_layout(showlegend=False)

@@ -1,16 +1,16 @@
 import math
 
 from src.DigitalDriveShaft.cylindrical import DriveShaft
-from src.DigitalDriveShaft.basic import Loading
-from src.DigitalDriveShaft.analysis import get_relevant_value
-from ..cylindircal import driveshaft_to_mapdl, anaylse_stackup
+from src.DigitalDriveShaft.analysis import get_relevant_value, Loading
+from ..cylindrical import driveshaft_to_mapdl, anaylse_stackup
 from ansys.mapdl.core import Mapdl
 from typing import Optional
 import numpy as np
-from ..cylindircal import CylindricMeshBuilder
 
 
-def calc_strength(mapdl: Mapdl, shaft: DriveShaft, load: Loading, mesh_builder: Optional[dict] = None) -> float:
+def calc_strength(
+    mapdl: Mapdl, shaft: DriveShaft, load: Loading, mesh_builder: Optional[dict] = None
+) -> float:
     """
 
     Parameters
@@ -19,7 +19,11 @@ def calc_strength(mapdl: Mapdl, shaft: DriveShaft, load: Loading, mesh_builder: 
     shaft
     load
     mesh_builder: dict
-        dictionary might containing: "n_z", "phi_max", "phi_min" (both in [DEG]), "n_phi"
+        dictionary might containing:
+            "n_z",
+            "phi_max",
+            "phi_min" (both in [DEG]),
+            "n_phi"
 
     Returns
     -------
@@ -31,9 +35,7 @@ def calc_strength(mapdl: Mapdl, shaft: DriveShaft, load: Loading, mesh_builder: 
         mapdl.clear()
         mapdl.prep7()
         driveshaft_to_mapdl(
-            mapdl, shaft,
-            element_type='SHELL',
-            mesh_builder=mesh_builder
+            mapdl, shaft, element_type="SHELL", mesh_builder=mesh_builder
         )
         mapdl.asel("ALL")
         mapdl.nummrg("NODE")
@@ -62,13 +64,13 @@ def calc_strength(mapdl: Mapdl, shaft: DriveShaft, load: Loading, mesh_builder: 
     for node in nodes:
         x = node[0]
         y = node[1]
-        radius = math.sqrt(x ** 2 + y ** 2)
+        radius = math.sqrt(x**2 + y**2)
         fm_i = mz_i / radius
         phi_rad = math.atan2(y, x)
         phi_deg = phi_rad / np.pi * 180
         mapdl.nsel("S", "LOC", "Z", length)
         mapdl.nsel("R", "LOC", "Y", phi_deg)
-        mapdl.csys(0)  # INFO: it seems like FCs are always in csys(0), so you might skip this
+        mapdl.csys(0)  # INFO: it seems like FCs are always in csys(0), maybe skip this
         mapdl.f("ALL", "FX", fx_i - fm_i * math.sin(phi_rad))
         mapdl.f("ALL", "FY", fy_i + fm_i * math.cos(phi_rad))
         mapdl.f("ALL", "FZ", fz_i)

@@ -1,3 +1,3 @@
-from .strength import calc_strength
-from .eigenfreq import calc_eigenfreq
-from .buckling import calc_buckling
+from .strength import calc_strength  # noqa
+from .eigenfreq import calc_eigenfreq  # noqa
+from .buckling import calc_buckling  # noqa

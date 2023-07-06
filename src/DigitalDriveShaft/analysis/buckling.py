@@ -1,5 +1,5 @@
 from ..cylindrical import DriveShaft
-from ..basic import Loading
+from .helpers import Loading
 import numpy as np
 
 
@@ -16,7 +16,7 @@ def calc_crit_moment(shaft: DriveShaft):
     nu_12 = homogenization.get_nu12()  # Querkontraktionszahl der Verbundschicht
     nu_21 = homogenization.get_nu21()
 
-    result = k_s * k_l * np.pi ** 3 / 6
+    result = k_s * k_l * np.pi**3 / 6
     result *= (d_shaft_outer / 2) ** (5 / 4)
     result *= laminate_thickness ** (9 / 4) / np.sqrt(shaft.get_length())
     result *= em_axial ** (3 / 8)

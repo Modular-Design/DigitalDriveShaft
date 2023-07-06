@@ -1,4 +1,4 @@
-# Pytests
+# Python Tests
 
 run tests with:
 ```shell
@@ -14,6 +14,20 @@ run only slow tests:
 ```shell
 pytest -k slow -v
 ```
+
+## Test Status
+
+- [X] Analysis
+- [X] Basic
+- [X] Cylindrical
+- [ ] Simulation
+  - [X] Evaluation
+    - [ ] Buckling
+    - [ ] Eigenfrequency
+    - [X] Strength
+  - [X] Geometry
+  - [X] Shell
+  - [X] Stackup
 
 ## References
 
