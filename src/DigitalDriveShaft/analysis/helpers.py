@@ -1,8 +1,27 @@
-from typing import Callable, Optional
+from pydantic import BaseModel
+from typing import List, Callable, Optional, Tuple
 
 
-def get_relevant_value(values: list,
-                       compr: Optional[Callable] = max) -> float:
+class Vector(BaseModel):
+    x = 0.0
+    y = 0.0
+    z = 0.0
+
+    def as_list(self) -> List[float]:
+        return [self.x, self.y, self.z]
+
+
+class Loading(BaseModel):
+    fx: Optional[float] = 0  # N
+    fy: Optional[float] = 0  # N
+    fz: Optional[float] = 0  # N
+    mx: Optional[float] = 0  # Nm
+    my: Optional[float] = 0  # Nm
+    mz: Optional[float] = 0  # Nm
+    rpm: Optional[float] = 0  # U/min
+
+
+def get_relevant_value(values: list, compr: Optional[Callable] = max) -> float:
     """
     Extracts the relevant value, by using a comparator.
 
@@ -58,3 +77,17 @@ def get_relevant_value(values: list,
             result.append(value)
 
     return compr(result)
+
+
+def extract_failures(
+    failures: List[Tuple[dict, dict]], whitelist: List[str]
+) -> List[dict]:
+    result = []
+    for layers in failures:
+        for layer in layers:
+            for failure in whitelist:
+                value = layer.get(failure)
+                if value is not None:
+                    result.append({failure: value})
+
+    return result
