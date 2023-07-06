@@ -1,19 +1,16 @@
-import math
-
-from ansys.mapdl.core.errors import MapdlRuntimeError
-
 from src.DigitalDriveShaft.cylindrical import DriveShaft
-from ..cylindrical import driveshaft_to_mapdl, anaylse_stackup
+from ..cylindrical import driveshaft_to_mapdl
 from ansys.mapdl.core import Mapdl
-from typing import Optional, List, Literal
-import numpy as np
+from typing import Optional, Literal
 import matplotlib.pyplot as plt
-from ..cylindrical import CylindricMeshBuilder
 
 
-def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
-                  mesh_builder: Optional[dict] = None,
-                  load_mode: Literal["FORCE", "MOMENT"] = "MOMENT") -> float:
+def calc_buckling(
+    mapdl: Mapdl,
+    shaft: DriveShaft,
+    mesh_builder: Optional[dict] = None,
+    load_mode: Literal["FORCE", "MOMENT"] = "MOMENT",
+) -> float:
     """
 
     Parameters
@@ -22,7 +19,12 @@ def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
     shaft
     load
     mesh_builder: dict
-        dictionary might containing: "n_z", "phi_max", "phi_min" (both in [DEG]), "n_phi"
+        dictionary might containing:
+            "n_z",
+            "phi_max",
+            "phi_min" (both in [DEG]),
+            "n_phi"
+
     load_mode: str
 
     Returns
@@ -40,9 +42,7 @@ def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
         mapdl.clear()
         mapdl.prep7()
         driveshaft_to_mapdl(
-            mapdl, shaft,
-            element_type='SHELL',
-            mesh_builder=mesh_builder
+            mapdl, shaft, element_type="SHELL", mesh_builder=mesh_builder
         )
         mapdl.asel("ALL")
         mapdl.nummrg("NODE")
@@ -63,7 +63,7 @@ def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
     # Loading
     length = shaft.get_length()
     mapdl.nsel("S", "LOC", "Z", length)
-    nodes = mapdl.mesh.nodes
+    # nodes = mapdl.mesh.nodes
     if load_mode == "FORCE":
         mapdl.d("ALL", "UZ", -10)
         mapdl.d("ALL", "UX", 1)  # imperfection
@@ -74,7 +74,10 @@ def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
         mapdl.d("ALL", "UY", 10)
         mapdl.csys(0)
     else:
-        raise ValueError(f"load_mode is nether 'FORCE' or 'MOMENT'! (load_mode is: '{load_mode}')")
+        raise ValueError(
+            "load_mode is nether 'FORCE' or 'MOMENT'! "
+            + f"(load_mode is: '{load_mode}')"
+        )
     mapdl.allsel("ALL")
     mapdl.nsel("ALL")
 
@@ -93,8 +96,10 @@ def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
     mapdl.allsel("ALL")
     try:
         mapdl.solve()
-    except Exception as e:
-        raise RuntimeError("Large deformations detected inside elements! Please refine mesh!")
+    except Exception:
+        raise RuntimeError(
+            "Large deformations detected inside elements! " "Please refine mesh!"
+        )
     mapdl.finish()
 
     mapdl.post1()
@@ -108,9 +113,9 @@ def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
         mapdl.csys(1)
         mapdl.fsum()
         if load_mode == "FORCE":
-            loads.append(-1 * mapdl.get_value("FSUM", '', "ITEM", "FZ"))
+            loads.append(-1 * mapdl.get_value("FSUM", "", "ITEM", "FZ"))
         elif load_mode == "MOMENT":
-            loads.append(-1 * mapdl.get_value("FSUM", '', "ITEM", "MZ"))
+            loads.append(-1 * mapdl.get_value("FSUM", "", "ITEM", "MZ"))
         mapdl.csys(0)
         #
         # loads.append(mapdl.get("REAC_1", "FSUM", "", "ITEM", "FZ"))
@@ -118,10 +123,12 @@ def calc_buckling(mapdl: Mapdl, shaft: DriveShaft,
         #                                     displacement_factor=1.0,
         #                                     show_edges=True, vtk=True,
         #                                     )
-        result.plot_nodal_displacement(show_displacement=True,
-                                       displacement_factor=1.0,
-                                       show_edges=True,
-                                       vtk=True, )
+        result.plot_nodal_displacement(
+            show_displacement=True,
+            displacement_factor=1.0,
+            show_edges=True,
+            vtk=True,
+        )
         # """
     print(loads)
 

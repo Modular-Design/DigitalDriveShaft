@@ -1,3 +1,3 @@
-from .mesh import CylindricMeshBuilder
-from .geometry import driveshaft_to_mapdl
-from .stackup import extract_stackup_stresses, anaylse_stackup
+from .mesh import CylindricMeshBuilder  # noqa
+from .geometry import driveshaft_to_mapdl  # noqa
+from .stackup import extract_stackup_stresses, anaylse_stackup  # noqa

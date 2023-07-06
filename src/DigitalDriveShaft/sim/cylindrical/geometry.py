@@ -1,16 +1,18 @@
 from typing import Optional, Union, Literal
 from ansys.mapdl.core import Mapdl
 from src.DigitalDriveShaft.cylindrical import DriveShaft
-from ..elements import Shell181, Solid185
+from ..elements import Shell181
 from ..material import material_to_mapdl
 from .mesh import CylindricMeshBuilder
 import numpy as np
 
 
-def driveshaft_to_mapdl(mapdl: Mapdl, shaft: DriveShaft,
-                        element_type=Union[Literal["SHELL"], Literal["SOLID"]],
-                        mesh_builder: Optional[dict] = None
-                        ):
+def driveshaft_to_mapdl(
+    mapdl: Mapdl,
+    shaft: DriveShaft,
+    element_type=Union[Literal["SHELL"], Literal["SOLID"]],
+    mesh_builder: Optional[dict] = None,
+):
     mapdl.csys(1)
 
     if mesh_builder is None:
@@ -28,9 +30,9 @@ def driveshaft_to_mapdl(mapdl: Mapdl, shaft: DriveShaft,
         # __mesh_with_solid__(mapdl, shaft, mesh_builder)
 
 
-def __mesh_with_shell__(mapdl: Mapdl,
-                        shaft: DriveShaft,
-                        mesh_builder: CylindricMeshBuilder):
+def __mesh_with_shell__(
+    mapdl: Mapdl, shaft: DriveShaft, mesh_builder: CylindricMeshBuilder
+):
     start_id = 1
     dz = shaft.form.length() / mesh_builder.n_z
     dphi = (mesh_builder.phi_max - mesh_builder.phi_min) / mesh_builder.n_phi
@@ -43,7 +45,7 @@ def __mesh_with_shell__(mapdl: Mapdl,
             r = shaft.get_center_radius(z, phi, False)
             mapdl.k(k_id, r, phi / np.pi * 180, z)
             k_id += 1
-    k_end = k_id - 1
+    # k_end = k_id - 1
     # mapdl.kplot()
     z_divs = len(zs) - 1
     phi_divs = len(phis) - 1
@@ -54,7 +56,10 @@ def __mesh_with_shell__(mapdl: Mapdl,
     for i in range(phi_divs):
         for j in range(z_divs):
             # counter clockwise
-            rel_positions[index] = ((j + (j + 1)) / (2 * len(zs)), (phis[i] + phis[i + 1]) / 2)
+            rel_positions[index] = (
+                (j + (j + 1)) / (2 * len(zs)),
+                (phis[i] + phis[i + 1]) / 2,
+            )
             index += 1
             """
             d - c
@@ -87,18 +92,19 @@ def __mesh_with_shell__(mapdl: Mapdl,
                 material_hashes.append(mat_hash)
                 material_to_mapdl(mapdl, material, mat_id)
 
-            mapdl.secdata(ply.get_thickness(), mat_id, ply.get_rotation(degree=True) + 90, 3)
-        mapdl.asel("S", "AREA", '', i + 1)
+            mapdl.secdata(
+                ply.get_thickness(), mat_id, ply.get_rotation(degree=True) + 90, 3
+            )
+        mapdl.asel("S", "AREA", "", i + 1)
         mapdl.esize(0, 1)
         mapdl.type(1)
         mapdl.secnum(sec_id)
         mapdl.amesh("ALL")
 
 
-def __mesh_with_solid__(mapdl: Mapdl,
-                        shaft: DriveShaft,
-                        mesh_builder: CylindricMeshBuilder
-                        ):
+def __mesh_with_solid__(
+    mapdl: Mapdl, shaft: DriveShaft, mesh_builder: CylindricMeshBuilder
+):
     start_id = 1
     dz = shaft.form.length() / mesh_builder.n_z
     dphi = (mesh_builder.phi_max - mesh_builder.phi_min) / mesh_builder.n_phi
@@ -118,7 +124,7 @@ def __mesh_with_solid__(mapdl: Mapdl,
                 r += ply.get_thickness()
                 mapdl.k(k_id, r, phi / np.pi * 180, z)
                 k_id += 1
-    k_end = k_id - 1
+    # k_end = k_id - 1
     # mapdl.kplot(show_bounds=True, show_keypoint_numbering=True)
     n_phis = len(phis)
     n_zs = len(zs)
@@ -149,8 +155,8 @@ def __mesh_with_solid__(mapdl: Mapdl,
                 p8 - p7
                 |    |
                 p5 - p6
-                
-                bottom 
+
+                bottom
                 p4 - p3
                 |    |
                 p1 - p2
@@ -168,14 +174,16 @@ def __mesh_with_solid__(mapdl: Mapdl,
                 #     print(v_id)
                 #     mapdl.vsel("S", "VOLU", '', "ALL")
                 #     mapdl.vplot()
-                mapdl.vsel("S", "VOLU", '', v_id)
+                mapdl.vsel("S", "VOLU", "", v_id)
                 mapdl.esize(0, 1)
                 mapdl.mat(plies[p].get_material().get_id())
                 mapdl.vmesh("ALL")
-                mapdl.local(v_id, 1, 0, 0, 0, plies[p].get_rotation() / np.pi * 180.0 + 90)
+                mapdl.local(
+                    v_id, 1, 0, 0, 0, plies[p].get_rotation() / np.pi * 180.0 + 90
+                )
                 mapdl.esel("S", "ELEM", "", v_id)
                 mapdl.emodif("all", "ESYS", v_id)
                 v_id += 1
-    k_end = k_id - 1
-    mapdl.vsel("S", "VOLU", '', "ALL")
+    # k_end = k_id - 1
+    mapdl.vsel("S", "VOLU", "", "ALL")
     mapdl.esel("S", "ELEM", "", "ALL")

@@ -11,6 +11,6 @@ for item in items:
     if item.suffix != ".txt":
         continue
     suffix = item.suffix
-    name = item.name[:-len(suffix)]
+    name = item.name[: -len(suffix)]
     output_file = Path(scripts_path / (name + ".py"))
     pymapdl.convert_script(str(item.absolute()), str(output_file.absolute()))

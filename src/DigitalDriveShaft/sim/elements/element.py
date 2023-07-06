@@ -13,4 +13,3 @@ class Element:
         for key in self.options:
             value = self.options[key]
             mapdl.keyopt(self.element_id, key, value)
-

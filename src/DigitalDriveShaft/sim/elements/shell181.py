@@ -46,10 +46,13 @@ class Shell181(Element):
         """
         Specify layer data storage:
             0 -- For multi-layer elements, store data for bottom of bottom layer
-                    and top of top layer. For single-layer elements, store data for TOP and BOTTOM.
-                    (Default)
+                    and top of top layer. For single-layer elements, store data for
+                    TOP and BOTTOM. (Default)
+
             1 -- Store data for TOP and BOTTOM, for all layers (multi-layer elements)
-            2 -- Store data for TOP, BOTTOM, and MID for all layers; applies to single- and multi-layer elements
+
+            2 -- Store data for TOP, BOTTOM, and MID for all layers; applies to single-
+                    and multi-layer elements
         """
         self.options[8] = value
 
@@ -77,12 +80,20 @@ class Shell181(Element):
         """
         self.options[11] = value
 
-    def add_layer(self, thickness: float, mat_id: int, rotation: float, integration_points: Optional[int] = 3):
+    def add_layer(
+        self,
+        thickness: float,
+        mat_id: int,
+        rotation: float,
+        integration_points: Optional[int] = 3,
+    ):
         self.secdata.append([thickness, mat_id, rotation, integration_points])
 
     def add_to_mapdl(self, mapdl: Mapdl):
         super().add_to_mapdl(mapdl)
 
-        mapdl.sectype(secid=self.element_id, type_="SHELL", name=f"shell181_{self.element_id}")
+        mapdl.sectype(
+            secid=self.element_id, type_="SHELL", name=f"shell181_{self.element_id}"
+        )
         for data in self.secdata:
             mapdl.secdata(data[0], data[1], data[2], data[3])

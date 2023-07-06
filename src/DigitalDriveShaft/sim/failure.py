@@ -1,4 +1,4 @@
-from src.DigitalDriveShaft.basic import IFailure
+from pymaterial.failures import IFailure
 from ansys.mapdl.core import Mapdl
 
 

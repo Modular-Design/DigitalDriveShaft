@@ -4,28 +4,26 @@ from failure import OrthotropicStressFailure
 import math
 
 
-
-
 rotation_speed = 0  # Drehzahl in [1/min]
-angle_vel = rotation_speed/60. * 2 * math.pi  # Winkelgeschwindigkeit in [rad/s]
-nz = 4              # Zaehneanzahl
-sw = 360/nz/2       # Halber Sektionswinkel in [deg]
-ra = 97.5           # Aussenradius in [mm]
-la = 12             # Dicke der Aussenlage in [mm]
-li = 2              # Dicke der Innenlage in [mm]
-zw = 0.12*sw        # Anteil des Zahnkopfs am Sektor in [deg]
-zh = 6              # Zahnhoehe in [mm]
-zf = 0.63*sw        # Anteil Zahnfuss in [deg]
-rk = 0.5            # Radius am Zahnkopf in [mm]
-rf = 0.5            # Radius am Zahnfuss in [mm]
-bw = 0.8*sw         # Zahnfussbreite in [deg]
+angle_vel = rotation_speed / 60.0 * 2 * math.pi  # Winkelgeschwindigkeit in [rad/s]
+nz = 4  # Zaehneanzahl
+sw = 360 / nz / 2  # Halber Sektionswinkel in [deg]
+ra = 97.5  # Aussenradius in [mm]
+la = 12  # Dicke der Aussenlage in [mm]
+li = 2  # Dicke der Innenlage in [mm]
+zw = 0.12 * sw  # Anteil des Zahnkopfs am Sektor in [deg]
+zh = 6  # Zahnhoehe in [mm]
+zf = 0.63 * sw  # Anteil Zahnfuss in [deg]
+rk = 0.5  # Radius am Zahnkopf in [mm]
+rf = 0.5  # Radius am Zahnfuss in [mm]
+bw = 0.8 * sw  # Zahnfussbreite in [deg]
 
-deep = 40           # Laenge des Wellenstuecks in [mm]
+deep = 40  # Laenge des Wellenstuecks in [mm]
 deep_in = 20
 deep_out = 20
 
 moment = 168000000  # Drehmoment in [Nmm]
-alpha = 45          # Zahnflankenwinkel in [deg]
+alpha = 45  # Zahnflankenwinkel in [deg]
 
 d_nabe = 7
 ri_nabe = ra - la - li - zh - d_nabe  # Radius der Nabe in [mm]
@@ -35,11 +33,11 @@ sa = ra - la - li - zh / 2
 
 wb = (180 - alpha) * math.pi / 180
 x = sa / sb * math.sin(wb)
-wa = math.asin(x) * 180/ math.pi
+wa = math.asin(x) * 180 / math.pi
 wb = wb * 180 / math.pi
 fw = 180 - wa - wb
-fw = bw-fw
-es = 0.265*3
+fw = bw - fw
+es = 0.265 * 3
 
 mapdl = launch_mapdl(loglevel="WARNING")
 mapdl.finish()
@@ -47,11 +45,18 @@ mapdl.run("/clear")
 mapdl.run("/facet,fine")  # feinere Aufteilung der Facetten
 
 mapdl.prep7()
-CFK_UD_HTS40 = OrthotropicMaterial(E_l=138e3, E_t=8.5e3,
-                                   nu_lt=0.29, nu_tt=0.31,
-                                   G_lt=4.5e3, G_tt=3.24e3,
-                                   density=1.5e-9)
-cfk_failure = OrthotropicStressFailure(tens_l=1602, tens_t=25, shear_lt=40, shear_tt=40, compr_l=-800, compr_t=-115)
+CFK_UD_HTS40 = OrthotropicMaterial(
+    E_l=138e3,
+    E_t=8.5e3,
+    nu_lt=0.29,
+    nu_tt=0.31,
+    G_lt=4.5e3,
+    G_tt=3.24e3,
+    density=1.5e-9,
+)
+cfk_failure = OrthotropicStressFailure(
+    tens_l=1602, tens_t=25, shear_lt=40, shear_tt=40, compr_l=-800, compr_t=-115
+)
 
 mat1_id = 201
 mat2_id = 202
@@ -69,17 +74,17 @@ steel.add_to_mapdl(mapdl, nabe_mat_id)
 mapdl.k(100, 0, 0)  # Wellenmittelpunkt
 mapdl.k(101, 0, ra)  # Punkt auf Aussenradius
 mapdl.circle(100, "", "", 101, sw, 1)  # Bogen um K100, ra von K101 um Winkel sw aus
-mapdl.k(102, 0, (ra-la))
+mapdl.k(102, 0, (ra - la))
 mapdl.circle(100, "", "", 102, sw, 1)
-mapdl.k(103, 0, (ra-la-li))  # Kreisbogen des Zahnfusses
+mapdl.k(103, 0, (ra - la - li))  # Kreisbogen des Zahnfusses
 mapdl.circle(100, "", "", 103, sw)
-mapdl.k(104, 0, (ra-la-li-zh/2))  # Kreisbogen des Zahnfusses
+mapdl.k(104, 0, (ra - la - li - zh / 2))  # Kreisbogen des Zahnfusses
 mapdl.circle(100, "", "", 104, sw)
-mapdl.k(105, 0, (ra-la-li-zh))  # Kreisbogen des Zahnfusses
+mapdl.k(105, 0, (ra - la - li - zh))  # Kreisbogen des Zahnfusses
 mapdl.circle(100, "", "", 105, sw)
-mapdl.k(106, 0, (ra-la-li))  # Kreisbogen des Zahnfusses
+mapdl.k(106, 0, (ra - la - li))  # Kreisbogen des Zahnfusses
 mapdl.circle(100, "", "", 106, bw)
-mapdl.k(107, 0, (ra-la-li-zh/2))  # Kreisbogen des Zahnfusses
+mapdl.k(107, 0, (ra - la - li - zh / 2))  # Kreisbogen des Zahnfusses
 mapdl.circle(100, "", "", 107, fw)
 mapdl.l(1, 3)
 mapdl.l(2, 4)
@@ -97,7 +102,7 @@ mapdl.ldele(8)
 mapdl.cskp(11, 0, 12, 16, 1)
 mapdl.lgen(2, 4, "", "", "", li, "", "", 0)
 mapdl.csys(0)
-mapdl.k(108, 0, (ra-zh-la))
+mapdl.k(108, 0, (ra - zh - la))
 mapdl.circle(100, "", "", 108, bw)
 mapdl.lextnd(5, 14, li, 0)
 mapdl.ldele(6)
@@ -118,7 +123,7 @@ mapdl.l(19, 16)
 mapdl.l(12, 20)
 mapdl.lsbl(3, 5)
 mapdl.csys(11)
-mapdl.lgen(2, 4, "", "", "", li/2, "", "", 0)
+mapdl.lgen(2, 4, "", "", "", li / 2, "", "", 0)
 mapdl.csys(0)
 mapdl.cskp(12, 0, 22, 24, 1)
 mapdl.k(109, 0, li)
@@ -145,10 +150,10 @@ mapdl.lsbl(2, 3)
 mapdl.nummrg("kp")
 mapdl.ldele(2)
 mapdl.ldele(4)
-mapdl.lfillt(12, 13, rk+0.5)
+mapdl.lfillt(12, 13, rk + 0.5)
 mapdl.lfillt(11, 5, rk)
 mapdl.lfillt(7, 8, rf)
-mapdl.lfillt(14, 3, rf*1.0)
+mapdl.lfillt(14, 3, rf * 1.0)
 mapdl.lcomb(14, 16, 0)
 mapdl.lcomb(7, 15, 0)
 mapdl.lcomb(13, 2, 0)
@@ -157,7 +162,7 @@ mapdl.lcomb(7, 8, 0)
 mapdl.lcomb(14, 3, 0)
 mapdl.lcomb(2, 12, 0)
 mapdl.lcomb(4, 5, 0)
-mapdl.k(111, 0, ra-(1.001*la))
+mapdl.k(111, 0, ra - (1.001 * la))
 mapdl.circle(100, "", "", 111, bw)
 mapdl.lsbl(3, 5)
 mapdl.lsbl(5, 3)
@@ -214,8 +219,8 @@ mapdl.vmesh(1)
 
 # === Aussenlage ===
 mapdl.sectype(101, "shell", "", "aussen")
-mapdl.secdata(la/4, 202, 45, 5)  # 5 Integrationspunkte
-mapdl.secdata(la/4, 202, 45, 5)
+mapdl.secdata(la / 4, 202, 45, 5)  # 5 Integrationspunkte
+mapdl.secdata(la / 4, 202, 45, 5)
 mapdl.esel("s", "ename", "", "outer")
 mapdl.emodif("all", "sec", 101)
 mapdl.vsel("s", "volu", "", 2)
@@ -233,7 +238,7 @@ mapdl.vmesh(2)
 
 # === Innenlage ===
 mapdl.sectype(102, "shell", "", "aussen")
-mapdl.secdata(li/2, 202, 45, 5)  # 5 Integrationspunkte
+mapdl.secdata(li / 2, 202, 45, 5)  # 5 Integrationspunkte
 mapdl.esel("s", "ename", "", "inner")
 mapdl.emodif("all", "sec", 102)
 mapdl.allsel()
@@ -252,7 +257,7 @@ mapdl.vmesh(3)
 
 # === Innenlage ===
 mapdl.sectype(102, "shell", "", "aussen")
-mapdl.secdata(li/2, 202, 45, 5)  # 5 Integrationspunkte
+mapdl.secdata(li / 2, 202, 45, 5)  # 5 Integrationspunkte
 mapdl.esel("s", "ename", "", "inner")
 mapdl.emodif("all", "sec", 102)
 mapdl.allsel()
@@ -271,7 +276,7 @@ mapdl.vmesh(4)
 
 # === Innenlage ===
 mapdl.sectype(102, "shell", "", "aussen")
-mapdl.secdata(li/2, 202, 45, 5)  # 5 Integrationspunkte
+mapdl.secdata(li / 2, 202, 45, 5)  # 5 Integrationspunkte
 mapdl.esel("s", "ename", "", "inner")
 mapdl.emodif("all", "sec", 102)
 mapdl.allsel()
@@ -280,7 +285,7 @@ mapdl.cm("core", "volu")
 mapdl.et(103, 186)
 mapdl.keyopt(103, 3, 1)
 mapdl.type(103)
-mapdl.esize(1.5*es)
+mapdl.esize(1.5 * es)
 mapdl.veorient(5, "area", 34)
 mapdl.vmesh(5)
 mapdl.veorient(6, "area", 38)
@@ -326,8 +331,8 @@ mapdl.type(104)
 mapdl.aesize(45, es)
 mapdl.aesize(44, es)
 mapdl.aesize(46, es)
-mapdl.aesize(41, es*3)
-mapdl.esize(es*6)
+mapdl.aesize(41, es * 3)
+mapdl.esize(es * 6)
 mapdl.mshkey("mapped")
 mapdl.vmesh(7)
 mapdl.esel("s", "ename", "", "insert")
@@ -343,7 +348,7 @@ mapdl.real(3)
 mapdl.et(105, 170)
 mapdl.et(106, 174)
 mapdl.r(3, "", "", 1.0, 0.1, 0, "")
-mapdl.rmore("", "", 1.0E20, 0.0, 1.0, "")
+mapdl.rmore("", "", 1.0e20, 0.0, 1.0, "")
 mapdl.rmore(0.0, 0, 1.0, "", 1.0, 0.5)
 mapdl.rmore(0, 1.0, 1.0, 0.0, "", 1.0)
 mapdl.keyopt(106, 4, 0)
@@ -386,7 +391,7 @@ mapdl.real(4)
 mapdl.et(107, 170)
 mapdl.et(108, 174)
 mapdl.r(4, "", "", 1.0, 0.1, 0, "")
-mapdl.rmore("", "", 1.0E20, 0.0, 1.0, "")
+mapdl.rmore("", "", 1.0e20, 0.0, 1.0, "")
 mapdl.rmore(0.0, 0, 1.0, "", 1.0, 0.5)
 mapdl.rmore(0, 1.0, 1.0, 0.0, "", 1.0)
 mapdl.keyopt(108, 4, 0)
@@ -429,7 +434,7 @@ mapdl.real(7)
 mapdl.et(109, 170)
 mapdl.et(110, 174)
 mapdl.r(7, "", "", 1.0, 0.1, 0, "")
-mapdl.rmore("", "", 1.0E20, 0.0, 1.0, "")
+mapdl.rmore("", "", 1.0e20, 0.0, 1.0, "")
 mapdl.rmore(0.0, 0, 1.0, "", 1.0, 0.5)
 mapdl.rmore(0, 1.0, 1.0, 0.0, "", 1.0)
 mapdl.keyopt(110, 4, 0)
