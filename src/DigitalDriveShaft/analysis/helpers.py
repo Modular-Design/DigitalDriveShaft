@@ -19,6 +19,9 @@ class Loading(BaseModel):
     my: Optional[float] = 0  # Nm
     mz: Optional[float] = 0  # Nm
     rpm: Optional[float] = 0  # U/min
+    """class that can be used to describe loading cases
+
+    """
 
 
 def get_relevant_value(values: list, compr: Optional[Callable] = max) -> float:

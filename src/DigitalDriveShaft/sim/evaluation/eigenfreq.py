@@ -1,4 +1,4 @@
-from src.DigitalDriveShaft.cylindrical import DriveShaft
+from DigitalDriveShaft.cylindrical import DriveShaft
 from ..cylindrical import driveshaft_to_mapdl
 from ansys.mapdl.core import Mapdl
 from typing import Optional, List
@@ -70,8 +70,28 @@ def calc_eigenfreq(
     return (f0).tolist()  # eigen-frequencies in [RPM?]
     """
 
+    # result = mapdl.result
+    # # print(result.time_values)
+    # # print(output)
+    # return list(result.time_values)
+    r"""
     _output = mapdl.modal_analysis(nmode=10, freqb=1)
-    result = mapdl.result
-    # print(result.time_values)
-    # print(output)
-    return list(result.time_values)
+    mapdl.post1()
+    resp = mapdl.set("LIST")
+    w_n = np.array(re.findall(r"\s\d*\.\d\s", resp), np.float32)
+    return w_n
+    """
+
+    # Modal Analysis
+    mapdl.slashsolu()
+    mm = mapdl.math
+    nev = 10  # Get the first 10 modes
+    _output = mapdl.modal_analysis("DAMP", nmode=nev)
+    mapdl.finish()
+    mm.free()
+
+    k = mm.stiff(fname=f"{mapdl.jobname}.full")
+    M = mm.mass(fname=f"{mapdl.jobname}.full")
+    A = mm.mat(k.nrow, nev)
+    eigenvalues = mm.eigs(nev, k, M, phi=A, fmin=1.0)
+    return eigenvalues

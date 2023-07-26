@@ -1,7 +1,7 @@
 import math
 
-from src.DigitalDriveShaft.cylindrical import DriveShaft
-from src.DigitalDriveShaft.analysis import get_relevant_value, Loading
+from DigitalDriveShaft.cylindrical import DriveShaft
+from DigitalDriveShaft.analysis import get_relevant_value, Loading
 from ..cylindrical import driveshaft_to_mapdl, anaylse_stackup
 from ansys.mapdl.core import Mapdl
 from typing import Optional

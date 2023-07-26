@@ -1,6 +1,6 @@
 from typing import Optional
 from ansys.mapdl.core import Mapdl
-from src.DigitalDriveShaft.cylindrical import CylindricalStackup
+from DigitalDriveShaft.cylindrical import CylindricalStackup
 
 
 def anaylse_stackup(

@@ -1,6 +1,6 @@
 from typing import Optional, Union, Literal
 from ansys.mapdl.core import Mapdl
-from src.DigitalDriveShaft.cylindrical import DriveShaft
+from DigitalDriveShaft.cylindrical import DriveShaft
 from ..elements import Shell181
 from ..material import material_to_mapdl
 from .mesh import CylindricMeshBuilder
