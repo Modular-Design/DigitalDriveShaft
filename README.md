@@ -11,6 +11,11 @@
 0. setup venv `python -m venv .`
 1. activate venv (Windows: `venv\Scripts\activate`, Linux)
 2. install requrements with `pip install -e .`
+3. starting ansys find more information here [here](https://mapdl.docs.pyansys.com/version/stable/getting_started/running_mapdl.html)
+
+```
+sudo /opt/ansys_inc/v222/ansys/bin/ansys222 -grpc
+```
 
 
 ## Features

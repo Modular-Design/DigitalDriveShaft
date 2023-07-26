@@ -6,7 +6,7 @@ with open("requirements.txt") as f:
 
 
 setup(
-    name="DgitalDriveShaft",
+    name="DigitalDriveShaft",
     classifiers=[
         "Programming Language :: Python :: 3.8",
     ],
