@@ -1,16 +1,6 @@
 import numpy as np
-import os
+from pathlib import Path
 from ansys.mapdl.core import launch_mapdl
-
-
-def mkdir(path):
-    folder = os.path.exists(path)
-    if not folder:
-        os.makedirs(path)
-        print("---  new folder...  ---")
-        print("---  OK  ---")
-    else:
-        print("---  There is this folder!  ---")
 
 
 # constants
@@ -18,6 +8,9 @@ thickness = 12  # meters
 rad = 85
 rad_out = rad + thickness
 rad_in = rad - thickness / 2
+
+location = Path.cwd() / "dong"
+location.mkdir(exist_ok=True)
 
 
 def material():
@@ -670,6 +663,8 @@ def post_processing():
     f.close()
 
 
+# Parameterstudy
+
 for row in [2]:
     for sectors in [7]:
         for bolt_diameter in [14, 16]:  # 8,10,12,
@@ -681,11 +676,8 @@ for row in [2]:
                         str_bolt_diameter = str(bolt_diameter)
                         str_dbr = str(dbr)
                         str_ed = str(ed)
-                        file0 = "C:\\result\\"  # directory of computing
                         file = (
-                            file0
-                            + "_"
-                            + str_row
+                            str_row
                             + "_"
                             + str_sectors
                             + "_"
@@ -695,9 +687,9 @@ for row in [2]:
                             + "_"
                             + str_ed
                         )
-                        mkdir(file)
-                        os.chdir(file)
-                        mapdl = launch_mapdl(run_location=file, override=True)
+                        storage = (location / file).absolute()
+                        storage.mkdir(exist_ok=True)
+                        mapdl = launch_mapdl(run_location=storage, override=True)
                         mapdl.clear()
                         mapdl.prep7()
                         mapdl.units(
@@ -758,6 +750,3 @@ for row in [2]:
                     except Exception as ex:
                         print(ex)
                         continue
-
-
-# A program by Yuejie Gu and Ruihua Dong

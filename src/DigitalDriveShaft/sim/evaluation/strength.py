@@ -29,7 +29,6 @@ def calc_strength(
     -------
     min_safety
     """
-
     mapdl.finish()
     if mesh_builder is not None:
         mapdl.clear()
@@ -85,6 +84,7 @@ def calc_strength(
     mapdl.antype("STATIC")
     mapdl.outres("ALL", "ALL")
     mapdl.solve()
+
     mapdl.finish()
 
     # Post Processing
