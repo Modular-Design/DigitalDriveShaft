@@ -1,6 +1,6 @@
 from ansys.mapdl.core import Mapdl, launch_mapdl  # noqa
-from pymaterial.failures import CuntzeFailure
-from pymaterial.materials import TransverselyIsotropicMaterial
+from pymaterial.failures import CuntzeFailure, VonMisesFailure
+from pymaterial.materials import TransverselyIsotropicMaterial, IsotropicMaterial
 
 from pymaterial.combis.clt import Ply, Stackup
 
@@ -33,20 +33,37 @@ hts40_mat = TransverselyIsotropicMaterial(
 )  # MPa
 
 
+# Stainless steel 316 (source: Granta DB)
+steel_mises = VonMisesFailure(252)
+
+steel = IsotropicMaterial(Em=195000, nu=0.27, density=7.969, failures=[steel_mises])
+
+# Titan alloy Ti-6Al-4V (source: Granta DB)
+
+titan_mises = VonMisesFailure(845.7)
+
+titan = IsotropicMaterial(Em=111200, nu=0.3387, density=4.429, failures=[titan_mises])
+
 material_legend = {
     "CFK": hts40_mat,
-    "Alu": None,
-    "GFK": None,
+    "Steel": steel,
+    "Titan": titan,
 }
 
 mapdl = Mapdl("127.0.0.1", port=50052)
 
 
-def create_shaft(materials, shape, n_layers, thicknesses, angles):
+def create_shape_func(shape):
     csp = CubicSpline(
         [0 * length, 0.5 * length, 1 * length],
         [d0 / 2, (d1 - d0) / 2 * (shape + 1.0), d1 / 2],
+        bc_type=((1, 0.0), (1, 0.0)),
     )
+    return csp
+
+
+def create_shaft(materials, shape, n_layers, thicknesses, angles):
+    csp = create_shape_func(shape)
     cyl_form = CylindricalForm(lambda z, phi: csp(z), 500)
 
     def stackup_func(z: float, phi: float) -> Stackup:
@@ -61,3 +78,17 @@ def create_shaft(materials, shape, n_layers, thicknesses, angles):
     cyl_stackup = CylindricalStackup(stackup_func)
     shaft = DriveShaft(cyl_form, cyl_stackup)
     return shaft
+
+
+# Show driveshaft shapes
+"""
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(0, length, 1000)
+y = create_shape_func(0.2)(x)
+fig, ax = plt.subplots(figsize=(6.5, 4))
+
+ax.plot(x, y, label='data')
+plt.show()
+"""

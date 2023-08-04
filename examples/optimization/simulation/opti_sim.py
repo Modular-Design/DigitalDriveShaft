@@ -14,6 +14,8 @@ from typing import Union, Sequence
 
 # launch_mapdl(mode="grpc", loglevel="ERROR")
 
+material_selection = []  # possible content: "CFK", "Steel", "Titan"
+
 
 def objective(trial) -> Union[float, Sequence[float]]:
     n_layers = 4  # trial.suggest_int("n_layers", 1, 6)
@@ -23,13 +25,11 @@ def objective(trial) -> Union[float, Sequence[float]]:
     materials = []
 
     for i in range(n_layers):
-        thicknesses.append(trial.suggest_float(f"t{i}", 0.2, 4, step=0.2))
+        thicknesses.append(trial.suggest_float(f"t{i}", 1.2, 5.2, step=0.4))
         angles.append(
             trial.suggest_float(f"a{i}", -90.0, 90.0, step=1.0),
         )
-        materials.append(
-            trial.suggest_categorical(f"material{i}", ["CFK"])  # , "Alu", "GFK"
-        )
+        materials.append(trial.suggest_categorical(f"material{i}", material_selection))
 
     shaft = create_shaft(materials, shape, n_layers, thicknesses, angles)
     mass = shaft.get_mass()
@@ -42,11 +42,21 @@ def objective(trial) -> Union[float, Sequence[float]]:
 
 
 study = create_study(
-    study_name="simulation",
+    study_name="simulation_metal",
     storage="sqlite:///db.sqlite3",
     load_if_exists=True,
     directions=["minimize", "minimize", "maximize"],
 )
-study.optimize(objective, n_trials=100)
+material_selection = ["Steel", "Titan"]
+study.optimize(objective, n_trials=200)
+
+study = create_study(
+    study_name="simulation_composite",
+    storage="sqlite:///db.sqlite3",
+    load_if_exists=True,
+    directions=["minimize", "minimize", "maximize"],
+)
+material_selection = ["CFK", "Steel", "Titan"]
+study.optimize(objective, n_trials=300)
 
 # optuna-dashboard.exe sqlite:///examples/db.sqlite3
