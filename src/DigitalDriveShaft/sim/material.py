@@ -35,7 +35,7 @@ def material_to_mapdl(mapdl: Mapdl, material: Material, mat_id: int):
     # TB, Lab, MATID, NTEMP, NPTS, TBOPT, --, FuncName
     # TBDATA,,
     mapdl.tb("ANEL", mat_id, "", "", 0)
-    mapdl.mptemp(mat_id, 0)
+    # mapdl.mptemp(mat_id, 0)
     mapdl.tbtemp(0)
     mapdl.tbdata(
         "",
