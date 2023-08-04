@@ -68,7 +68,8 @@ def material_to_mapdl(mapdl: Mapdl, material: Material, mat_id: int):
 
     density = material.get_density()
     if density is not None:
-        mapdl.mpdata("DENS", mat_id, "", density)
+        # mapdl.mpdata("DENS", mat_id, "", density)
+        mapdl.mp("DENS", mat_id, density)
     else:
         raise ValueError("Density is None.")
 
