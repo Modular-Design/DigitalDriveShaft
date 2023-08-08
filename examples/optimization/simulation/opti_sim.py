@@ -32,7 +32,7 @@ def objective(trial) -> Union[float, Sequence[float]]:
     materials = []
 
     for i in range(n_layers):
-        thicknesses.append(trial.suggest_float(f"t{i}", 1.2e-3, 5.2e-3, step=0.4e-3))
+        thicknesses.append(trial.suggest_float(f"t{i}", 1.2, 5.2, step=0.4))
         angles.append(
             trial.suggest_float(f"a{i}", -90.0, 90.0, step=1.0),
         )
