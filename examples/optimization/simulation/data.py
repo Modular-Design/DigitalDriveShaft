@@ -62,6 +62,8 @@ material_legend = {
 }
 
 mapdl = Mapdl("127.0.0.1", port=50052)
+# MKS - MKS system (m, kg, s, °C)
+mapdl.units("MKS")
 
 
 def create_shape_func(shape):
