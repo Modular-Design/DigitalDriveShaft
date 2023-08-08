@@ -11,48 +11,56 @@ from DigitalDriveShaft.cylindrical import (
     CylindricalForm,
 )
 
-d0 = 0.170  # m
-d1 = 0.340  # m
-length = 0.500  # m
-M_max = 160e3  # Nm
-N_max = -2e3  # N
+mapdl = Mapdl("127.0.0.1", port=50052)
+# https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/database/_autosummary/ansys.mapdl.core.Mapdl.units.html
+# MKS - MKS system (m, kg, s, °C)
+# MPA - MPA system (mm, Mg = t, s, °C)
+# MPA is required, because small scale details are hard to model in [m]
+mapdl.units("MPA")
+
+
+d0 = 170  # mm
+d1 = 340  # mm
+length = 500  # mm
+M_max = 160e3 * 1e3  # Nm = 1 kg*m^2*s^2 -> 1e3 t*mm^2/s^2
+N_max = -2e3  # N = 1 kg*m*s^2 -> 1 t*mm/s^2
 rpm_min = 6000  # rpm
 
 # CFK UD(230 GPa) prepreg (source: ANSYS composite engineering data)
 CFK_230GPa_prepreg_cuntze = CuntzeFailure(
-    E1=121000e6,  # Pa
-    R_1t=2231.0e6,
-    R_1c=1082e6,  # Pa
-    R_2t=29e6,
-    R_2c=100e6,  # Pa
-    R_21=60e6,  # Pa
+    E1=121000,  # t/s^2/mm
+    R_1t=2231.0,  # t/s^2/mm
+    R_1c=1082,  # t/s^2/mm
+    R_2t=29,  # t/s^2/mm
+    R_2c=100,  # t/s^2/mm
+    R_21=60,  # t/s^2/mm
     my_21=0.27,
 )
 
 CFK_230GPa_prepreg = TransverselyIsotropicMaterial(
-    E_l=121000e6,  # Pa
-    E_t=8600e6,  # Pa
+    E_l=121000,  # t/s^2/mm
+    E_t=8600,  # t/s^2/mm
     nu_lt=0.27,
     nu_tt=0.4,
-    G_lt=4700e6,  # Pa
-    density=1490,  # kg/m^3
+    G_lt=4700,  # t/s^2/mm
+    density=1.490e-9,  # t/mm^3
     failures=[CFK_230GPa_prepreg_cuntze],
 )  # MPa
 
 
 # Stainless steel 316 (source: Granta DB)
-steel_mises = VonMisesFailure(252e6)  # Pa
+steel_mises = VonMisesFailure(252.1)  # Pa
 
 steel = IsotropicMaterial(
-    Em=195000e6, nu=0.27, density=7969, failures=[steel_mises]  # Pa
+    Em=195000, nu=0.27, density=7.969e-9, failures=[steel_mises]  # t/s^2/mm  # t/mm^3
 )
 
 # Titan alloy Ti-6Al-4V (source: Granta DB)
 
-titan_mises = VonMisesFailure(845.7e6)
+titan_mises = VonMisesFailure(845.7)  # t/s^2/mm
 
 titan = IsotropicMaterial(
-    Em=111200e6, nu=0.3387, density=4429, failures=[titan_mises]  # Pa  # kg/m^3
+    Em=111200, nu=0.3387, density=4.429e-9, failures=[titan_mises]  # t/s^2/mm  # t/mm^3
 )
 
 material_legend = {
@@ -60,10 +68,6 @@ material_legend = {
     "Steel": steel,
     "Titanium": titan,
 }
-
-mapdl = Mapdl("127.0.0.1", port=50052)
-# MKS - MKS system (m, kg, s, °C)
-mapdl.units("MKS")
 
 
 def create_shape_func(shape):
