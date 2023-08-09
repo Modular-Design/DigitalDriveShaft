@@ -56,6 +56,7 @@ def objective(trial) -> Union[float, Sequence[float]]:
     return mass, max(f_moment, f_force), np.abs(rpm - rpm_min), deform
 
 
+"""
 study = create_study(
     study_name="simulation_metal",
     storage="sqlite:///db.sqlite3",
@@ -64,14 +65,15 @@ study = create_study(
 )
 material_selection = ["Steel", "Titanium"]
 study.optimize(objective, n_trials=400)
+"""
 
 study = create_study(
-    study_name="simulation_composite",
+    study_name="simulation",
     storage="sqlite:///db.sqlite3",
     load_if_exists=True,
     directions=["minimize", "minimize", "maximize", "maximize"],
 )
-material_selection = ["CFK", "Titanium"]
-study.optimize(objective, n_trials=400)
+material_selection = ["CFK", "Titanium", "Steel"]
+study.optimize(objective, n_trials=1000)
 
 # optuna-dashboard.exe sqlite:///examples/db.sqlite3
