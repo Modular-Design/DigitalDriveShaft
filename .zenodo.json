@@ -1,7 +1,7 @@
 {
     "title": "DigitalDriveShaft",
     "description": "A digital framework to design and optimize hybrid composite driveshafts for various applications.",
-    "license": "BSD-3",
+    "license": "BSD-3-Clause",
     "upload_type": "software",
     "creators": [
         {
