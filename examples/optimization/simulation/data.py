@@ -47,6 +47,47 @@ CFK_230GPa_prepreg = TransverselyIsotropicMaterial(
     failures=[CFK_230GPa_prepreg_cuntze],
 )  # MPa
 
+# CFK UD(395 GPa) prepreg (source: ANSYS composite engineering data)
+CFK_395GPa_prepreg_cuntze = CuntzeFailure(
+    E1=121000,  # t/s^2/mm
+    R_1t=1979,  # t/s^2/mm
+    R_1c=893,  # t/s^2/mm
+    R_2t=26,  # t/s^2/mm
+    R_2c=139,  # t/s^2/mm
+    R_21=100,  # t/s^2/mm
+    my_21=0.27,
+)
+
+CFK_395GPa_prepreg = TransverselyIsotropicMaterial(
+    E_l=209000,  # t/s^2/mm
+    E_t=9450,  # t/s^2/mm
+    nu_lt=0.27,
+    nu_tt=0.4,
+    G_lt=5500,  # t/s^2/mm
+    density=1.54e-09,  # t/mm^3
+    failures=[CFK_230GPa_prepreg_cuntze],
+)  # MPa
+
+# Epoxy S-Glass UD (source: ANSYS composite engineering data)
+GFK_cuntze = CuntzeFailure(
+    E1=50000,  # t/s^2/mm
+    R_1t=1700,  # t/s^2/mm
+    R_1c=1000,  # t/s^2/mm
+    R_2t=35,  # t/s^2/mm
+    R_2c=120,  # t/s^2/mm
+    R_21=80,  # t/s^2/mm
+    my_21=0.3,
+)
+
+GFK_prepreg = TransverselyIsotropicMaterial(
+    E_l=50000,  # t/s^2/mm
+    E_t=8000,  # t/s^2/mm
+    nu_lt=0.3,
+    nu_tt=0.4,
+    G_lt=5000,  # t/s^2/mm
+    density=2e-09,  # t/mm^3
+    failures=[CFK_230GPa_prepreg_cuntze],
+)  # MPa
 
 # Stainless steel 316 (source: Granta DB)
 steel_mises = VonMisesFailure(252.1)  # Pa
@@ -64,7 +105,9 @@ titan = IsotropicMaterial(
 )
 
 material_legend = {
-    "CFK": CFK_230GPa_prepreg,
+    r"CFK_{230\;GPa}": CFK_230GPa_prepreg,
+    r"CFK_{395\;GPa}": CFK_395GPa_prepreg,
+    "GFK": GFK_prepreg,
     "Steel": steel,
     "Titanium": titan,
 }

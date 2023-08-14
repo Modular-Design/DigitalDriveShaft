@@ -32,7 +32,7 @@ def objective(trial) -> Union[float, Sequence[float]]:
     materials = []
 
     for i in range(n_layers):
-        thicknesses.append(trial.suggest_float(f"t{i}", 1.2, 5.2, step=0.4))
+        thicknesses.append(trial.suggest_float(f"t{i}", 2.2, 6.2, step=0.4))
         angles.append(
             trial.suggest_float(f"a{i}", -90.0, 90.0, step=1.0),
         )
@@ -73,7 +73,7 @@ study = create_study(
     load_if_exists=True,
     directions=["minimize", "minimize", "maximize", "maximize"],
 )
-material_selection = ["CFK", "Titanium", "Steel"]
+material_selection = ["GFK", r"CFK_{230\;GPa}", r"CFK_{395\;GPa}"]
 study.optimize(objective, n_trials=1000)
 
 # optuna-dashboard.exe sqlite:///examples/db.sqlite3
