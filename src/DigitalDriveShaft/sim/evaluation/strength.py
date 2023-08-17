@@ -45,11 +45,9 @@ def calc_strength(
     mapdl.real(master_enum)
     mapdl.type(master_enum)
     mapdl.r(master_enum, 1.0e-9, 1.0e-9, 1.0e-9)
-    eid = mapdl.e(master_id)
-    print(eid)
+    mapdl.e(master_id)
     mapdl.nsel("S", "NODE", "", master_id)
     mapdl.cm("master", "NODE")
-    # mapdl.cmsel("A", "master")
 
     mapdl.nsel("S", "LOC", "Z", length)
     mapdl.rbe3(master_id, "ALL", "ALL")
@@ -65,11 +63,6 @@ def calc_strength(
     mapdl.nsel("ALL")
 
     # Loading
-    mapdl.nsel("S", "LOC", "Z", length)
-
-    nodes = mapdl.mesh.nodes
-    print(f"nodes: {len(nodes)}")
-
     mapdl.cmsel("S", "master")
     mapdl.f("ALL", "FX", load.fx)
     mapdl.f("ALL", "FY", load.fy)
