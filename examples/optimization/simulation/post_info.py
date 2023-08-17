@@ -5,7 +5,7 @@ from post_plots import plot_study_results, table_best
 
 study = optuna.create_study(
     study_name="simulation",  # simulation_metal or simulation_composite
-    storage="sqlite:////home/willi/Nextcloud/share/sim5/db.sqlite3",
+    storage="sqlite:////home/willi/Nextcloud/share/sim6/db.sqlite3",
     load_if_exists=True,
 )
 
@@ -58,7 +58,7 @@ CFK_rpm = cfk_df.sort_values(by="values_2", ascending=False).head(1)
 CFK_bending = cfk_df.sort_values(by="values_3", ascending=False).head(1)
 
 
-if False:
+if True:
     importance = dict()
     importance["mass"] = optuna.importance.get_param_importances(
         study, target=lambda t: t.values[0]
@@ -82,29 +82,27 @@ if False:
 print(f"usefull: {len(usefull_df.index[:])}")
 print(f"rest: {len(rest_df.index[:])}")
 
-if False:
+if True:
     plot_study_results(
-        df,
-        ["mass", "utilization", "rpm", "bending"],
         {
             # "trails": rest_df.index[:],
-            "trails": usefull_df.index[:],
-            "mass": bc_mass.index[0],
-            "utilization": bc_util.index[0],
-            "rpm": bc_rpm.index[0],
-            "bending": bc_bending.index[0],
+            "trails": usefull_df,
+            "mass": bc_mass,
+            "utilization": bc_util,
+            "rpm": bc_rpm,
+            "deformation": bc_bending,
         },
+        ["mass", "utilization", "rpm", "deformation"],
     )
 
 
 if True:
     table_best(
-        df,
         {
-            "mass": bc_mass.index[0],
-            "utilization": bc_util.index[0],
-            "rpm": bc_rpm.index[0],
-            "bending": bc_bending.index[0],
+            "mass": bc_mass,
+            "utilization": bc_util,
+            "rpm": bc_rpm,
+            "deformation": bc_bending,
             # r"$\mathrm{CFK_{mass}}$": CFK_mass.index[0],
             # r"$\mathrm{CFK_{util.}}$":CFK_util.index[0],
             # r"$\mathrm{CFK_{rpm}}$":CFK_rpm.index[0],

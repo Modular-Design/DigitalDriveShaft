@@ -7,7 +7,7 @@ from DigitalDriveShaft.sim.evaluation import (
     calc_bending,
 )
 import numpy as np
-from optuna import create_study
+from optuna import create_study, samplers
 from typing import Union, Sequence
 
 
@@ -41,8 +41,9 @@ def objective(trial) -> Union[float, Sequence[float]]:
     shaft = create_shaft(materials, shape, n_layers, thicknesses, angles)
     mass = shaft.get_mass()
 
-    f_moment = calc_strength(mapdl, shaft, Loading(mz=M_max), dict())  # Nm
-    f_force = calc_strength(mapdl, shaft, Loading(fz=N_max), dict())  # Nm
+    f_moment_1 = calc_strength(mapdl, shaft, Loading(mz=M_max), dict())
+    f_moment_2 = calc_strength(mapdl, shaft, Loading(mz=-1.0 * M_max), dict())
+    f_force = calc_strength(mapdl, shaft, Loading(fz=N_max), dict())
 
     # buck_moment = calc_buckling(mapdl, shaft, None, "MOMENT")[0] * 1000.0  # [Nm]
 
@@ -51,29 +52,43 @@ def objective(trial) -> Union[float, Sequence[float]]:
 
     deform = calc_bending(mapdl, shaft, None)
 
-    trial.set_user_attr("utilization", (f_moment, f_force))
+    trial.set_user_attr("utilization", (f_moment_1, f_moment_2, f_force))
     trial.set_user_attr("rpm", rpm)
-    return mass, max(f_moment, f_force), np.abs(rpm - rpm_min), deform
+    return mass, max(f_moment_1, f_moment_2, f_force), np.abs(rpm - rpm_min), deform
 
 
-"""
-study = create_study(
-    study_name="simulation_metal",
-    storage="sqlite:///db.sqlite3",
-    load_if_exists=True,
-    directions=["minimize", "minimize", "maximize", "maximize"],
-)
-material_selection = ["Steel", "Titanium"]
-study.optimize(objective, n_trials=400)
-"""
-
-study = create_study(
-    study_name="simulation",
-    storage="sqlite:///db.sqlite3",
-    load_if_exists=True,
-    directions=["minimize", "minimize", "maximize", "maximize"],
-)
 material_selection = ["GFK", r"CFK_{230\;GPa}", r"CFK_{395\;GPa}"]
-study.optimize(objective, n_trials=1000)
+n_trials = 200
+
+sampler_nsga3 = samplers.NSGAIIISampler()
+study = create_study(
+    study_name="simulation_nsga3",
+    storage="sqlite:///db.sqlite3",
+    sampler=sampler_nsga3,
+    load_if_exists=True,
+    directions=["minimize", "minimize", "maximize", "maximize"],
+)
+study.optimize(objective, n_trials=n_trials)
+
+
+sampler_nsga2 = samplers.NSGAIISampler()
+study = create_study(
+    study_name="simulation_nsga2",
+    storage="sqlite:///db.sqlite3",
+    sampler=sampler_nsga2,
+    load_if_exists=True,
+    directions=["minimize", "minimize", "maximize", "maximize"],
+)
+study.optimize(objective, n_trials=n_trials)
+
+sampler_tpe = samplers.TPESampler()
+study = create_study(
+    study_name="simulation_tpe",
+    storage="sqlite:///db.sqlite3",
+    sampler=sampler_tpe,
+    load_if_exists=True,
+    directions=["minimize", "minimize", "maximize", "maximize"],
+)
+study.optimize(objective, n_trials=n_trials)
 
 # optuna-dashboard.exe sqlite:///examples/db.sqlite3

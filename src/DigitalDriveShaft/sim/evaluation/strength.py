@@ -1,11 +1,8 @@
-import math
-
 from DigitalDriveShaft.cylindrical import DriveShaft
 from DigitalDriveShaft.analysis import get_relevant_value, Loading
 from ..cylindrical import driveshaft_to_mapdl, anaylse_stackup
 from ansys.mapdl.core import Mapdl
 from typing import Optional
-import numpy as np
 
 
 def calc_strength(
@@ -39,6 +36,24 @@ def calc_strength(
         mapdl.asel("ALL")
         mapdl.nummrg("NODE")
 
+    # master RBE3
+    length = shaft.get_length()
+    mapdl.nsel("S", "LOC", "Z", length)
+
+    master_id = mapdl.n("", 0, 0, length)
+    master_enum = mapdl.et("", "MASS21")
+    mapdl.real(master_enum)
+    mapdl.type(master_enum)
+    mapdl.r(master_enum, 1.0e-9, 1.0e-9, 1.0e-9)
+    eid = mapdl.e(master_id)
+    print(eid)
+    mapdl.nsel("S", "NODE", "", master_id)
+    mapdl.cm("master", "NODE")
+    # mapdl.cmsel("A", "master")
+
+    mapdl.nsel("S", "LOC", "Z", length)
+    mapdl.rbe3(master_id, "ALL", "ALL")
+
     # BCs
     mapdl.run("/solu")
     # Fixation
@@ -50,30 +65,18 @@ def calc_strength(
     mapdl.nsel("ALL")
 
     # Loading
-    length = shaft.get_length()
     mapdl.nsel("S", "LOC", "Z", length)
+
     nodes = mapdl.mesh.nodes
+    print(f"nodes: {len(nodes)}")
 
-    radius = shaft.get_center_radius(length, 0, False)
+    mapdl.cmsel("S", "master")
+    mapdl.f("ALL", "FX", load.fx)
+    mapdl.f("ALL", "FY", load.fy)
+    mapdl.f("ALL", "FZ", load.fz)
+    mapdl.f("ALL", "MZ", load.mz)
 
-    fx_i = load.fx / len(nodes)
-    fy_i = load.fy / len(nodes)
-    fz_i = load.fz / len(nodes)
-    mz_i = load.mz / len(nodes)
-    for node in nodes:
-        x = node[0]
-        y = node[1]
-        radius = math.sqrt(x**2 + y**2)
-        fm_i = mz_i / radius
-        phi_rad = math.atan2(y, x)
-        phi_deg = phi_rad / np.pi * 180
-        mapdl.nsel("S", "LOC", "Z", length)
-        mapdl.nsel("R", "LOC", "Y", phi_deg)
-        mapdl.csys(0)  # INFO: it seems like FCs are always in csys(0), maybe skip this
-        mapdl.f("ALL", "FX", fx_i - fm_i * math.sin(phi_rad))
-        mapdl.f("ALL", "FY", fy_i + fm_i * math.cos(phi_rad))
-        mapdl.f("ALL", "FZ", fz_i)
-        mapdl.csys(1)
+    mapdl.csys(1)
 
     # radius = shaft.get_center_radius(length, 0, False)
     # mapdl.lsel("S", "LOC", "Z", length)
@@ -93,10 +96,14 @@ def calc_strength(
 
     # print("# NUMERIC: ")
     # print("## Stresses: ")
-    stresses, strains, failures = anaylse_stackup(mapdl, shaft.get_stackup())
+
+    _, _, failures = anaylse_stackup(mapdl, shaft.get_stackup())
+
     # print("## Failures: ")
     # print(failures)
+
     max_failure = get_relevant_value(failures)
+
     # mapdl.post_processing.plot_element_displacement("Z")
     # mapdl.post_processing.plot_nodal_component_stress('z')
     return max_failure  # safety

@@ -124,31 +124,35 @@ def _format_values(df, labels, i, filter_ids=None):
     if filter_ids is not None:
         vals = vals[filter_ids]
 
+    if labels[i] == "mass":
+        vals = vals * 1e3
+
+    return vals, np.min(vals), np.max(vals)
+
+
+def _calc_ticks(val_min, val_max) -> tuple[int, float, float]:
     step = 0.001
     ticks = 10
     counter = 0
     multiplier = [2, 5.0 / 2, 10 / 5]
 
-    if labels[i] == "mass":
-        vals = vals * 1e3
-
     while True:
-        val_min = np.floor(np.min(vals) / step) * step
-        val_max = np.ceil(np.max(vals) / step) * step
-        ticks = int((val_max - val_min) / step) + 1
+        tick_min = np.floor(val_min / step) * step
+        tick_max = np.ceil(val_max / step) * step
+        ticks = int((tick_max - tick_min) / step) + 1
         if ticks < 6:
             break
         step = step * multiplier[counter % 3]
         counter = counter + 1
 
-    return vals, val_min, val_max, ticks
+    return ticks, tick_min, tick_max
 
 
-def _pointplot(axs, i, j, df, labels, specials: dict[str, int]):
+def _pointplot(axs, i, j, datasets: dict[str, object], labels):
     ax = _get_subplot(axs, i, j)
     # ax.set_title(f"{i}|{j}")
-    xs, x_min, x_max, x_ticks = _format_values(df, labels, i, specials["trails"])
-    ys, y_min, y_max, y_ticks = _format_values(df, labels, j, specials["trails"])
+    # xs, x_min, x_max = _format_values(df, labels, i)
+    # ys, y_min, y_max = _format_values(df, labels, j)
     # normal = ax.scatter(
     #     xs,
     #     ys,
@@ -157,12 +161,23 @@ def _pointplot(axs, i, j, df, labels, specials: dict[str, int]):
     #     label="trials"
     # )
     plot_obj = []
-    for key, value in specials.items():
-        special = ax.scatter(xs[value], ys[value], s=8, zorder=20, label=key)
+    x_mins, x_maxs = [], []
+    y_mins, y_maxs = [], []
+    for label, dataset in datasets.items():
+        xs, x_min, x_max = _format_values(dataset, labels, i)
+        x_mins.append(x_min)
+        x_maxs.append(x_max)
+        ys, y_min, y_max = _format_values(dataset, labels, j)
+        y_mins.append(y_min)
+        y_maxs.append(y_max)
+        special = ax.scatter(xs, ys, s=8, zorder=20, label=label)
         plot_obj.append(special)
 
     ax.ticklabel_format(useOffset=False, style="plain")
     ax.tick_params(axis="both", labelsize="small")
+
+    x_ticks, x_min, x_max = _calc_ticks(np.min(x_mins), np.max(x_maxs))
+    y_ticks, y_min, y_max = _calc_ticks(np.min(y_mins), np.max(y_maxs))
 
     if j == 0:
         ax.set_xlim([x_min, x_max])
@@ -195,7 +210,7 @@ def _pointplot(axs, i, j, df, labels, specials: dict[str, int]):
     return plot_obj
 
 
-def plot_study_results(df, objectives, special: dict[str, int]):
+def plot_study_results(datasets: dict[str, object], objectives):
     plt.rcParams.update(light_plots)
     num_axs = len(objectives)
     fig, axs = plt.subplots(
@@ -203,9 +218,9 @@ def plot_study_results(df, objectives, special: dict[str, int]):
     )
 
     for i, j in combinations_with_replacement(list(range(num_axs)), 2):
-        _pointplot(axs, i, j, df, objectives, special)
+        _pointplot(axs, i, j, datasets, objectives)
         if i != j:
-            _pointplot(axs, j, i, df, objectives, special)
+            _pointplot(axs, j, i, datasets, objectives)
 
     handles, labels = axs[0, 0].get_legend_handles_labels()
     plt.legend(
@@ -237,12 +252,11 @@ def plot_study_results(df, objectives, special: dict[str, int]):
 
     plt.savefig(
         result_path / ("study" + ".pgf"),
-        # bbox_inches="tight"
     )
     # plt.show()
 
 
-def table_best(df, specials: dict[str, int]):
+def table_best(datasets: dict[str, object]):
     with (result_path / "tab_overview.tex").open("+w") as fp:
         fp.writelines(
             [
@@ -288,9 +302,9 @@ def table_best(df, specials: dict[str, int]):
             ]
         )
         n_layers = 4
-        for descr, idx in specials.items():
-            row = df.loc[[idx]]
-            fp.writelines([descr, "&", str(idx), "&"])
+        for descr, dataset in datasets.items():
+            row = dataset.head(1)  # .loc[[0]]
+            fp.writelines([descr, "&", str(row["number"].values[0]), "&"])
             fp.writelines(
                 [
                     r"["
@@ -306,7 +320,12 @@ def table_best(df, specials: dict[str, int]):
                 [
                     r"["
                     + ", ".join(
-                        row[f"params_material{i}"].values[0].replace("Titanium", "Ti")
+                        r"$\mathrm{"
+                        + row[f"params_material{i}"]
+                        .values[0]
+                        .replace("Titanium", "Ti")
+                        .replace(r"\;GPa", "")
+                        + r"}$"
                         for i in range(n_layers)
                     )
                     + r"]",
