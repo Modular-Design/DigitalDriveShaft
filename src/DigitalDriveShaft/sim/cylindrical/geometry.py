@@ -34,15 +34,40 @@ def __mesh_with_shell__(
     mapdl: Mapdl, shaft: DriveShaft, mesh_builder: CylindricMeshBuilder
 ):
     start_id = 1
-    # dz = shaft.form.length() / mesh_builder.n_z
+    dz = shaft.form.length() / mesh_builder.n_z
     # dphi = (mesh_builder.phi_max - mesh_builder.phi_min) / mesh_builder.n_phi
-    zs = np.linspace(shaft.form.min_z(), shaft.form.max_z(), mesh_builder.n_z)
-    phis = np.linspace(mesh_builder.phi_min, mesh_builder.phi_max, mesh_builder.n_phi)
+
+    start_offset = list(
+        np.arange(
+            shaft.form.min_z() - mesh_builder.extensions[0], shaft.form.min_z(), dz
+        )
+    )
+    end_offset = list(
+        np.arange(
+            shaft.form.max_z() + mesh_builder.extensions[0], shaft.form.max_z(), -dz
+        )[::-1]
+    )
+    zs = (
+        start_offset
+        + list(
+            np.linspace(shaft.form.min_z(), shaft.form.max_z(), mesh_builder.n_z + 1)
+        )
+        + end_offset
+    )
+    phis = np.linspace(
+        mesh_builder.phi_min, mesh_builder.phi_max, mesh_builder.n_phi + 1
+    )
     k_start = start_id
     k_id = k_start
     for phi in phis:
         for z in zs:
-            r = shaft.get_center_radius(z, phi, False)
+            r = 0
+            if z < shaft.form.min_z():
+                r = shaft.get_center_radius(shaft.form.min_z(), phi, False)
+            elif z > shaft.form.max_z():
+                r = shaft.get_center_radius(shaft.form.max_z(), phi, False)
+            else:
+                r = shaft.get_center_radius(z, phi, False)
             mapdl.k(k_id, r, phi / np.pi * 180, z)
             k_id += 1
     # k_end = k_id - 1
@@ -79,7 +104,13 @@ def __mesh_with_shell__(
     layup_hashes = []
     for i in range(combinations):
         z, phi = rel_positions[i]
-        laminat = shaft.stackup.get_value(z, phi)
+        laminat = None
+        if z < shaft.form.min_z():
+            laminat = shaft.stackup.get_value(shaft.form.min_z(), phi)
+        elif z > shaft.form.max_z():
+            laminat = shaft.stackup.get_value(shaft.form.max_z(), phi)
+        else:
+            laminat = shaft.stackup.get_value(z, phi)
         plies = laminat.get_plies()
 
         layup_datas = []

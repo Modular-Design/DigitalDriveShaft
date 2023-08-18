@@ -37,7 +37,12 @@ def calc_strength(
         mapdl.nummrg("NODE")
 
     # master RBE3
-    length = shaft.get_length()
+    offset = 0
+    if mesh_builder is not None:
+        exts = mesh_builder.get("extensions")
+        if exts is not None:
+            offset = exts[1]
+    length = shaft.get_length() + offset
     mapdl.nsel("S", "LOC", "Z", length)
 
     master_id = mapdl.n("", 0, 0, length)
@@ -55,8 +60,15 @@ def calc_strength(
     # BCs
     mapdl.run("/solu")
     # Fixation
+
+    offset = 0
+    if mesh_builder is not None:
+        exts = mesh_builder.get("extensions")
+        if exts is not None:
+            offset = exts[0]
+
     mapdl.csys(1)
-    mapdl.nsel("S", "LOC", "Z", 0)
+    mapdl.nsel("S", "LOC", "Z", shaft.form.min_z() - offset)
     mapdl.d("ALL", "UY", 0)
     mapdl.d("ALL", "UZ", 0)
     mapdl.d("ALL", "UX", 0)
@@ -90,7 +102,7 @@ def calc_strength(
     # print("# NUMERIC: ")
     # print("## Stresses: ")
 
-    _, _, failures = anaylse_stackup(mapdl, shaft.get_stackup())
+    _, _, failures = anaylse_stackup(mapdl, shaft)
 
     # print("## Failures: ")
     # print(failures)

@@ -4,8 +4,8 @@ import json
 from post_plots import plot_study_results, table_best
 
 study = optuna.create_study(
-    study_name="simulation",  # simulation_metal or simulation_composite
-    storage="sqlite:////home/willi/Nextcloud/share/sim6/db.sqlite3",
+    study_name="simulation_nsga3",  # simulation_metal or simulation_composite
+    storage="sqlite:////home/willi/Nextcloud/share/sim7/db.sqlite3",
     load_if_exists=True,
 )
 
@@ -23,15 +23,28 @@ def max_util(x):
     # return max(x["values_1"], x["values_2"])
 
 
-# df["utilization"] = df.apply(max_util, axis=1)
+tlayers = [x for x in df.columns if x.startswith("params_t")]
+nlayers = len(tlayers)
+
+if "user_attrs_total_thickness" not in df.columns:
+
+    def total_thickness(x):
+        return sum([x[i] for i in tlayers])
+
+    df["user_attrs_total_thickness"] = df.apply(total_thickness, axis=1)
 
 
 print("Usefull Variants:")
 usefull_df = df[(df["values_1"] <= 1)]
 print(usefull_df, end="\n###################\n")
-rest_df = df[(df["values_1"] > 1)]
+rest_df = df[(df["values_1"] > 1)].sort_values(by=["values_1"])[
+    ["user_attrs_total_thickness", "values_1", "user_attrs_utilization"]
+]
 print("Unusefull Variants:")
 print(rest_df, end="\n###################\n")
+
+if usefull_df.shape[0] == 0:
+    exit()
 
 print("Best Candiadates")
 

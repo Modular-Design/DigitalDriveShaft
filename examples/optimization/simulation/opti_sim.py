@@ -41,9 +41,21 @@ def objective(trial) -> Union[float, Sequence[float]]:
     shaft = create_shaft(materials, shape, n_layers, thicknesses, angles)
     mass = shaft.get_mass()
 
-    f_moment_1 = calc_strength(mapdl, shaft, Loading(mz=M_max), dict())
-    f_moment_2 = calc_strength(mapdl, shaft, Loading(mz=-1.0 * M_max), dict())
-    f_force = calc_strength(mapdl, shaft, Loading(fz=N_max), dict())
+    f_moment_1 = calc_strength(
+        mapdl,
+        shaft,
+        Loading(mz=-1.0 * M_max),
+        dict(n_phi=32, n_z=25, extensions=(60, 60)),
+    )
+    f_moment_2 = calc_strength(
+        mapdl,
+        shaft,
+        Loading(mz=-1.0 * M_max),
+        dict(n_phi=32, n_z=25, extensions=(60, 60)),
+    )
+    f_force = calc_strength(
+        mapdl, shaft, Loading(fz=N_max), dict(n_phi=32, n_z=25, extensions=(60, 60))
+    )
 
     # buck_moment = calc_buckling(mapdl, shaft, None, "MOMENT")[0] * 1000.0  # [Nm]
 
@@ -58,7 +70,7 @@ def objective(trial) -> Union[float, Sequence[float]]:
 
 
 material_selection = ["GFK", r"CFK_{230\;GPa}", r"CFK_{395\;GPa}"]
-n_trials = 200
+n_trials = 1000
 
 sampler_nsga3 = samplers.NSGAIIISampler()
 study = create_study(
