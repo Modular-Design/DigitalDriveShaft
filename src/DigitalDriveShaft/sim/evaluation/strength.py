@@ -28,8 +28,6 @@ def calc_strength(
     """
     mapdl.finish()
     if mesh_builder is not None:
-        mapdl.clear()
-        mapdl.prep7()
         driveshaft_to_mapdl(
             mapdl, shaft, element_type="SHELL", mesh_builder=mesh_builder
         )

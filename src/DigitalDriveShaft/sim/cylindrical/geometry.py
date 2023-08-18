@@ -13,6 +13,8 @@ def driveshaft_to_mapdl(
     element_type=Union[Literal["SHELL"], Literal["SOLID"]],
     mesh_builder: Optional[dict] = None,
 ):
+    mapdl.clear()
+    mapdl.prep7()
     mapdl.csys(1)
 
     if mesh_builder is None:
