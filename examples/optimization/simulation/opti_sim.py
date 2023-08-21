@@ -72,7 +72,7 @@ def objective(trial) -> Union[float, Sequence[float]]:
     return mass, max(f_moment_1, f_moment_2, f_force), np.abs(rpm - rpm_min), deform
 
 
-material_selection = ["GFK", r"CFK_{230}", r"CFK_{395a}"]
+material_selection = ["GFK", r"CFK_{230}", r"CFK_{395}"]
 n_trials = 1000
 
 sampler_nsga3 = samplers.NSGAIIISampler()
