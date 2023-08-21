@@ -68,11 +68,11 @@ CFK_395GPa_prepreg = TransverselyIsotropicMaterial(
     failures=[CFK_230GPa_prepreg_cuntze],
 )  # MPa
 
-# Epoxy S-Glass UD (source: ANSYS composite engineering data)
+# Epoxy E-Glass UD (source: ANSYS composite engineering data)
 GFK_cuntze = CuntzeFailure(
-    E1=50000,  # t/s^2/mm
-    R_1t=1700,  # t/s^2/mm
-    R_1c=1000,  # t/s^2/mm
+    E1=45000,  # t/s^2/mm
+    R_1t=1100,  # t/s^2/mm
+    R_1c=675,  # t/s^2/mm
     R_2t=35,  # t/s^2/mm
     R_2c=120,  # t/s^2/mm
     R_21=80,  # t/s^2/mm
@@ -80,8 +80,8 @@ GFK_cuntze = CuntzeFailure(
 )
 
 GFK_prepreg = TransverselyIsotropicMaterial(
-    E_l=50000,  # t/s^2/mm
-    E_t=8000,  # t/s^2/mm
+    E_l=45000,  # t/s^2/mm
+    E_t=10000,  # t/s^2/mm
     nu_lt=0.3,
     nu_tt=0.4,
     G_lt=5000,  # t/s^2/mm

@@ -8,7 +8,7 @@ with open("requirements.txt") as f:
 setup(
     name="DigitalDriveShaft",
     classifiers=[
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.10",
     ],
     install_requires=reqs,
     extras_require={

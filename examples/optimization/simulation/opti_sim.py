@@ -45,16 +45,19 @@ def objective(trial) -> Union[float, Sequence[float]]:
         mapdl,
         shaft,
         Loading(mz=-1.0 * M_max),
-        dict(n_phi=32, n_z=25, extensions=(60, 60)),
+        dict(n_phi=16, n_z=10, extensions=(int(500 / 10 * 3), int(500 / 10 * 3))),
     )
     f_moment_2 = calc_strength(
         mapdl,
         shaft,
         Loading(mz=-1.0 * M_max),
-        dict(n_phi=32, n_z=25, extensions=(60, 60)),
+        dict(n_phi=16, n_z=10, extensions=(int(500 / 10 * 3), int(500 / 10 * 3))),
     )
     f_force = calc_strength(
-        mapdl, shaft, Loading(fz=N_max), dict(n_phi=32, n_z=25, extensions=(60, 60))
+        mapdl,
+        shaft,
+        Loading(fz=N_max),
+        dict(n_phi=16, n_z=10, extensions=(int(500 / 10 * 3), int(500 / 10 * 3))),
     )
 
     # buck_moment = calc_buckling(mapdl, shaft, None, "MOMENT")[0] * 1000.0  # [Nm]
