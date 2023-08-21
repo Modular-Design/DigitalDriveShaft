@@ -105,8 +105,8 @@ titan = IsotropicMaterial(
 )
 
 material_legend = {
-    r"CFK_{230\;GPa}": CFK_230GPa_prepreg,
-    r"CFK_{395\;GPa}": CFK_395GPa_prepreg,
+    r"CFK_{230}": CFK_230GPa_prepreg,
+    r"CFK_{395}": CFK_395GPa_prepreg,
     "GFK": GFK_prepreg,
     "Steel": steel,
     "Titanium": titan,
