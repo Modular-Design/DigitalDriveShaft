@@ -65,7 +65,7 @@ def objective(trial) -> Union[float, Sequence[float]]:
     rpms = np.array(calc_eigenfreq(mapdl, shaft, None)) * 60  # [RPM]
     rpm = find_nearest(rpms, rpm_min)
 
-    deform = calc_deformation(mapdl, Loading(fx=1), shaft, None)
+    deform = calc_deformation(mapdl, shaft, Loading(fx=1), None)
 
     trial.set_user_attr("rpms", rpms)
     trial.set_user_attr("utilization", (f_moment_1, f_moment_2, f_force))
