@@ -62,10 +62,10 @@ def objective(trial) -> Union[float, Sequence[float]]:
 
     # buck_moment = calc_buckling(mapdl, shaft, None, "MOMENT")[0] * 1000.0  # [Nm]
 
-    rpms = np.array(calc_eigenfreq(mapdl, shaft, None)) * 60  # [RPM]
+    rpms = np.array(calc_eigenfreq(mapdl, shaft, dict())) * 60  # [RPM]
     rpm = find_nearest(rpms, rpm_min)
 
-    deform = calc_deformation(mapdl, shaft, Loading(fx=1), None)
+    deform = calc_deformation(mapdl, shaft, Loading(fx=1), dict())
 
     trial.set_user_attr("rpms", rpms)
     trial.set_user_attr("utilization", (f_moment_1, f_moment_2, f_force))
