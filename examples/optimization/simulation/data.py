@@ -144,7 +144,7 @@ def create_shape_func(shape):
     return csp
 
 
-def create_shaft(materials, shape, n_layers, thicknesses, angles):
+def create_shaft(materials, shape, n_layers, thickness, angles):
     csp = create_shape_func(shape)
     cyl_form = CylindricalForm(lambda z, phi: csp(z), 500)
 
@@ -154,7 +154,8 @@ def create_shaft(materials, shape, n_layers, thicknesses, angles):
             material = material_legend[materials[i]]
             # start, end = angles[i]
             # rotation = (end - start) * z + start
-            plies.append(Ply(material, thicknesses[i], angles[i], degree=True))
+            t = d0 / 2 / csp(z) * thickness / n_layers
+            plies.append(Ply(material, t, angles[i], degree=True))
         return Stackup(plies)
 
     cyl_stackup = CylindricalStackup(stackup_func)

@@ -42,7 +42,8 @@ def calc_eigenfreq(
     # mapdl.omega("", "", 1e1)  # [Hz]
     # Fixation
     # """
-    """
+
+    mapdl.csys(1)
     mapdl.nsel("S", "LOC", "Z", 0)
     mapdl.d("ALL", "UX", 0)
     mapdl.d("ALL", "UY", 0)
@@ -51,7 +52,9 @@ def calc_eigenfreq(
 
     length = shaft.get_length()
     mapdl.nsel("S", "LOC", "Z", length)
-    # mapdl.d("ALL", "UX", 0)
+    mapdl.d("ALL", "UX", 0)
+    mapdl.allsel("ALL")
+    """
     mapdl.d("ALL", "ALL", 0)
     mapdl.allsel("ALL")
     mapdl.cm("SHAFT", "ELEM")

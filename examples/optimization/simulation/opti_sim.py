@@ -1,10 +1,9 @@
 from data import mapdl, create_shaft, M_max, N_max, rpm_min
 from DigitalDriveShaft.analysis import Loading
 from DigitalDriveShaft.sim.evaluation import (
-    calc_buckling,  # noqa
+    calc_deformation,
     calc_eigenfreq,
     calc_strength,
-    calc_bending,
 )
 import numpy as np
 from optuna import create_study, samplers
@@ -31,8 +30,9 @@ def objective(trial) -> Union[float, Sequence[float]]:
     angles = []
     materials = []
 
+    thicknesses = trial.suggest_float("t", 4.0, 18.0, step=0.4)
+
     for i in range(n_layers):
-        thicknesses.append(trial.suggest_float(f"t{i}", 2.2, 6.2, step=0.4))
         angles.append(
             trial.suggest_float(f"a{i}", -90.0, 90.0, step=1.0),
         )
@@ -65,8 +65,9 @@ def objective(trial) -> Union[float, Sequence[float]]:
     rpms = np.array(calc_eigenfreq(mapdl, shaft, None)) * 60  # [RPM]
     rpm = find_nearest(rpms, rpm_min)
 
-    deform = calc_bending(mapdl, shaft, None)
+    deform = calc_deformation(mapdl, Loading(fx=1), shaft, None)
 
+    trial.set_user_attr("rpms", rpms)
     trial.set_user_attr("utilization", (f_moment_1, f_moment_2, f_force))
     trial.set_user_attr("rpm", rpm)
     return mass, max(f_moment_1, f_moment_2, f_force), np.abs(rpm - rpm_min), deform

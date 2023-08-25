@@ -1,13 +1,13 @@
 from DigitalDriveShaft.cylindrical import DriveShaft
+from DigitalDriveShaft.analysis import Loading
 from ..cylindrical import driveshaft_to_mapdl
 from ansys.mapdl.core import Mapdl
 from typing import Optional, List
 import numpy as np
-import math
 
 
-def calc_bending(
-    mapdl: Mapdl, shaft: DriveShaft, mesh_builder: Optional[dict] = None
+def calc_deformation(
+    mapdl: Mapdl, shaft: DriveShaft, load: Loading, mesh_builder: Optional[dict] = None
 ) -> List[float]:
     """
 
@@ -30,17 +30,37 @@ def calc_bending(
 
     mapdl.finish()
     if mesh_builder is not None:
-        mapdl.clear()
-        mapdl.prep7()
         driveshaft_to_mapdl(
             mapdl, shaft, element_type="SHELL", mesh_builder=mesh_builder
         )
         mapdl.asel("ALL")
         mapdl.nummrg("NODE")
 
+    # master RBE3
+    offset = 0
+    if mesh_builder is not None:
+        exts = mesh_builder.get("extensions")
+        if exts is not None:
+            offset = exts[1]
+    length = shaft.get_length() + offset
+    mapdl.nsel("S", "LOC", "Z", length)
+
+    master_id = mapdl.n("", 0, 0, length)
+    master_enum = mapdl.et("", "MASS21")
+    mapdl.real(master_enum)
+    mapdl.type(master_enum)
+    mapdl.r(master_enum, 1.0e-9, 1.0e-9, 1.0e-9)
+    mapdl.e(master_id)
+    mapdl.nsel("S", "NODE", "", master_id)
+    mapdl.cm("master", "NODE")
+
+    mapdl.nsel("S", "LOC", "Z", length)
+    mapdl.rbe3(master_id, "ALL", "ALL")
+
     # BCs
     mapdl.run("/solu")
     # Fixation
+
     mapdl.csys(1)
     mapdl.nsel("S", "LOC", "Z", 0)
     mapdl.d("ALL", "UY", 0)
@@ -48,26 +68,15 @@ def calc_bending(
     mapdl.d("ALL", "UX", 0)
     mapdl.nsel("ALL")
 
+    mapdl.csys(0)
     # Loading
-    length = shaft.get_length()
-    mapdl.nsel("S", "LOC", "Z", length)
-    nodes = mapdl.mesh.nodes
+    mapdl.cmsel("S", "master")
+    mapdl.f("ALL", "FX", load.fx)
+    mapdl.f("ALL", "FY", load.fy)
+    mapdl.f("ALL", "FZ", load.fz)
+    mapdl.f("ALL", "MZ", load.mz)
 
-    # radius = shaft.get_center_radius(length, 0, False)
-
-    fx_i = 1.0 / len(nodes)
-    fy_i = 0.0 / len(nodes)
-    for node in nodes:
-        x = node[0]
-        y = node[1]
-        phi_rad = math.atan2(y, x)
-        phi_deg = phi_rad / np.pi * 180
-        mapdl.nsel("S", "LOC", "Z", length)
-        mapdl.nsel("R", "LOC", "Y", phi_deg)
-        mapdl.csys(0)  # INFO: it seems like FCs are always in csys(0), maybe skip this
-        mapdl.f("ALL", "FX", fx_i)
-        mapdl.f("ALL", "FY", fy_i)
-        mapdl.csys(1)
+    mapdl.csys(1)
 
     mapdl.nsel("ALL")
 

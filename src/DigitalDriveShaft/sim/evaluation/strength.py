@@ -73,6 +73,7 @@ def calc_strength(
     mapdl.nsel("ALL")
 
     # Loading
+    mapdl.csys(0)
     mapdl.cmsel("S", "master")
     mapdl.f("ALL", "FX", load.fx)
     mapdl.f("ALL", "FY", load.fy)
