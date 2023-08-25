@@ -43,6 +43,7 @@ def calc_eigenfreq(
     # Fixation
     # """
 
+    mapdl.slashsolu()
     mapdl.csys(1)
     mapdl.nsel("S", "LOC", "Z", 0)
     mapdl.d("ALL", "UX", 0)
@@ -86,7 +87,7 @@ def calc_eigenfreq(
     """
 
     # Modal Analysis
-    mapdl.slashsolu()
+
     mm = mapdl.math
     nev = 10  # Get the first 10 modes
     _output = mapdl.modal_analysis("DAMP", nmode=nev)
