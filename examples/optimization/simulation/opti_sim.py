@@ -67,7 +67,7 @@ def objective(trial) -> Union[float, Sequence[float]]:
 
     deform = calc_deformation(mapdl, shaft, Loading(fx=1), dict())
 
-    trial.set_user_attr("rpms", rpms)
+    trial.set_user_attr("rpms", list(rpms))
     trial.set_user_attr("utilization", (f_moment_1, f_moment_2, f_force))
     trial.set_user_attr("rpm", rpm)
     return mass, max(f_moment_1, f_moment_2, f_force), np.abs(rpm - rpm_min), deform
