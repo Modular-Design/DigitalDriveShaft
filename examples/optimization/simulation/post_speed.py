@@ -115,9 +115,9 @@ def _speedplot(axs, i, datasets: dict[str, object], labels):
 
     ax.set_xlim([x_min, x_max])
     ax.set_xticks(np.linspace(x_min, x_max, x_ticks))
-    if i == len(labels) - 1:
+    if i == 0:  # len(labels) - 1:
         ax.set_xlabel("iterations", weight="bold")
-        ax.legend(loc="lower right", fontsize="xx-small", handlelength=1)
+        ax.legend(loc="upper right", fontsize="xx-small", handlelength=1)
 
     ax.set_ylim([y_min, y_max])
     ax.set_yticks(np.linspace(y_min, y_max, y_ticks))
@@ -174,7 +174,7 @@ dfs = dict()
 for optimizer in optimizers:
     study = optuna.create_study(
         study_name=f"simulation_{optimizer}",
-        storage="sqlite:////home/willi/Nextcloud/share/sim11/db.sqlite3",
+        storage="sqlite:////home/willi/Nextcloud/share/sim13/db.sqlite3",
         load_if_exists=True,
     )
 

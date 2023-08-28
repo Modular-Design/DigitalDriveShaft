@@ -8,7 +8,7 @@ optimizers = ["nsga2", "nsga3", "tpe"]
 for opti in optimizers:
     study = optuna.create_study(
         study_name=f"simulation_{opti}",  # simulation_metal or simulation_composite
-        storage="sqlite:////home/willi/Nextcloud/share/sim11/db.sqlite3",
+        storage="sqlite:////home/willi/Nextcloud/share/sim13/db.sqlite3",
         load_if_exists=True,
     )
 
@@ -17,10 +17,11 @@ for opti in optimizers:
     )
 
     print(opti)
-    print(df)
+    # print(df)
     print(f"Simulation time: {df['duration'].sum()}")
     usefull_df = df[(df["values_1"] <= 1)]
     print(f"Usefull Trials: {usefull_df.shape[0]}")
+    print("================================================")
 
 exit()
 

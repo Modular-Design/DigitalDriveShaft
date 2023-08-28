@@ -25,16 +25,16 @@ material_selection = []  # possible content: "CFK", "Steel", "Titan"
 
 def objective(trial) -> Union[float, Sequence[float]]:
     n_layers = 4  # trial.suggest_int("n_layers", 1, 6)
-    shape = trial.suggest_float("shape", 0.0, 1.0)
+    shape = trial.suggest_float("shape", -1.0, 1.0)
     thicknesses = []
     angles = []
     materials = []
 
-    thicknesses = trial.suggest_float("t", 4.0, 18.0, step=0.4)
+    thicknesses = trial.suggest_float("t", 12.0, 18.0, step=0.4)
 
     for i in range(n_layers):
         angles.append(
-            trial.suggest_float(f"a{i}", -90.0, 90.0, step=1.0),
+            trial.suggest_float(f"a{i}", -60.0, 60.0, step=1.0),
         )
         materials.append(trial.suggest_categorical(f"material{i}", material_selection))
 
@@ -79,7 +79,7 @@ material_selection = [
     r"CFK_{395}",
     "HTS40",
 ]
-n_trials = 1000
+n_trials = 1500
 
 sampler_nsga3 = samplers.NSGAIIISampler()
 study = create_study(

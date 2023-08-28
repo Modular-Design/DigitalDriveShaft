@@ -35,7 +35,7 @@ def table_best(datasets: dict[str, object]):
         fp.writelines(
             [
                 r"\begin{tabular}{",
-                str("c" * 8) + "c}",
+                str("c" * 9) + "c}",
                 "\n",
                 r"\hline",
                 "\n",
@@ -46,6 +46,8 @@ def table_best(datasets: dict[str, object]):
                 r"$\mathrm{\mathbf{\alpha} \; \left[ ^\circ \right]}$",
                 "&",
                 r"\textbf{m} $\mathrm{\left[ \; \right]}$",
+                "&",
+                r"\textbf{s} $\mathrm{\left[ \; \right]}$",
                 "&",
                 r"\textbf{t} $\mathrm{\left[ mm \right]}$",
                 "&",
@@ -65,7 +67,10 @@ def table_best(datasets: dict[str, object]):
         n_layers = 4
         for descr, dataset in datasets.items():
             row = dataset.head(1)  # .loc[[0]]
-            fp.writelines([descr, "&", str(row["number"].values[0]), "&"])
+            try:
+                fp.writelines([descr, "&", str(row["number"].values[0]), "&"])
+            except IndexError:
+                print(f"ERROR: no entry found for: {descr}")
             fp.writelines(
                 [
                     r"["
@@ -92,12 +97,9 @@ def table_best(datasets: dict[str, object]):
             )
             fp.writelines(
                 [
-                    r"["
-                    + ", ".join(
-                        str(np.round(row[f"params_t{i}"].values[0], 1))
-                        for i in range(n_layers)
-                    )
-                    + r"]",
+                    str(np.round(row["params_shape"].values[0], 1)),
+                    "&",
+                    str(np.round(row["params_t"].values[0], 1)),
                     "&",
                 ]
             )
@@ -159,13 +161,19 @@ optimizers = ["nsga3", "nsga2", "tpe"]
 for optimizer in optimizers:
     study = optuna.create_study(
         study_name=f"simulation_{optimizer}",
-        storage="sqlite:////home/willi/Nextcloud/share/sim11/db.sqlite3",
+        storage="sqlite:////home/willi/Nextcloud/share/sim13/db.sqlite3",
         load_if_exists=True,
     )
 
     df = study.trials_dataframe(
         attrs=("number", "value", "params", "user_attrs", "duration", "state")
     )
+
+    print("#####################")
+    print(optimizer)
+    print("#####################")
+    for col in df.columns:
+        print(col)
 
     usefull_df = df[(df["values_1"] <= 1)]
 

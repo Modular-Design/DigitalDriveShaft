@@ -27,7 +27,7 @@ if False:
     for opti in optimizers:
         study = optuna.create_study(
             study_name=f"simulation_{opti}",  # simulation_metal or simulation_composite
-            storage="sqlite:////home/willi/Nextcloud/share/sim11/db.sqlite3",
+            storage="sqlite:////home/willi/Nextcloud/share/sim13/db.sqlite3",
             load_if_exists=True,
         )
 
@@ -136,12 +136,12 @@ def plot_importance(
         elif para.startswith("shape"):
             key_len = len("shape")
             para = r"s"
-        elif para.startswith("t"):
-            key_len = len("t")
-            para = r"t_" + str(int(para[key_len:]) + 1)
+        # elif para.startswith("t"):
+        #     key_len = len("t")
+        #     para = r"t_" + str(int(para[key_len:]) + 1)
         params[i] = r"$\mathrm{" + para + r"}$"
     ax.set_yticks(y, params)
-    ax.legend(loc="upper right", ncols=1)  # len(goals)
+    ax.legend(loc="center right", ncols=1)  # len(goals)
     ax.set_xlim([0, 1])
     ax.set_ylim([y_min, y_max])
     fig.tight_layout(pad=0)
