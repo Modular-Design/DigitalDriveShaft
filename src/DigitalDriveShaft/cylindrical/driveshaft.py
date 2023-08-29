@@ -1,7 +1,7 @@
 from .econtour import EContour
 from .form import CylindricalForm, Cylinder
 from .stackup import CylindricalStackup, Stackup
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 import numpy as np
 
@@ -39,7 +39,7 @@ class DriveShaft:
 
     def get_value(
         self, z: float, phi: float, iso=True
-    ) -> (float, Stackup):  # z in [0,1], phi[0,1]
+    ) -> Tuple[float, Stackup]:  # z in [0,1], phi[0,1]
         return self.form.get_value(z, phi, iso), self.stackup.get_value(z, phi, iso)
 
     def get_radius(

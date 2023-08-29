@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable
 
 
 class CylindricalCoordFunction:
@@ -6,7 +6,23 @@ class CylindricalCoordFunction:
     A function best described in a cylindrical coordinate system.
     """
 
-    def __init__(self, func, z_max: float, z_min: Optional[float] = 0):
+    def __init__(
+        self,
+        func: Callable[[float, float], float],
+        z_max: float,
+        z_min: Optional[float] = 0,
+    ):
+        """A function best described in a cylindrical coordinate system.
+
+        Parameters
+        ----------
+        func : Callable[[float, float], float]
+            functional wich intakes z and phi and returns the radius
+        z_max : float
+            maximum z value
+        z_min : Optional[float], optional
+            mimimum z value, by default 0
+        """
         self.func = func
         self.z_max = z_max
         self.z_min = z_min

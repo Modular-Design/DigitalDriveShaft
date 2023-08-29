@@ -1,6 +1,6 @@
 from typing import Optional, Union, Literal
 from ansys.mapdl.core import Mapdl
-from src.DigitalDriveShaft.cylindrical import DriveShaft
+from DigitalDriveShaft.cylindrical import DriveShaft
 from ..elements import Shell181
 from ..material import material_to_mapdl
 from .mesh import CylindricMeshBuilder
@@ -13,6 +13,8 @@ def driveshaft_to_mapdl(
     element_type=Union[Literal["SHELL"], Literal["SOLID"]],
     mesh_builder: Optional[dict] = None,
 ):
+    mapdl.clear()
+    mapdl.prep7()
     mapdl.csys(1)
 
     if mesh_builder is None:
@@ -35,14 +37,39 @@ def __mesh_with_shell__(
 ):
     start_id = 1
     dz = shaft.form.length() / mesh_builder.n_z
-    dphi = (mesh_builder.phi_max - mesh_builder.phi_min) / mesh_builder.n_phi
-    zs = np.arange(shaft.form.min_z(), shaft.form.max_z() + dz, dz)
-    phis = np.arange(mesh_builder.phi_min, mesh_builder.phi_max + dphi, dphi)
+    # dphi = (mesh_builder.phi_max - mesh_builder.phi_min) / mesh_builder.n_phi
+
+    start_offset = list(
+        np.arange(
+            shaft.form.min_z() - mesh_builder.extensions[0], shaft.form.min_z(), dz
+        )
+    )
+    end_offset = list(
+        np.arange(
+            shaft.form.max_z() + mesh_builder.extensions[0], shaft.form.max_z(), -dz
+        )[::-1]
+    )
+    zs = (
+        start_offset
+        + list(
+            np.linspace(shaft.form.min_z(), shaft.form.max_z(), mesh_builder.n_z + 1)
+        )
+        + end_offset
+    )
+    phis = np.linspace(
+        mesh_builder.phi_min, mesh_builder.phi_max, mesh_builder.n_phi + 1
+    )
     k_start = start_id
     k_id = k_start
     for phi in phis:
         for z in zs:
-            r = shaft.get_center_radius(z, phi, False)
+            r = 0
+            if z < shaft.form.min_z():
+                r = shaft.get_center_radius(shaft.form.min_z(), phi, False)
+            elif z > shaft.form.max_z():
+                r = shaft.get_center_radius(shaft.form.max_z(), phi, False)
+            else:
+                r = shaft.get_center_radius(z, phi, False)
             mapdl.k(k_id, r, phi / np.pi * 180, z)
             k_id += 1
     # k_end = k_id - 1
@@ -76,12 +103,19 @@ def __mesh_with_shell__(
     element.set_layer_storage(1)
     element.add_to_mapdl(mapdl)
     material_hashes = []
+    layup_hashes = []
     for i in range(combinations):
         z, phi = rel_positions[i]
-        laminat = shaft.stackup.get_value(z, phi)
+        laminat = None
+        if z < shaft.form.min_z():
+            laminat = shaft.stackup.get_value(shaft.form.min_z(), phi)
+        elif z > shaft.form.max_z():
+            laminat = shaft.stackup.get_value(shaft.form.max_z(), phi)
+        else:
+            laminat = shaft.stackup.get_value(z, phi)
         plies = laminat.get_plies()
-        sec_id = i + 1
-        mapdl.sectype(secid=sec_id, type_="SHELL", name="shell181")
+
+        layup_datas = []
         for ply in plies:
             material = ply.get_material()
             mat_hash = hash(material)
@@ -92,13 +126,29 @@ def __mesh_with_shell__(
                 material_hashes.append(mat_hash)
                 material_to_mapdl(mapdl, material, mat_id)
 
-            mapdl.secdata(
-                ply.get_thickness(), mat_id, ply.get_rotation(degree=True) + 90, 3
+            layup_datas.append(
+                (
+                    np.round(ply.get_thickness(), 2),
+                    mat_id,
+                    np.round(ply.get_rotation(degree=True) + 90, 2),
+                    3,
+                )
             )
+
+        layup_hash = hash(str(layup_datas))
+        if layup_hash in layup_hashes:
+            layup_id = layup_hashes.index(layup_hash) + 1
+        else:
+            layup_id = len(layup_hashes) + 1
+            layup_hashes.append(layup_hash)
+            mapdl.sectype(secid=layup_id, type_="SHELL", name="shell181")
+
+            for data in layup_datas:
+                mapdl.secdata(data[0], data[1], data[2], data[3])
         mapdl.asel("S", "AREA", "", i + 1)
         mapdl.esize(0, 1)
         mapdl.type(1)
-        mapdl.secnum(sec_id)
+        mapdl.secnum(layup_id)
         mapdl.amesh("ALL")
 
 

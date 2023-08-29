@@ -1,4 +1,4 @@
-from src.DigitalDriveShaft.cylindrical import DriveShaft
+from DigitalDriveShaft.cylindrical import DriveShaft
 from ..cylindrical import driveshaft_to_mapdl
 from ansys.mapdl.core import Mapdl
 from typing import Optional, Literal

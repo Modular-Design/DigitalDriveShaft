@@ -1,16 +1,15 @@
-from typing import Optional
 from ansys.mapdl.core import Mapdl
-from src.DigitalDriveShaft.cylindrical import CylindricalStackup
+from DigitalDriveShaft.cylindrical import DriveShaft, CylindricalStackup
 
 
 def anaylse_stackup(
     mapdl: Mapdl,
-    stackup: CylindricalStackup,
+    shaft: DriveShaft,
     calculate_failures=True,
-    id_offset: Optional[int] = 0,
 ):
     phis = mapdl.post_processing.element_values("CENT", "Y")
     zs = mapdl.post_processing.element_values("CENT", "Z")
+    stackup = shaft.get_stackup()
     mapdl.rsys("LSYS")
     stresses = []
     strains = []
@@ -18,6 +17,8 @@ def anaylse_stackup(
 
     for elem_id in range(len(zs)):
         phi_pos, z_pos = phis[elem_id], zs[elem_id]
+        if z_pos < shaft.form.min_z() or z_pos > shaft.form.max_z():
+            continue
         mapdl.esel("S", "ELEM", "", elem_id)
         current_stackup = stackup.get_laminat(z_pos, phi_pos, iso=False)
         no_layers = len(current_stackup.get_plies())
@@ -64,9 +65,7 @@ def anaylse_stackup(
     return stresses, strains, failures
 
 
-def extract_stackup_stresses(
-    mapdl: Mapdl, stackup: CylindricalStackup, id_offset: Optional[int] = 0
-):
+def extract_stackup_stresses(mapdl: Mapdl, stackup: CylindricalStackup):
     mapdl.rsys("LSYS")
     stresses = []
 

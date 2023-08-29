@@ -6,13 +6,13 @@ with open("requirements.txt") as f:
 
 
 setup(
-    name="DgitalDriveShaft",
+    name="DigitalDriveShaft",
     classifiers=[
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.10",
     ],
     install_requires=reqs,
     extras_require={
         "develop": ["pytest>=7.1.1", "matplotlib>=3.5"],
-        "ansys": " ansys-mapdl-core>=0.62.1",
+        "ansys": " ansys-mapdl-core>=0.65.1",
     },
 )
