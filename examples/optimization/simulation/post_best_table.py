@@ -1,6 +1,7 @@
 import optuna
 from pathlib import Path
 import numpy as np
+from post_db import optimizers, storage
 
 result_path = (Path(__file__).parent / "data").absolute()
 
@@ -143,8 +144,6 @@ ascendences = {
     "values_3": False,
 }
 
-optimizers = ["nsga2", "nsga3", "tpe"]
-
 
 def generate_key(opti, value):
     return r"$\mathrm{{" + opti.upper() + r"}_{" + value + r"}}$"
@@ -161,7 +160,7 @@ optimizers = ["nsga3", "nsga2", "tpe"]
 for optimizer in optimizers:
     study = optuna.create_study(
         study_name=f"simulation_{optimizer}",
-        storage="sqlite:////home/willi/Nextcloud/share/sim13/db.sqlite3",
+        storage=storage,
         load_if_exists=True,
     )
 

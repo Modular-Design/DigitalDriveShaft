@@ -25,7 +25,7 @@ material_selection = []  # possible content: "CFK", "Steel", "Titan"
 
 def objective(trial) -> Union[float, Sequence[float]]:
     n_layers = 4  # trial.suggest_int("n_layers", 1, 6)
-    shape = trial.suggest_float("shape", -1.0, 1.0)
+    shape = trial.suggest_float("shape", 0.0, 1.0)
     thicknesses = []
     angles = []
     materials = []

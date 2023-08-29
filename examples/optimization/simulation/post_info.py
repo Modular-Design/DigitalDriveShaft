@@ -1,14 +1,13 @@
 import optuna
 from pathlib import Path
 import json
+from .post_db import optimizers, storage
 
-
-optimizers = ["nsga2", "nsga3", "tpe"]
 
 for opti in optimizers:
     study = optuna.create_study(
         study_name=f"simulation_{opti}",  # simulation_metal or simulation_composite
-        storage="sqlite:////home/willi/Nextcloud/share/sim13/db.sqlite3",
+        storage=storage,
         load_if_exists=True,
     )
 

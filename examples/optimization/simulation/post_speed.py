@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib import cycler
 import numpy as np
+from post_db import optimizers, storage
 
 from pathlib import Path
 import optuna
@@ -167,14 +168,12 @@ def plot_study_speed(datasets: dict[str, object], objectives):
     # plt.show()
 
 
-optimizers = ["nsga2", "nsga3", "tpe"]
-
 dfs = dict()
 
 for optimizer in optimizers:
     study = optuna.create_study(
         study_name=f"simulation_{optimizer}",
-        storage="sqlite:////home/willi/Nextcloud/share/sim13/db.sqlite3",
+        storage=storage,
         load_if_exists=True,
     )
 

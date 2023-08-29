@@ -8,15 +8,14 @@ from DigitalDriveShaft.sim.evaluation import (
 )  # noqa
 
 
-thicknesses = []
+thicknesses = 12
 materials = []
 angles = []
 for i in range(4):
     materials.append(bconf.iloc[0][f"params_material{i}"])
-    thicknesses.append(bconf.iloc[0][f"params_t{i}"])
     angles.append(bconf.iloc[0][f"params_a{i}"])
 
-shape = bconf.iloc[0]["params_shape"]
+shape = -0.99  # bconf.iloc[0]["params_shape"]
 n_layers = len(materials)
 print(angles)
 
