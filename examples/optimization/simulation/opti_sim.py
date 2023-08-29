@@ -79,8 +79,9 @@ material_selection = [
     r"CFK_{395}",
     "HTS40",
 ]
-n_trials = 1500
+n_trials = 500
 
+"""
 sampler_nsga3 = samplers.NSGAIIISampler()
 study = create_study(
     study_name="simulation_nsga3",
@@ -90,6 +91,7 @@ study = create_study(
     directions=["minimize", "minimize", "maximize", "maximize"],
 )
 study.optimize(objective, n_trials=n_trials)
+"""
 
 
 sampler_nsga2 = samplers.NSGAIISampler()
