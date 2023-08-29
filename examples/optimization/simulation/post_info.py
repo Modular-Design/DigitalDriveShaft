@@ -1,7 +1,7 @@
 import optuna
 from pathlib import Path
 import json
-from .post_db import optimizers, storage
+from post_db import optimizers, storage
 
 
 for opti in optimizers:
